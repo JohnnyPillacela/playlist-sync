@@ -7,7 +7,7 @@ const tokenDetails = await _fetchTokenDetails();
 const worshipHimPlaylistID = "6Qrp1OAdtxJomUi1RyhyPr"
 
 const _fetchPlaylistTracks = async (playlistID: string, accessToken: string) => {
-    const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistID}`, {
+    const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistID}/tracks`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${accessToken}`,
@@ -17,9 +17,9 @@ const _fetchPlaylistTracks = async (playlistID: string, accessToken: string) => 
     return data;
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
     const playlistTracks = await _fetchPlaylistTracks(worshipHimPlaylistID, tokenDetails.access_token);
-    const playlistTrackItems = playlistTracks.tracks.items;
+    const playlistTrackItems = playlistTracks.items;
     const songs: Song[] = [];
     playlistTrackItems.forEach((item: any) => {
         const trackName = item.track.name;
