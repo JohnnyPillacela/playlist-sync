@@ -5,5 +5,5 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
     const tokenDetails = await _fetchTokenDetails();
-    return NextResponse.json(tokenDetails);
+    return NextResponse.json(null);
 }
