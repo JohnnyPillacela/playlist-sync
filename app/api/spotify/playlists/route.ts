@@ -1,7 +1,7 @@
 // /api/spotify/playlists
 import { NextRequest, NextResponse } from "next/server";
 import { _fetchTokenDetails } from "../auth/route";
-import { Song } from "@/app/lib/constants/song";
+import { Song } from "@/lib/constants/song";
 
 const tokenDetails = await _fetchTokenDetails();
 const worshipHimPlaylistID = "6Qrp1OAdtxJomUi1RyhyPr"
