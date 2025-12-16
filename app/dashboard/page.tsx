@@ -1,8 +1,7 @@
 // app/dashboard/page.tsx
 
 import { Song } from "@/lib/constants/song";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import Image from "next/image";
+import { SongCard } from "@/components/song-card";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 const playlistUrl = `${baseUrl}/api/spotify/playlists`;
@@ -29,15 +28,7 @@ export default async function Dashboard() {
             <div className="w-3/4 mx-auto mt-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
                     {songs.map((song: Song) => (
-                        <Card key={song.id}>
-                            <CardHeader>
-                                <CardTitle>{song.name}</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <Image src={song.trackAlbumImageUrl} alt={song.name} width={100} height={100} />
-                                <p>{song.artists.join(', ')}</p>
-                            </CardContent>
-                        </Card>
+                        <SongCard key={song.id} song={song} />  
                     ))}
                 </div>
             </div>
