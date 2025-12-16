@@ -23,8 +23,10 @@ export async function GET(request: NextRequest) {
     const songs: Song[] = [];
     playlistTrackItems.forEach((item: any) => {
         const trackName = item.track.name;
+        const trackID = item.track.id;
         const trackArtists: string[] = item.track.artists.map((artist: any) => artist.name);
         const currentSong: Song = {
+            id: trackID,
             name: trackName,
             artists: trackArtists,
         }
