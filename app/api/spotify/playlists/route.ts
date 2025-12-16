@@ -16,7 +16,23 @@ const _fetchPlaylistTracks = async (playlistID: string, accessToken: string) => 
     return data;
 }
 
+type Song = {
+    name: string;
+    artists: string[];
+}
+
 export async function GET(request: NextRequest) {
     const playlistTracks = await _fetchPlaylistTracks(worshipHimPlaylistID, tokenDetails.access_token);
-    return NextResponse.json(playlistTracks);
+    const playlistTrackItems = playlistTracks.tracks.items;
+    const songs: Song[] = [];
+    playlistTrackItems.forEach((item: any) => {
+        const trackName = item.track.name;
+        const trackArtists: string[] = item.track.artists.map((artist: any) => artist.name);
+        const currentSong: Song = {
+            name: trackName,
+            artists: trackArtists,
+        }
+        songs.push(currentSong);
+    })
+    return NextResponse.json(songs);
 }
