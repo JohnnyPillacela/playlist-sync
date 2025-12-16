@@ -1,6 +1,7 @@
 // /api/spotify/playlists
 import { NextRequest, NextResponse } from "next/server";
 import { _fetchTokenDetails } from "../auth/route";
+import { Song } from "@/app/lib/constants/song";
 
 const tokenDetails = await _fetchTokenDetails();
 const worshipHimPlaylistID = "6Qrp1OAdtxJomUi1RyhyPr"
@@ -14,11 +15,6 @@ const _fetchPlaylistTracks = async (playlistID: string, accessToken: string) => 
     });
     const data = await response.json();
     return data;
-}
-
-type Song = {
-    name: string;
-    artists: string[];
 }
 
 export async function GET(request: NextRequest) {
