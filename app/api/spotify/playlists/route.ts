@@ -1,6 +1,6 @@
 // /api/spotify/playlists
 import { NextRequest, NextResponse } from "next/server";
-import { _fetchTokenDetails } from "../auth/route";
+import { _fetchTokenDetails } from "@/lib/spotify/auth";
 import { Song } from "@/lib/constants/song";
 
 const tokenDetails = await _fetchTokenDetails();
