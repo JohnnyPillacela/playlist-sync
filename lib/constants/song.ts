@@ -4,4 +4,5 @@ export type Song = {
     id: string;
     name: string;
     artists: string[];
+    trackAlbumImageUrl: string;
 }
