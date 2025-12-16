@@ -17,11 +17,16 @@ const authOptions = {
     json: true
 };
 
-const _fetchTokenDetails = async (authOptions: any) => {
-    const response = await fetch(authOptions.url, {
+// Overloaded function signatures
+export async function _fetchTokenDetails(): Promise<any>;
+export async function _fetchTokenDetails(customAuthOptions: any): Promise<any>;
+export async function _fetchTokenDetails(customAuthOptions?: any): Promise<any> {
+    const options = customAuthOptions || authOptions;
+    
+    const response = await fetch(options.url, {
         method: 'POST',
-        headers: authOptions.headers,
-        body: new URLSearchParams(authOptions.body).toString(),
+        headers: options.headers,
+        body: new URLSearchParams(options.body).toString(),
     });
     const data = await response.json();
     return data;
