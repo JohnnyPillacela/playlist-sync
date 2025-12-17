@@ -3,6 +3,7 @@
 import { Song } from "@/lib/constants/song";
 import { SongCard } from "@/components/song-card";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { _getCurrentUser } from "@/lib/spotify/auth";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 const playlistUrl = `${baseUrl}/api/spotify/playlists`;
@@ -20,15 +21,29 @@ const fetchSongs = async () => {
 
 export default async function Dashboard() {
     const songs = await fetchSongs();
-
+    
+    let name = 'Unknown';
+    let email = 'unknown@example.com';
+    
+    try {
+        const user = await _getCurrentUser();
+        name = user.display_name || name
+        email = user.email || email;
+    } catch (error) {
+        console.error('Error fetching user:', error);
+    }
     return (
         <div className="min-h-screen bg-background">
             <div className="w-3/4 mx-auto mt-8 mb-8">
                 <Card>
                     <CardHeader>
-                        <CardTitle className="text-3xl font-bold">Welcome back, Johnny!</CardTitle>
+                        <CardTitle className="text-3xl font-bold">Welcome back, {name}!</CardTitle>
                         <CardDescription className="text-base mt-2">
                             Here's your playlist overview
+                            <br />
+                            <span className="text-sm text-muted-foreground">
+                                {email}
+                            </span>
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
