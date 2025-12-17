@@ -49,6 +49,7 @@ export async function GET(request: Request) {
             secure: isHttps,  // Use secure flag based on actual HTTPS connection, not just NODE_ENV
             sameSite: 'lax',
             maxAge: tokens.expires_in,  // Expires when token expires (typically 3600 seconds)
+            // path: '/',  // Make cookie available to all routes
         });
 
         // Clean up temporary cookies
