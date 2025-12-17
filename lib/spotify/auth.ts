@@ -31,6 +31,34 @@ export async function _fetchTokenDetails(customAuthOptions?: any): Promise<any> 
     return data;
 }
 
+/**
+ * Retrieves the current user from the Spotify API.
+ * 
+ * @param accessToken - The access token to use for the request
+ * @returns The current user
+ */
+export async function _getCurrentUser(accessToken: string | null | undefined): Promise<any> {
+    if (!accessToken) {
+        throw new Error('No access token found');
+    }
+
+    const response = await fetch('https://api.spotify.com/v1/me', {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+        }
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Spotify API error: ${errorData.error?.message || response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data;
+}
+
 export async function _exchangeCodeForTokens(
     code: string, 
     codeVerifier: string): 
