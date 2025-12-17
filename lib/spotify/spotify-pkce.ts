@@ -54,7 +54,7 @@ export async function redirectToSpotifyAuth(): Promise<void> {
         throw new Error('Required environment variables are not set');
     }
 
-    const scope = 'user-read-private user-read-email';
+    const scope = 'user-read-private user-read-email playlist-read-private playlist-read-collaborative playlist-modify-public playlist-modify-private';
     const authUrl = new URL(AUTH_URL);
 
     const redirectUri = `${BASE_URL}/api/spotify/callback`;
