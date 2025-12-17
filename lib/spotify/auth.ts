@@ -69,7 +69,7 @@ export async function _getCurrentUser(): Promise<any> {
 
 }
 
-export async function _getCurrentUserDetails(): Promise<any> {
+export async function _getCurrentUserDetails(): Promise<SpotifyUser> {
     const currentUser = await _getCurrentUser();
 
     if (!currentUser) {
@@ -81,8 +81,8 @@ export async function _getCurrentUserDetails(): Promise<any> {
         country: currentUser.country,
         display_name: currentUser.display_name,
         email: currentUser.email,
-        external_url: currentUser.external_url,
-        followers: currentUser.followers,
+        external_url: currentUser.external_urls?.spotify || '', // Extract spotify URL from external_urls object
+        followers: currentUser.followers?.total || 0, // Extract total from followers object
         href: currentUser.href,
         product: currentUser.product,
         type: currentUser.type,
