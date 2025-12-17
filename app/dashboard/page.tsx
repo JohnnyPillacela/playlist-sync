@@ -3,7 +3,8 @@
 import { Song } from "@/lib/constants/song";
 import { SongCard } from "@/components/song-card";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { _getCurrentUser } from "@/lib/spotify/auth";
+import { _getCurrentUserDetails } from "@/lib/spotify/auth";
+import { SpotifyUser } from "@/lib/constants/spotify";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 const playlistUrl = `${baseUrl}/api/spotify/playlists`;
@@ -26,7 +27,7 @@ export default async function Dashboard() {
     let email = 'unknown@example.com';
     
     try {
-        const user = await _getCurrentUser();
+        const user: SpotifyUser = await _getCurrentUserDetails();
         name = user.display_name || name
         email = user.email || email;
     } catch (error) {
