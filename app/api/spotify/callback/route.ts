@@ -38,9 +38,15 @@ export async function GET(request: Request) {
         const tokens = await _exchangeCodeForTokens(codeURL, codeVerifier);
         const response = NextResponse.redirect(`${BASE_URL}/dashboard`);
 
+        // Determine if the request is over HTTPS by checking the URL protocol
+        // Also check x-forwarded-proto header (set by proxies/load balancers)
+        const requestUrl = new URL(request.url);
+        const isHttps = requestUrl.protocol === 'https:' || 
+                       request.headers.get('x-forwarded-proto') === 'https';
+
         response.cookies.set('access_token', tokens.access_token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',  // Only use secure in production (HTTPS required)
+            secure: isHttps,  // Use secure flag based on actual HTTPS connection, not just NODE_ENV
             sameSite: 'lax',
             maxAge: tokens.expires_in,  // Expires when token expires (typically 3600 seconds)
         });
