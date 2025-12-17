@@ -1,5 +1,7 @@
 // /lib/spotify/auth.ts
 
+import { cookies } from "next/headers";
+
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
 const BASE_URL = process.env.BASE_URL;
@@ -31,15 +33,9 @@ export async function _fetchTokenDetails(customAuthOptions?: any): Promise<any> 
     return data;
 }
 
-/**
- * Retrieves the current user from the Spotify API.
- * 
- * @param accessToken - The access token to use for the request
- * @returns The current user
- */
-export async function _getCurrentUser(accessToken: string | null | undefined): Promise<any> {
+async function _getCurrentUserFromToken(accessToken: string): Promise<any> {
     if (!accessToken) {
-        throw new Error('No access token found');
+        throw new Error('No access token provided');
     }
 
     const response = await fetch('https://api.spotify.com/v1/me', {
@@ -57,6 +53,19 @@ export async function _getCurrentUser(accessToken: string | null | undefined): P
 
     const data = await response.json();
     return data;
+}
+
+
+export async function _getCurrentUser(): Promise<any> {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('access_token')?.value;
+    
+    if (!token) {
+        throw new Error('No access token found in cookies');
+    }
+
+    return await _getCurrentUserFromToken(token);
+
 }
 
 export async function _exchangeCodeForTokens(
