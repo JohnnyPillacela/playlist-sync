@@ -1,6 +1,7 @@
 // /lib/spotify/auth.ts
 
 import { cookies } from "next/headers";
+import { SpotifyUser } from "../constants/spotify";
 
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
@@ -66,6 +67,29 @@ export async function _getCurrentUser(): Promise<any> {
 
     return await _getCurrentUserFromToken(token);
 
+}
+
+export async function _getCurrentUserDetails(): Promise<any> {
+    const currentUser = await _getCurrentUser();
+
+    if (!currentUser) {
+        throw new Error('No current user found');
+    }
+
+    const user: SpotifyUser = {
+        id: currentUser.id,
+        country: currentUser.country,
+        display_name: currentUser.display_name,
+        email: currentUser.email,
+        external_url: currentUser.external_url,
+        followers: currentUser.followers,
+        href: currentUser.href,
+        product: currentUser.product,
+        type: currentUser.type,
+        uri: currentUser.uri,
+    };
+
+    return user;
 }
 
 export async function _exchangeCodeForTokens(
