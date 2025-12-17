@@ -40,9 +40,9 @@ export async function GET(request: Request) {
 
         response.cookies.set('access_token', tokens.access_token, {
             httpOnly: true,
-            secure: true,  // Only send over HTTPS
+            secure: process.env.NODE_ENV === 'production',  // Only use secure in production (HTTPS required)
             sameSite: 'lax',
-            maxAge: tokens.expires_in  // Expires when token expires
+            maxAge: tokens.expires_in,  // Expires when token expires (typically 3600 seconds)
         });
 
         // Clean up temporary cookies
