@@ -3,10 +3,12 @@
 import { Song } from "@/lib/constants/song";
 import { SongCard } from "@/components/song-card";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { _getCurrentUserDetails } from "@/lib/spotify/auth";
 import { SpotifyUser } from "@/lib/constants/spotify";
 import { _fetchUsersPlaylists } from "@/lib/spotify/playlists";
 import PlaylistTable from "@/components/playlist-table";
+import Link from "next/link";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 const playlistUrl = `${baseUrl}/api/spotify/playlists`;
@@ -38,6 +40,28 @@ export default async function Dashboard() {
     } catch (error) {
         console.error('Error fetching user:', error);
     }
+
+    // Show "not signed in" view if user is null
+    if (!user) {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <Card className="w-full max-w-md">
+                    <CardHeader>
+                        <CardTitle className="text-2xl font-bold text-center">Not Signed In</CardTitle>
+                        <CardDescription className="text-center mt-2">
+                            Please sign in with Spotify to view your playlists
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex justify-center">
+                        <Button asChild>
+                            <Link href="/">Sign In with Spotify</Link>
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-background">
             <div className="w-3/4 mx-auto mt-8 mb-8">
