@@ -23,13 +23,14 @@ const fetchSongs = async () => {
 export default async function Dashboard() {
     const songs = await fetchSongs();
     
+    let user: SpotifyUser | null = null;
     let name = 'Unknown';
     let email = 'unknown@example.com';
     
     try {
-        const user: SpotifyUser = await _getCurrentUserDetails();
-        name = user.display_name || name
-        email = user.email || email;
+        user = await _getCurrentUserDetails();
+        name = user?.display_name || name
+        email = user?.email || email;
     } catch (error) {
         console.error('Error fetching user:', error);
     }
@@ -41,11 +42,26 @@ export default async function Dashboard() {
                         <CardTitle className="text-3xl font-bold">Welcome back, {name}!</CardTitle>
                         <CardDescription className="text-base mt-2">
                             Here's your playlist overview
-                            <br />
-                            <span className="text-sm text-muted-foreground">
-                                {email}
-                            </span>
                         </CardDescription>
+                        <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground">
+                            {email && (
+                                <span className="flex items-center">
+                                    {email}
+                                </span>
+                            )}
+                            {user?.country && (
+                                <>
+                                    <span className="text-border">•</span>
+                                    <span>{user.country}</span>
+                                </>
+                            )}
+                            {user?.followers !== undefined && user.followers > 0 && (
+                                <>
+                                    <span className="text-border">•</span>
+                                    <span>{user.followers.toLocaleString()} followers</span>
+                                </>
+                            )}
+                        </div>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center gap-6">
