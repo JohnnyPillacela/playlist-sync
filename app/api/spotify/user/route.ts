@@ -1,20 +1,15 @@
 // /api/spotify/user
 
-import { _fetchTokenDetails, _getCurrentUser } from "@/lib/spotify/auth";
-import { cookies } from "next/headers";
+import { _getCurrentUser } from "@/lib/spotify/auth";
 import { NextResponse } from "next/server";
 
 export async function GET() {
     try {
-        const cookieStore = await cookies();
-        const accessTokenCookie = cookieStore.get('access_token');
-        
-        const accessToken = accessTokenCookie?.value;
-        const currentUser = await _getCurrentUser(accessToken);
+        const currentUser = await _getCurrentUser(); // Reads access token from cookies automatically
         return NextResponse.json(currentUser);
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        console.error('Error in /api/spotify/auth:', errorMessage);
+        console.error('Error in /api/spotify/user:', errorMessage);
         return NextResponse.json({ error: errorMessage }, { status: 401 });
     }
 }
