@@ -12,7 +12,7 @@ import {
 
 export default function PlaylistTable({ playlists }: { playlists: any[] }) {
   return (
-    <Card>
+    <Card className="w-3/4 mx-auto shadow-lg">
       <CardHeader>
         <CardTitle>Your Playlists</CardTitle>
       </CardHeader>

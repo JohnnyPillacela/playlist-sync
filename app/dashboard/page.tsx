@@ -48,7 +48,7 @@ export default async function Dashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-emerald-50">
             <div className="w-3/4 mx-auto mt-8 mb-8">
                 <Card>
                     <CardHeader>
