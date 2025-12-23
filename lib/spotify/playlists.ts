@@ -2,6 +2,8 @@
 
 import { _getCurrentUserDetails } from "./auth";
 import { cookies } from "next/headers";
+import { getServerSDK } from "./sdk";
+import { Page, SimplifiedPlaylist } from "@spotify/web-api-ts-sdk";
 
 export async function _fetchPlaylistTracks(playlistID: string, accessToken: string) {
     const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistID}/tracks`, {
@@ -28,25 +30,13 @@ export async function _fetchUsersPlaylists() {
         throw new Error('No access token found');
     }
 
-    const userId = currentUser.id;
-
-    const response = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${access_token}`,
-        },
-    });
-
-    if (!response.ok) {
-        throw new Error(`Failed to fetch playlists for user ${currentUser.display_name}`);
-    }
-
-    const data = await response.json();
+    const sdk = await getServerSDK();
+    const response: Page<SimplifiedPlaylist> = await sdk.currentUser.playlists.playlists(50);
 
     const playlistDetails: { total: number, playlists: any[] } = { total: 0, playlists: [] };
-    const playlists: any[] = data.items;
+    const playlists: SimplifiedPlaylist[] = response.items;
 
-    playlistDetails.total = data.total;
+    playlistDetails.total = response.total;
     playlistDetails.playlists = playlists;
 
     return playlistDetails;
