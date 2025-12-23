@@ -25,7 +25,7 @@ export async function _fetchPlaylistTracksSDK(playlistID: string) {
     return trackItems;
 }
 
-export async function _fetchUsersPlaylists() {
+export async function _fetchUsersPlaylists(): Promise<SimplifiedPlaylist[]> {
     const currentUser = await _getCurrentUserDetails();
 
     if(!currentUser){
@@ -42,11 +42,7 @@ export async function _fetchUsersPlaylists() {
     const sdk = await getServerSDK();
     const response: Page<SimplifiedPlaylist> = await sdk.currentUser.playlists.playlists(50);
 
-    const playlistDetails: { total: number, playlists: any[] } = { total: 0, playlists: [] };
-    const playlists: SimplifiedPlaylist[] = response.items;
+    const simplifiedPlaylists: SimplifiedPlaylist[] = response.items;
 
-    playlistDetails.total = response.total;
-    playlistDetails.playlists = playlists;
-
-    return playlistDetails;
+    return simplifiedPlaylists;
 }

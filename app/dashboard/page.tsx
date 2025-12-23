@@ -7,12 +7,12 @@ import { SpotifyUser } from "@/lib/constants/spotify";
 import { _fetchPlaylistTracksSDK, _fetchUsersPlaylists } from "@/lib/spotify/playlists";
 import PlaylistTable from "@/components/playlist-table";
 import PleaseSignIn from "@/components/please-sign-in";
-import { Track } from "@spotify/web-api-ts-sdk";
+import { SimplifiedPlaylist, Track } from "@spotify/web-api-ts-sdk";
 
 export default async function Dashboard() {
     const worshipHimPlaylistID = "6Qrp1OAdtxJomUi1RyhyPr"
     
-    let playlists: { total: number, playlists: any[] } = { total: 0, playlists: [] };
+    let playlists: SimplifiedPlaylist[] = [];
     let user: SpotifyUser | null = null;
     let name = 'Unknown';
     let email = 'unknown@example.com';
@@ -66,7 +66,7 @@ export default async function Dashboard() {
                             </div> 
                             <div className="h-12 w-px bg-border"></div>
                             <div className="flex flex-col">
-                                <span className="text-3xl font-bold text-primary">{playlists.total}</span>
+                                <span className="text-3xl font-bold text-primary">{playlists.length}</span>
                                 <span className="text-sm text-muted-foreground mt-1">Total Playlists</span>
                             </div>
 
@@ -76,7 +76,7 @@ export default async function Dashboard() {
             </div>
 
             <div className="w-3/4 mx-auto mt-4">
-                <PlaylistTable playlists={playlists.playlists} />
+                <PlaylistTable playlists={playlists} />
             </div>
 
             <div className="w-3/4 mx-auto mt-4">

@@ -10,8 +10,9 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import Image from "next/image";
+import { SimplifiedPlaylist } from "@spotify/web-api-ts-sdk";
 
-export default function PlaylistTable({ playlists }: { playlists: any[] }) {
+export default function PlaylistTable({ playlists }: { playlists: SimplifiedPlaylist[] }) {
   return (
     <Card className="w-3/4 mx-auto shadow-lg">
       <CardHeader>
@@ -21,18 +22,20 @@ export default function PlaylistTable({ playlists }: { playlists: any[] }) {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="text-left">ID</TableHead>
               <TableHead className="text-left">Thumbnail</TableHead>
               <TableHead>Playlist Name</TableHead>
               <TableHead className="text-right">Songs</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {playlists.map((playlist: any) => {
+            {playlists.map((playlist: SimplifiedPlaylist, index: number = 0) => {
               const totalSongs = playlist.tracks?.total || 0;
               const thumbnailUrl = playlist.images?.[0]?.url || 'Undefined';
 
               return (
                 <TableRow key={playlist.id}>
+                  <TableCell className="font-medium">{index + 1}</TableCell>
                   <TableCell className="flex justify-center">
                     <div className="w-20 h-20 overflow-hidden">
                       <Image src={thumbnailUrl} alt={playlist.name} width={80} height={80} />
