@@ -1,12 +1,10 @@
 // app/dashboard/page.tsx
 
-import { SongCard } from "@/components/song-card";
 import { _getCurrentUserDetails } from "@/lib/spotify/auth";
 import { SpotifyUser } from "@/lib/constants/spotify";
-import { _fetchPlaylistTracksSDK, _fetchUsersPlaylists } from "@/lib/spotify/playlists";
+import { _fetchUsersPlaylists } from "@/lib/spotify/playlists";
 import PleaseSignIn from "@/components/please-sign-in";
-import { SimplifiedPlaylist, Track } from "@spotify/web-api-ts-sdk";
-import PlaylistCarousel from "@/components/playlist-carousel";
+import { SimplifiedPlaylist } from "@spotify/web-api-ts-sdk";
 import GreetUserCard from "@/components/GreetUserCard";
 import PlaylistViewer from "@/components/playlist-viewer";
 
