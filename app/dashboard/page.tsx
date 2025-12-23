@@ -52,11 +52,11 @@ export default async function Dashboard() {
             <div className="w-3/4 mx-auto mt-8 mb-8">
                 <Card>
                     <CardHeader>
-                        <CardTitle className="text-3xl font-bold">Welcome back, {name}!</CardTitle>
-                        <CardDescription className="text-base mt-2">
+                        <CardTitle className="text-5xl font-bold">Welcome back, {name}!</CardTitle>
+                        <CardDescription className="text-xl mt-2">
                             Here's your playlist overview
                         </CardDescription>
-                        <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground">
+                        <div className="flex flex-wrap items-center gap-4 mt-3 text-base text-muted-foreground">
                             {email && (
                                 <span className="flex items-center">
                                     {email}
