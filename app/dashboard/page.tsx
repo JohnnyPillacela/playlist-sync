@@ -81,10 +81,6 @@ export default async function Dashboard() {
             </div>
 
             <div className="w-3/4 mx-auto mt-4">
-                <PlaylistTable playlists={playlists} />
-            </div>
-
-            <div className="w-3/4 mx-auto mt-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
                     {songs.map((track: Track) => (
                         <SongCard key={track.id} track={track} />
