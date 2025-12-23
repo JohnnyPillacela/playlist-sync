@@ -1,38 +1,26 @@
 // app/dashboard/page.tsx
 
-import { Song } from "@/lib/constants/song";
 import { SongCard } from "@/components/song-card";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { _getCurrentUserDetails } from "@/lib/spotify/auth";
 import { SpotifyUser } from "@/lib/constants/spotify";
-import { _fetchUsersPlaylists } from "@/lib/spotify/playlists";
+import { _fetchPlaylistTracksSDK, _fetchUsersPlaylists } from "@/lib/spotify/playlists";
 import PlaylistTable from "@/components/playlist-table";
 import PleaseSignIn from "@/components/please-sign-in";
-
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-const playlistUrl = `${baseUrl}/api/spotify/playlists`;
-
-const fetchSongs = async () => {
-    const response = await fetch(playlistUrl, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
-    const data = await response.json();
-    return data;
-}
+import { Track } from "@spotify/web-api-ts-sdk";
 
 export default async function Dashboard() {
-    const songs = await fetchSongs();
+    const worshipHimPlaylistID = "6Qrp1OAdtxJomUi1RyhyPr"
     
     let playlists: { total: number, playlists: any[] } = { total: 0, playlists: [] };
     let user: SpotifyUser | null = null;
     let name = 'Unknown';
     let email = 'unknown@example.com';
+    let songs: Track[] = [];
     
     try {
         user = await _getCurrentUserDetails();
+        songs = await _fetchPlaylistTracksSDK(worshipHimPlaylistID);
         playlists = await _fetchUsersPlaylists();
         name = user?.display_name || name
         email = user?.email || email;
@@ -93,8 +81,8 @@ export default async function Dashboard() {
 
             <div className="w-3/4 mx-auto mt-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
-                    {songs.map((song: Song) => (
-                        <SongCard key={song.id} song={song} />  
+                    {songs.map((track: Track) => (
+                        <SongCard key={track.id} track={track} />
                     ))}
                 </div>
             </div>
