@@ -3,7 +3,7 @@
 import { _getCurrentUserDetails } from "./auth";
 import { cookies } from "next/headers";
 import { getServerSDK } from "./sdk";
-import { Page, SimplifiedPlaylist } from "@spotify/web-api-ts-sdk";
+import { Page, PlaylistedTrack, SimplifiedPlaylist, Track } from "@spotify/web-api-ts-sdk";
 
 export async function _fetchPlaylistTracks(playlistID: string, accessToken: string) {
     const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistID}/tracks`, {
@@ -13,7 +13,16 @@ export async function _fetchPlaylistTracks(playlistID: string, accessToken: stri
         },
     });
     const data = await response.json();
+
     return data;
+}
+
+export async function _fetchPlaylistTracksSDK(playlistID: string) {
+    const sdk = await getServerSDK();
+    const playlistedTrackInfo: Page<PlaylistedTrack> = await sdk.playlists.getPlaylistItems(playlistID);
+    const playlistedTrackInfoItems: PlaylistedTrack[] = playlistedTrackInfo.items;
+    const trackItems: Track[] = playlistedTrackInfoItems.map((item) => item.track as Track);
+    return trackItems;
 }
 
 export async function _fetchUsersPlaylists() {
