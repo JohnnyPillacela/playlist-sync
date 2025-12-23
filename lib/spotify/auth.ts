@@ -2,6 +2,8 @@
 
 import { cookies } from "next/headers";
 import { SpotifyUser } from "../constants/spotify";
+import { getServerSDK } from "./sdk";
+import { UserProfile } from "@spotify/web-api-ts-sdk";
 
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
@@ -34,30 +36,7 @@ export async function _fetchTokenDetails(customAuthOptions?: any): Promise<any> 
     return data;
 }
 
-async function _getCurrentUserFromToken(accessToken: string): Promise<any> {
-    if (!accessToken) {
-        throw new Error('No access token provided');
-    }
-
-    const response = await fetch('https://api.spotify.com/v1/me', {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
-        }
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Spotify API error: ${errorData.error?.message || response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data;
-}
-
-
-export async function _getCurrentUser(): Promise<any> {
+export async function _getCurrentUserProfile(): Promise<UserProfile> {
     const cookieStore = await cookies();
     const token = cookieStore.get('access_token')?.value;
     
@@ -65,12 +44,13 @@ export async function _getCurrentUser(): Promise<any> {
         throw new Error('No access token found in cookies');
     }
 
-    return await _getCurrentUserFromToken(token);
-
+    // Use Spotify SDK to fetch current user profile
+    const sdk = await getServerSDK();
+    return await sdk.currentUser.profile();
 }
 
 export async function _getCurrentUserDetails(): Promise<SpotifyUser> {
-    const currentUser = await _getCurrentUser();
+    const currentUser = await _getCurrentUserProfile();
 
     if (!currentUser) {
         throw new Error('No current user found');
