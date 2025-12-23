@@ -9,6 +9,7 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
+import Image from "next/image";
 
 export default function PlaylistTable({ playlists }: { playlists: any[] }) {
   return (
@@ -20,6 +21,7 @@ export default function PlaylistTable({ playlists }: { playlists: any[] }) {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="text-left">Thumbnail</TableHead>
               <TableHead>Playlist Name</TableHead>
               <TableHead className="text-right">Songs</TableHead>
             </TableRow>
@@ -27,6 +29,11 @@ export default function PlaylistTable({ playlists }: { playlists: any[] }) {
           <TableBody>
             {playlists.map((playlist: any) => (
               <TableRow key={playlist.id}>
+                <TableCell className="flex justify-center">
+                  <div className="w-20 h-20 overflow-hidden">
+                    <Image src={playlist.images[0].url} alt={playlist.name} width={80} height={80} />
+                  </div>
+                </TableCell>
                 <TableCell className="font-medium">{playlist.name}</TableCell>
                 <TableCell className="text-right text-muted-foreground">
                   {playlist.tracks?.total || 0}{" "}
