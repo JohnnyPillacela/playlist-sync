@@ -27,20 +27,25 @@ export default function PlaylistTable({ playlists }: { playlists: any[] }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {playlists.map((playlist: any) => (
-              <TableRow key={playlist.id}>
-                <TableCell className="flex justify-center">
-                  <div className="w-20 h-20 overflow-hidden">
-                    <Image src={playlist.images[0].url} alt={playlist.name} width={80} height={80} />
-                  </div>
-                </TableCell>
-                <TableCell className="font-medium">{playlist.name}</TableCell>
-                <TableCell className="text-right text-muted-foreground">
-                  {playlist.tracks?.total || 0}{" "}
-                  {playlist.tracks?.total === 1 ? "song" : "songs"}
-                </TableCell>
-              </TableRow>
-            ))}
+            {playlists.map((playlist: any) => {
+              const totalSongs = playlist.tracks?.total || 0;
+              const thumbnailUrl = playlist.images?.[0]?.url || 'Undefined';
+
+              return (
+                <TableRow key={playlist.id}>
+                  <TableCell className="flex justify-center">
+                    <div className="w-20 h-20 overflow-hidden">
+                      <Image src={thumbnailUrl} alt={playlist.name} width={80} height={80} />
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-medium">{playlist.name}</TableCell>
+                  <TableCell className="text-right text-muted-foreground">
+                    {totalSongs}{" "}
+                    {totalSongs === 1 ? "song" : "songs"}
+                  </TableCell>
+                </TableRow>
+              )
+            })}
           </TableBody>
         </Table>
       </CardContent>
