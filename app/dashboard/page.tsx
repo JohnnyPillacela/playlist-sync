@@ -8,6 +8,7 @@ import { _fetchPlaylistTracksSDK, _fetchUsersPlaylists } from "@/lib/spotify/pla
 import PlaylistTable from "@/components/playlist-table";
 import PleaseSignIn from "@/components/please-sign-in";
 import { SimplifiedPlaylist, Track } from "@spotify/web-api-ts-sdk";
+import PlaylistCarousel from "@/components/playlist-carousel";
 
 export default async function Dashboard() {
     const playlistID = "5Iavgt4CvEYZ2tJXfyqNPw"
@@ -73,6 +74,10 @@ export default async function Dashboard() {
                         </div>
                     </CardContent>
                 </Card>
+            </div>
+
+            <div className="w-3/4 mx-auto mt-4">
+                <PlaylistCarousel playlists={playlists} />
             </div>
 
             <div className="w-3/4 mx-auto mt-4">
