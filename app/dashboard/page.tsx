@@ -10,7 +10,7 @@ import PleaseSignIn from "@/components/please-sign-in";
 import { SimplifiedPlaylist, Track } from "@spotify/web-api-ts-sdk";
 
 export default async function Dashboard() {
-    const worshipHimPlaylistID = "6Qrp1OAdtxJomUi1RyhyPr"
+    const playlistID = "5Iavgt4CvEYZ2tJXfyqNPw"
     
     let playlists: SimplifiedPlaylist[] = [];
     let user: SpotifyUser | null = null;
@@ -20,7 +20,7 @@ export default async function Dashboard() {
     
     try {
         user = await _getCurrentUserDetails();
-        songs = await _fetchPlaylistTracksSDK(worshipHimPlaylistID);
+        songs = await _fetchPlaylistTracksSDK(playlistID);
         playlists = await _fetchUsersPlaylists();
         name = user?.display_name || name
         email = user?.email || email;
