@@ -22,10 +22,11 @@ export default function PlaylistTable({ playlists }: { playlists: SimplifiedPlay
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-left">ID</TableHead>
+              <TableHead className="text-left">No.</TableHead>
               <TableHead className="text-left">Thumbnail</TableHead>
               <TableHead>Playlist Name</TableHead>
               <TableHead className="text-right">Songs</TableHead>
+              <TableHead className="text-right">ID</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -45,6 +46,9 @@ export default function PlaylistTable({ playlists }: { playlists: SimplifiedPlay
                   <TableCell className="text-right text-muted-foreground">
                     {totalSongs}{" "}
                     {totalSongs === 1 ? "song" : "songs"}
+                  </TableCell>
+                  <TableCell className="text-right text-muted-foreground">
+                    {playlist.id}
                   </TableCell>
                 </TableRow>
               )
