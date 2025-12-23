@@ -5,7 +5,6 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { _getCurrentUserDetails } from "@/lib/spotify/auth";
 import { SpotifyUser } from "@/lib/constants/spotify";
 import { _fetchPlaylistTracksSDK, _fetchUsersPlaylists } from "@/lib/spotify/playlists";
-import PlaylistTable from "@/components/playlist-table";
 import PleaseSignIn from "@/components/please-sign-in";
 import { SimplifiedPlaylist, Track } from "@spotify/web-api-ts-sdk";
 import PlaylistCarousel from "@/components/playlist-carousel";
