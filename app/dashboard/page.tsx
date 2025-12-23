@@ -14,16 +14,12 @@ export default async function Dashboard() {
     
     let playlists: SimplifiedPlaylist[] = [];
     let user: SpotifyUser | null = null;
-    let name = 'Unknown';
-    let email = 'unknown@example.com';
     let songs: Track[] = [];
     
     try {
         user = await _getCurrentUserDetails();
         songs = await _fetchPlaylistTracksSDK(playlistID);
         playlists = await _fetchUsersPlaylists();
-        name = user?.display_name || name
-        email = user?.email || email;
     } catch (error) {
         console.error('Error fetching user:', error);
     }
@@ -38,7 +34,7 @@ export default async function Dashboard() {
     return (
         <div className="min-h-screen bg-emerald-50">
             <div className="w-3/4 mx-auto mt-8 mb-8">
-                <GreetUserCard name={name} email={email} country={user?.country || ''} product={user?.product || ''} playlists={playlists.length} />
+                <GreetUserCard user={user} playlists={playlists.length} />
             </div>
 
             <div className="w-3/4 mx-auto mt-4">
