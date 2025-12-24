@@ -26,35 +26,49 @@ async function getPlaylistTracks(playlistId: string): Promise<Track[]> {
 }
 
 export default function PlaylistViewer({ playlists }: PlaylistViewerProps) {
-    const [songs, setSongs] = useState<Track[]>([]);
-    const [loading, setLoading] = useState(true); // Start as loading
+    const [songs, setSongs] = useState<Track[] | null>(null);
+    const [playlistId, setPlaylistId] = useState<string>("");
+    const [loading, setLoading] = useState(false);
 
-    const playlistId = "5Iavgt4CvEYZ2tJXfyqNPw"
+    const handlePlaylistClick = (playlistId: string) => {
+        setPlaylistId(playlistId);
+    }
     
     useEffect(() => {
-        // This function runs when the component mounts
+        // Only fetch if a playlist is selected
+        if (!playlistId) return;
+        
         async function fetchTracks() {
-            setLoading(true); // Start loading
+            setLoading(true);
             const tracks = await getPlaylistTracks(playlistId);
-            setSongs(tracks); // Update state with the fetched tracks
-            setLoading(false); // Done loading
+            setSongs(tracks);
+            setLoading(false);
         }
         
         fetchTracks(); // Call the function
-    }, []); // Empty array = only run once when component mounts
+    }, [playlistId]); // Run whenever playlistId changes
 
     return (
         <>
             <div className="w-3/4 mx-auto mt-4">
-                <PlaylistCarousel playlists={playlists} />
+                <PlaylistCarousel playlists={playlists} onPlaylistClick={handlePlaylistClick} />
             </div>
 
             <div className="w-3/4 mx-auto mt-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
-                    {songs.map((track: Track) => (
-                        <SongCard key={track.id} track={track} />
-                    ))}
-                </div>
+                {loading ? (
+                    <div className="text-center">Loading tracks...</div>
+                ) : songs === null ? (
+                    <div className="text-center">Click a playlist to view its tracks</div>
+                ) : songs.length === 0 ? (
+                    <div className="text-center">No tracks found</div>
+                ) : (
+                    // Show tracks
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
+                        {songs.map((track: Track) => (
+                            <SongCard key={track.id} track={track} />
+                        ))}
+                    </div>
+                )}
             </div>
         </>
     )
