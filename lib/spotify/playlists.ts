@@ -3,7 +3,7 @@
 import { _getCurrentUserDetails } from "./auth";
 import { cookies } from "next/headers";
 import { getServerSDK } from "./sdk";
-import { Page, PlaylistedTrack, SimplifiedPlaylist, Track } from "@spotify/web-api-ts-sdk";
+import { MaxInt, Page, PlaylistedTrack, SimplifiedPlaylist, Track } from "@spotify/web-api-ts-sdk";
 
 export async function _fetchPlaylistTracks(playlistID: string, accessToken: string) {
     const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistID}/tracks`, {
@@ -19,10 +19,34 @@ export async function _fetchPlaylistTracks(playlistID: string, accessToken: stri
 
 export async function _fetchPlaylistTracksSDK(playlistID: string): Promise<Track[]> {
     const sdk = await getServerSDK();
-    const playlistedTrackInfo: Page<PlaylistedTrack> = await sdk.playlists.getPlaylistItems(playlistID);
-    const playlistedTrackInfoItems: PlaylistedTrack[] = playlistedTrackInfo.items;
-    const trackItems: Track[] = playlistedTrackInfoItems.map((item) => item.track as Track);
-    return trackItems;
+    const allTracks: Track[] = [];
+    let offset = 0;
+    let limit = 100;
+
+    while (true) {
+        const page = await sdk.playlists.getPlaylistItems(
+            playlistID,
+            undefined,
+            undefined,
+            limit as MaxInt<50>,
+            offset,
+        );
+
+        // Add tracks from this page to the allTracks array
+        const tracks = page.items
+            .map(item => item.track as Track)
+            .filter(track => track !== null);
+        
+        allTracks.push(...tracks);
+
+        if (!page.next){
+            break;
+        }
+
+        offset += limit;
+    }
+
+    return allTracks;
 }
 
 export async function _fetchUsersPlaylists(): Promise<SimplifiedPlaylist[]> {
