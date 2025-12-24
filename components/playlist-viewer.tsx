@@ -83,7 +83,7 @@ export default function PlaylistViewer({ playlists }: PlaylistViewerProps) {
                         </EmptyHeader>
                     </Empty>
                 ) : (
-                    <SongTable tracks={songs} />
+                    <SongTable tracks={songs} playlistId={playlistId} />
                 )}
             </div>
         </>
