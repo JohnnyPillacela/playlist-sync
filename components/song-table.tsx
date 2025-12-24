@@ -9,13 +9,14 @@ import { Music } from "lucide-react";
 interface SongTableProps {
     tracks: Track[];
     playlistId: string;
+    playlistName: string;
 }
 
-export function SongTable({ tracks, playlistId }: SongTableProps) {
+export function SongTable({ tracks, playlistId, playlistName }: SongTableProps) {
     return (
         <Card className="w-full">
-            <CardHeader>
-                <CardTitle>Playlist Tracks</CardTitle>
+            <CardHeader className="my-8">
+                <CardTitle className="text-5xl font-bold">{playlistName}</CardTitle>
                 <CardDescription>Total tracks: {tracks.length}</CardDescription>
                 <CardDescription>Playlist ID: {playlistId}</CardDescription>
             </CardHeader>
@@ -31,11 +32,11 @@ export function SongTable({ tracks, playlistId }: SongTableProps) {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {tracks.map((track, index = 0) => {
+                        {tracks.map((track, index) => {
                             const thumbnailUrl = track.album?.images?.[0]?.url;
 
                             return (
-                                <TableRow key={track.id}>
+                                <TableRow key={index}>
                                     <TableCell>{index + 1}</TableCell>
                                     <TableCell>
                                         {thumbnailUrl ? (
