@@ -5,7 +5,8 @@ import { SimplifiedPlaylist, Track } from "@spotify/web-api-ts-sdk";
 import PlaylistCarousel from "./playlist-carousel";
 import { SongCard } from "./song-card";
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Music, ListMusic } from "lucide-react";   
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 
 interface PlaylistViewerProps {
     playlists: SimplifiedPlaylist[];
@@ -64,9 +65,23 @@ export default function PlaylistViewer({ playlists }: PlaylistViewerProps) {
                         </div>
                     </div>
                 ) : songs === null ? (
-                    <div className="text-center">Click a playlist to view its tracks</div>
+                    <Empty>
+                        <EmptyHeader>
+                            <EmptyMedia>
+                                <ListMusic className="w-16 h-16" />
+                            </EmptyMedia>
+                            <EmptyTitle>Click a playlist to view its tracks</EmptyTitle>
+                        </EmptyHeader>
+                    </Empty>
                 ) : songs.length === 0 ? (
-                    <div className="text-center">No tracks found</div>
+                    <Empty>
+                        <EmptyHeader>
+                            <EmptyMedia>
+                                <Music className="w-16 h-16" />
+                            </EmptyMedia>
+                            <EmptyTitle>This playlist is empty</EmptyTitle>
+                        </EmptyHeader>
+                    </Empty>
                 ) : (
                     // Show tracks
                     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
