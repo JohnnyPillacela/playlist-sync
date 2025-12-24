@@ -17,7 +17,7 @@ export async function _fetchPlaylistTracks(playlistID: string, accessToken: stri
     return data;
 }
 
-export async function _fetchPlaylistTracksSDK(playlistID: string) {
+export async function _fetchPlaylistTracksSDK(playlistID: string): Promise<Track[]> {
     const sdk = await getServerSDK();
     const playlistedTrackInfo: Page<PlaylistedTrack> = await sdk.playlists.getPlaylistItems(playlistID);
     const playlistedTrackInfoItems: PlaylistedTrack[] = playlistedTrackInfo.items;
