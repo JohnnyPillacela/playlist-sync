@@ -30,10 +30,12 @@ async function getPlaylistTracks(playlistId: string): Promise<Track[]> {
 export default function PlaylistViewer({ playlists }: PlaylistViewerProps) {
     const [songs, setSongs] = useState<Track[] | null>(null);
     const [playlistId, setPlaylistId] = useState<string>("");
+    const [playlistName, setPlaylistName] = useState<string>("");
     const [loading, setLoading] = useState(false);
 
-    const handlePlaylistClick = (playlistId: string) => {
+    const handlePlaylistClick = (playlistId: string, playlistName: string) => {
         setPlaylistId(playlistId);
+        setPlaylistName(playlistName);
     }
     
     useEffect(() => {
@@ -83,7 +85,7 @@ export default function PlaylistViewer({ playlists }: PlaylistViewerProps) {
                         </EmptyHeader>
                     </Empty>
                 ) : (
-                    <SongTable tracks={songs} playlistId={playlistId} />
+                    <SongTable tracks={songs} playlistName={playlistName} playlistId={playlistId} />
                 )}
             </div>
         </>
