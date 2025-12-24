@@ -5,6 +5,7 @@ import { SimplifiedPlaylist, Track } from "@spotify/web-api-ts-sdk";
 import PlaylistCarousel from "./playlist-carousel";
 import { SongCard } from "./song-card";
 import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 
 interface PlaylistViewerProps {
     playlists: SimplifiedPlaylist[];
@@ -56,7 +57,12 @@ export default function PlaylistViewer({ playlists }: PlaylistViewerProps) {
 
             <div className="w-3/4 mx-auto mt-4">
                 {loading ? (
-                    <div className="text-center">Loading tracks...</div>
+                    <div className="flex justify-center items-center my-20">
+                        <div className="flex items-center gap-2 text-4xl font-bold">
+                            <Loader2 className="w-10 h-10 animate-spin" />
+                            <span>Loading tracks...</span>
+                        </div>
+                    </div>
                 ) : songs === null ? (
                     <div className="text-center">Click a playlist to view its tracks</div>
                 ) : songs.length === 0 ? (
