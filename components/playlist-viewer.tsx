@@ -55,7 +55,7 @@ export default function PlaylistViewer({ playlists }: PlaylistViewerProps) {
     return (
         <>
             <div className="w-3/4 mx-auto mt-4">
-                <PlaylistCarousel playlists={playlists} onPlaylistClick={handlePlaylistClick} />
+                <PlaylistCarousel playlists={playlists} onPlaylistClick={handlePlaylistClick} selectedPlaylistId={playlistId} />
             </div>
 
             <div className="w-3/4 mx-auto mt-4">
