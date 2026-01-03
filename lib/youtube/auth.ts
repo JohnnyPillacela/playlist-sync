@@ -61,3 +61,32 @@ export async function exchangeCodeForYoutubeTokens(code: string): Promise<{
         ),
     };
 }
+
+/**
+ * Refresh an expired YouTube access token
+ */
+export async function refreshYoutubeAccessToken(
+    refreshToken: string
+): Promise<{
+    access_token: string;
+    expires_in: number;
+}> {
+    const client = createOAuth2Client();
+
+    client.setCredentials({
+        refresh_token: refreshToken,
+    });
+
+    const { credentials } = await client.refreshAccessToken();
+
+    if (!credentials.access_token || !credentials.expiry_date) {
+        throw new Error("Failed to refresh YouTube access token");
+    }
+
+    return {
+        access_token: credentials.access_token,
+        expires_in: Math.floor(
+            (credentials.expiry_date - Date.now()) / 1000
+        ),
+    };
+}
