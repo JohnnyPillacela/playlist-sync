@@ -46,6 +46,7 @@ export async function GET(request: Request) {
             secure: isHttps,
             sameSite: 'lax',
             maxAge: tokens.expires_in,
+            // path: '/',
         });
 
         /**
@@ -61,6 +62,7 @@ export async function GET(request: Request) {
                 secure: isHttps,
                 sameSite: 'lax',
                 // Refresh tokens are long-lived; cookie maxAge is optional here
+                // path: '/',
             });
         }
 
