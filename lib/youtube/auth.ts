@@ -55,7 +55,7 @@ export async function exchangeCodeForYoutubeTokens(code: string): Promise<{
     const { tokens } = await client.getToken(code);
 
     if (!tokens.access_token || !tokens.expiry_date) {
-        throw new Error("Failed to retrieve YouTube access token");
+        throw new Error("Failed to retrieve Google access token");
     }
 
     return {
@@ -68,7 +68,7 @@ export async function exchangeCodeForYoutubeTokens(code: string): Promise<{
 }
 
 /**
- * Refresh an expired YouTube access token
+ * Refresh an expired Google access token
  */
 export async function refreshYoutubeAccessToken(
     refreshToken: string
