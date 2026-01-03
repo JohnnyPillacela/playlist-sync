@@ -21,3 +21,17 @@ function createOAuth2Client(): OAuth2Client {
         GOOGLE_REDIRECT_URI
     );
 }
+
+/**
+ * Build the Google OAuth authorization URL
+ * (used by callback route: /api/youtube/auth)
+ */
+export function getYoutubeAuthUrl(): string {
+    const client = createOAuth2Client();
+
+    return client.generateAuthUrl({
+        access_type: "offline",     // REQUIRED for refresh token
+        prompt: "consent",          // REQUIRED to always get refresh token
+        scope: [YOUTUBE_SCOPE],
+    });
+}
