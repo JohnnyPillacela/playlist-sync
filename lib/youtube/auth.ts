@@ -35,3 +35,29 @@ export function getYoutubeAuthUrl(): string {
         scope: [YOUTUBE_SCOPE],
     });
 }
+
+/**
+ * Exchange authorization code for access + refresh tokens
+ * (used by /api/youtube/callback)
+ */
+export async function exchangeCodeForYoutubeTokens(code: string): Promise<{
+    access_token: string;
+    refresh_token?: string;
+    expires_in: number;
+}> {
+    const client = createOAuth2Client();
+
+    const { tokens } = await client.getToken(code);
+
+    if (!tokens.access_token || !tokens.expiry_date) {
+        throw new Error("Failed to retrieve YouTube access token");
+    }
+
+    return {
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token || undefined, // ⚠️ only returned on first consent
+        expires_in: Math.floor(
+            (tokens.expiry_date - Date.now()) / 1000
+        ),
+    };
+}
