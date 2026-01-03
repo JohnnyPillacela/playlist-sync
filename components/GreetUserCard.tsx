@@ -1,9 +1,11 @@
 // /components/GreetUserCard.tsx
+"use client";
 
 import { SpotifyUser } from "@/lib/constants/spotify";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card";
 import { Button } from "./ui/button";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface GreetUserCardProps {
     user: SpotifyUser;
@@ -11,6 +13,24 @@ interface GreetUserCardProps {
 }
 
 export default function GreetUserCard({ user, playlists }: GreetUserCardProps) {
+    const router = useRouter();
+
+    const handleClearCookies = async () => {
+        try {
+            const response = await fetch('/api/dev/clear-cookies', {
+                method: 'POST',
+            });
+            
+            if (response.ok) {
+                // Redirect to home page after clearing cookies
+                router.push('/dashboard');
+                router.refresh();
+            }
+        } catch (error) {
+            console.error('Failed to clear cookies:', error);
+        }
+    };
+
     return (
         <Card>
         <CardHeader>
@@ -31,10 +51,13 @@ export default function GreetUserCard({ user, playlists }: GreetUserCardProps) {
                     </>
                 )}
             </div>
-            <div className="mt-4">
+            <div className="mt-4 flex gap-3">
                 <Link href="/">
                     <Button variant="outline">Back to Home</Button>
                 </Link>
+                <Button variant="destructive" onClick={handleClearCookies}>
+                    Clear Cookies
+                </Button>
             </div>
         </CardHeader>
         <CardContent>
