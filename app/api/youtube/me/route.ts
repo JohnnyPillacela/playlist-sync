@@ -1,11 +1,12 @@
 // /app/api/youtube/me/route.ts
 
+import { GOOGLE_ACCESS_TOKEN_KEY } from "@/lib/constants/google";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 type GoogleUserInfo = {
     id: string;
-    email: string;
+    email: string
     verified_email: boolean;
     name?: string;
     given_name?: string;
@@ -16,9 +17,9 @@ type GoogleUserInfo = {
 
 export async function GET() {
     const cookieStore = await cookies();
-    const youtubeAccessToken = cookieStore.get("youtube_access_token");
+    const googleAccessToken = cookieStore.get(GOOGLE_ACCESS_TOKEN_KEY);
 
-    if (!youtubeAccessToken) {
+    if (!googleAccessToken) {
         return NextResponse.json(
             { error: "Not authenticated with Google" },
             { status: 401 }
@@ -29,7 +30,7 @@ export async function GET() {
         "https://www.googleapis.com/oauth2/v2/userinfo",
         {
             headers: {
-                Authorization: `Bearer ${youtubeAccessToken.value}`,
+                Authorization: `Bearer ${googleAccessToken.value}`,
             },
             // Prevent accidental caching during dev
             cache: "no-store",

@@ -2,6 +2,7 @@
 
 import { NextResponse } from "next/server";
 import { exchangeCodeForYoutubeTokens } from "@/lib/youtube/auth";
+import { GOOGLE_ACCESS_TOKEN_KEY, GOOGLE_REFRESH_TOKEN_KEY } from "@/lib/constants/google";
 
 const BASE_URL = process.env.BASE_URL;
 
@@ -41,7 +42,7 @@ export async function GET(request: Request) {
          * (e.g., Supabase) and refreshed server-side per user.
         */
 
-        response.cookies.set("youtube_access_token", tokens.access_token, {
+        response.cookies.set(GOOGLE_ACCESS_TOKEN_KEY, tokens.access_token, {
             httpOnly: true,
             secure: isHttps,
             sameSite: 'lax',
@@ -57,7 +58,7 @@ export async function GET(request: Request) {
         */
 
         if (tokens.refresh_token) {
-            response.cookies.set("youtube_refresh_token", tokens.refresh_token, {
+            response.cookies.set(GOOGLE_REFRESH_TOKEN_KEY, tokens.refresh_token, {
                 httpOnly: true,
                 secure: isHttps,
                 sameSite: 'lax',
