@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/
 import { Button } from "./ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface GreetUserCardProps {
     user: SpotifyUser;
@@ -14,6 +15,19 @@ interface GreetUserCardProps {
 
 export default function GreetUserCard({ user, playlists }: GreetUserCardProps) {
     const router = useRouter();
+    const [googleEmail, setGoogleEmail] = useState<string | null>(null);
+
+    useEffect(() => {
+        // Fetch Google user info
+        fetch('/api/youtube/me')
+            .then(res => res.json())
+            .then(data => {
+                if (data.email) {
+                    setGoogleEmail(data.email);
+                }
+            })
+            .catch(err => console.error('Failed to fetch Google user:', err));
+    }, []);
 
     const handleClearCookies = async () => {
         try {
@@ -29,7 +43,7 @@ export default function GreetUserCard({ user, playlists }: GreetUserCardProps) {
         } catch (error) {
             console.error('Failed to clear cookies:', error);
         }
-    };
+    }; 
 
     return (
         <Card>
@@ -41,8 +55,14 @@ export default function GreetUserCard({ user, playlists }: GreetUserCardProps) {
             <div className="flex flex-wrap items-center gap-4 mt-3 text-base text-muted-foreground">
                 {user.email && (
                     <span className="flex items-center">
-                        {user.email}
+                        Spotify: {user.email}
                     </span>
+                )}
+                {googleEmail && (
+                    <>
+                        <span className="text-border">•</span>
+                        <span>Google: {googleEmail}</span>
+                    </>
                 )}
                 {user.country && (
                     <>
