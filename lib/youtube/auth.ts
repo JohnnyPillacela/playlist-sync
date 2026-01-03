@@ -5,7 +5,12 @@ const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
 
-const YOUTUBE_SCOPE = "https://www.googleapis.com/auth/youtube";
+const GOOGLE_SCOPES = [
+    "https://www.googleapis.com/auth/youtube",
+    "https://www.googleapis.com/auth/userinfo.profile",
+    "https://www.googleapis.com/auth/userinfo.email",
+];
+
 
 /**
  * Create a reusable OAuth2 client
@@ -32,7 +37,7 @@ export function getYoutubeAuthUrl(): string {
     return client.generateAuthUrl({
         access_type: "offline",     // REQUIRED for refresh token
         prompt: "consent",          // REQUIRED to always get refresh token
-        scope: [YOUTUBE_SCOPE],
+        scope: GOOGLE_SCOPES,
     });
 }
 
