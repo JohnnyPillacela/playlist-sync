@@ -2,6 +2,8 @@
 
 import { SpotifyUser } from "@/lib/constants/spotify";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card";
+import { Button } from "./ui/button";
+import Link from "next/link";
 
 interface GreetUserCardProps {
     user: SpotifyUser;
@@ -28,6 +30,11 @@ export default function GreetUserCard({ user, playlists }: GreetUserCardProps) {
                         <span>{user.country}</span>
                     </>
                 )}
+            </div>
+            <div className="mt-4">
+                <Link href="/">
+                    <Button variant="outline">Back to Home</Button>
+                </Link>
             </div>
         </CardHeader>
         <CardContent>
