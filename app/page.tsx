@@ -11,14 +11,18 @@ export default function Home() {
 
   const handleSpotifyLogin = async () => {
     try {
-        console.log('Starting authorization...');
+        console.log('Starting Spotify authorization...');
         await redirectToSpotifyAuth();
         console.log('Authorization function completed');
     } catch (error) {
         console.error('Authorization failed:', error);
         alert(`Authorization failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-};
+  };
+
+  const handleGoogleLogin = () => {
+    window.location.href = '/api/youtube/auth';
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background">
@@ -28,6 +32,9 @@ export default function Home() {
       </Button>
       <Button variant="default" size="lg" onClick={handleSpotifyLogin}>
        Login with Spotify
+      </Button>
+      <Button variant="default" size="lg" onClick={handleGoogleLogin}>
+        Login with Google
       </Button>
     </div>
   );
