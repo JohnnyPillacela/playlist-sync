@@ -2,6 +2,7 @@
 
 import { NextResponse } from "next/server";
 import { _exchangeCodeForTokens } from "@/lib/spotify/auth";
+import { SPOTIFY_ACCESS_TOKEN_KEY } from "@/lib/constants/spotify";
 
 const BASE_URL = process.env.BASE_URL;
 
@@ -44,7 +45,7 @@ export async function GET(request: Request) {
         const isHttps = requestUrl.protocol === 'https:' || 
                        request.headers.get('x-forwarded-proto') === 'https';
 
-        response.cookies.set('access_token', tokens.access_token, {
+        response.cookies.set(SPOTIFY_ACCESS_TOKEN_KEY, tokens.access_token, {
             httpOnly: true,
             secure: isHttps,  // Use secure flag based on actual HTTPS connection, not just NODE_ENV
             sameSite: 'lax',

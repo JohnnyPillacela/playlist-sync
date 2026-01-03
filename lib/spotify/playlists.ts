@@ -3,13 +3,14 @@
 import { _getCurrentUserDetails } from "./auth";
 import { cookies } from "next/headers";
 import { getServerSDK } from "./sdk";
-import { MaxInt, Page, PlaylistedTrack, SimplifiedPlaylist, Track } from "@spotify/web-api-ts-sdk";
+import { MaxInt, Page, SimplifiedPlaylist, Track } from "@spotify/web-api-ts-sdk";
+import { SPOTIFY_ACCESS_TOKEN_KEY } from "../constants/spotify";
 
-export async function _fetchPlaylistTracks(playlistID: string, accessToken: string) {
+export async function _fetchPlaylistTracks(playlistID: string, spotifyAccessToken: string) {
     const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistID}/tracks`, {
         method: 'GET',
         headers: {
-            'Authorization': `Bearer ${accessToken}`,
+            'Authorization': `Bearer ${spotifyAccessToken}`,
         },
     });
     const data = await response.json();
@@ -57,10 +58,10 @@ export async function _fetchUsersPlaylists(): Promise<SimplifiedPlaylist[]> {
     }
 
     const cookieStore = await cookies();
-    const access_token = cookieStore.get('access_token')?.value;
+    const spotifyAccessToken = cookieStore.get(SPOTIFY_ACCESS_TOKEN_KEY)?.value;
 
-    if(!access_token){
-        throw new Error('No access token found');
+    if(!spotifyAccessToken){
+        throw new Error('No Spotify access token found');
     }
 
     const sdk = await getServerSDK();

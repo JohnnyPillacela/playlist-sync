@@ -1,7 +1,7 @@
 // /lib/spotify/auth.ts
 
 import { cookies } from "next/headers";
-import { SpotifyUser } from "../constants/spotify";
+import { SPOTIFY_ACCESS_TOKEN_KEY, SpotifyUser } from "../constants/spotify";
 import { getServerSDK } from "./sdk";
 import { UserProfile } from "@spotify/web-api-ts-sdk";
 
@@ -38,10 +38,10 @@ export async function _fetchTokenDetails(customAuthOptions?: any): Promise<any> 
 
 export async function _getCurrentUserProfile(): Promise<UserProfile> {
     const cookieStore = await cookies();
-    const token = cookieStore.get('access_token')?.value;
+    const token = cookieStore.get(SPOTIFY_ACCESS_TOKEN_KEY)?.value;
     
     if (!token) {
-        throw new Error('No access token found in cookies');
+        throw new Error('No Spotify access token found in cookies');
     }
 
     // Use Spotify SDK to fetch current user profile
