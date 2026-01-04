@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { SPOTIFY_ACCESS_TOKEN_KEY, SpotifyUser } from "../constants/spotify";
 import { getServerSDK } from "./sdk";
 import { UserProfile } from "@spotify/web-api-ts-sdk";
+import { Result } from "../types";
 
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
@@ -36,25 +37,37 @@ export async function _fetchTokenDetails(customAuthOptions?: any): Promise<any> 
     return data;
 }
 
-export async function _getCurrentUserProfile(): Promise<UserProfile> {
-    const cookieStore = await cookies();
-    const token = cookieStore.get(SPOTIFY_ACCESS_TOKEN_KEY)?.value;
-    
-    if (!token) {
-        throw new Error('No Spotify access token found in cookies');
+export async function _getCurrentUserProfile(): Promise<Result<UserProfile>> {
+    // Use Spotify SDK to fetch current user profile
+    const sdkResult = await getServerSDK();
+
+    if (!sdkResult.ok) {
+        return {
+            ok: false,
+            error: sdkResult.error
+        }
     }
 
-    // Use Spotify SDK to fetch current user profile
-    const sdk = await getServerSDK();
-    return await sdk.currentUser.profile();
+    const sdk = sdkResult.data;
+    const profile = await sdk.currentUser.profile();
+
+    return {
+        ok: true,
+        data: profile
+    }
 }
 
-export async function _getCurrentUserDetails(): Promise<SpotifyUser> {
-    const currentUser = await _getCurrentUserProfile();
+export async function _getCurrentUserDetails(): Promise<Result<SpotifyUser>> {
+    const currentUserResult = await _getCurrentUserProfile();
 
-    if (!currentUser) {
-        throw new Error('No current user found');
+    if (!currentUserResult.ok) {
+        return {
+            ok: false,
+            error: currentUserResult.error
+        }
     }
+
+    const currentUser = currentUserResult.data;
 
     const user: SpotifyUser = {
         id: currentUser.id,
@@ -69,7 +82,10 @@ export async function _getCurrentUserDetails(): Promise<SpotifyUser> {
         uri: currentUser.uri,
     };
 
-    return user;
+    return {
+        ok: true,
+        data: user
+    }
 }
 
 export async function _exchangeCodeForTokens(

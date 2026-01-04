@@ -1,30 +1,24 @@
 // app/dashboard/page.tsx
 
 import { _getCurrentUserDetails } from "@/lib/spotify/auth";
-import { SpotifyUser } from "@/lib/constants/spotify";
 import { _fetchUsersPlaylists } from "@/lib/spotify/playlists";
 import PleaseSignIn from "@/components/please-sign-in";
-import { SimplifiedPlaylist } from "@spotify/web-api-ts-sdk";
 import GreetUserCard from "@/components/GreetUserCard";
 import PlaylistViewer from "@/components/playlist-viewer";
 
 export default async function Dashboard() {
-    let user: SpotifyUser | null = null;
-    let playlists: SimplifiedPlaylist[] = [];
+    const userResult = await _getCurrentUserDetails();
     
-    try {
-        user = await _getCurrentUserDetails();
-        playlists = await _fetchUsersPlaylists();
-    } catch (error) {
-        console.error('Error fetching user:', error);
-    }
-
     // Show "not signed in" view if user is null
-    if (!user) {
+    if (!userResult.ok) {
         return (
             <PleaseSignIn musicProvider="Spotify" />
         );
     }
+    const user = userResult.data;
+
+    const playlistsResult = await _fetchUsersPlaylists();
+    const playlists = playlistsResult.ok ? playlistsResult.data : [];
 
     return (
         <div className="min-h-screen bg-emerald-50">

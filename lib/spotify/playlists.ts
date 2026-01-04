@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { getServerSDK } from "./sdk";
 import { MaxInt, Page, SimplifiedPlaylist, Track } from "@spotify/web-api-ts-sdk";
 import { SPOTIFY_ACCESS_TOKEN_KEY } from "../constants/spotify";
+import { Result } from "../types";
 
 export async function _fetchPlaylistTracks(playlistID: string, spotifyAccessToken: string) {
     const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistID}/tracks`, {
@@ -18,8 +19,15 @@ export async function _fetchPlaylistTracks(playlistID: string, spotifyAccessToke
     return data;
 }
 
-export async function _fetchPlaylistTracksSDK(playlistID: string): Promise<Track[]> {
-    const sdk = await getServerSDK();
+export async function _fetchPlaylistTracksSDK(playlistID: string): Promise<Result<Track[]>> {
+    const sdkResult = await getServerSDK();
+    if (!sdkResult.ok) {
+        return {
+            ok: false,
+            error: sdkResult.error
+        }
+    }
+    const sdk = sdkResult.data;
     const allTracks: Track[] = [];
     let offset = 0;
     let limit = 100;
@@ -47,27 +55,29 @@ export async function _fetchPlaylistTracksSDK(playlistID: string): Promise<Track
         offset += limit;
     }
 
-    return allTracks;
+    return {
+        ok: true,
+        data: allTracks
+    }
 }
 
-export async function _fetchUsersPlaylists(): Promise<SimplifiedPlaylist[]> {
-    const currentUser = await _getCurrentUserDetails();
-
-    if(!currentUser){
-        throw new Error('No current user found');
+export async function _fetchUsersPlaylists(): Promise<Result<SimplifiedPlaylist[]>> {
+    const sdkResult = await getServerSDK();
+    if (!sdkResult.ok) {
+        return {
+            ok: false,
+            error: sdkResult.error
+        }
     }
 
-    const cookieStore = await cookies();
-    const spotifyAccessToken = cookieStore.get(SPOTIFY_ACCESS_TOKEN_KEY)?.value;
+    const sdk = sdkResult.data;
 
-    if(!spotifyAccessToken){
-        throw new Error('No Spotify access token found');
-    }
-
-    const sdk = await getServerSDK();
     const response: Page<SimplifiedPlaylist> = await sdk.currentUser.playlists.playlists(50);
 
     const simplifiedPlaylists: SimplifiedPlaylist[] = response.items;
 
-    return simplifiedPlaylists;
+    return {
+        ok: true,
+        data: simplifiedPlaylists
+    }
 }

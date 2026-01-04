@@ -15,7 +15,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         }
     
         const tracks = await _fetchPlaylistTracksSDK(playlistId);
-        return NextResponse.json(tracks);
+        if (!tracks.ok) {
+            return NextResponse.json(
+                { error: tracks.error },
+                { status: 500 }
+            );
+        }
+        return NextResponse.json(tracks.data);
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Failed to fetch playlist tracks";
         return NextResponse.json(
