@@ -2,8 +2,6 @@
 
 import { GoogleUserInfo } from "@/lib/constants/google";
 import { SpotifyUser } from "@/lib/constants/spotify";
-import { Button } from "./ui/button";
-import Link from "next/link";
 import { LogoutServiceButton } from "./logout-service-button";
 import { LoginServiceButton } from "./login-service-button";
 
@@ -19,7 +17,7 @@ interface ServiceUserInfoProps {
 export default function ServiceUserInfo({ service, serviceName, userData, authUrl, onLogout, extraFields }: ServiceUserInfoProps) {
     return (
         <div key={service} className="flex flex-col gap-1 p-4 border rounded-lg bg-card">
-            <h3 className="text-lg font-semibold">{serviceName}</h3>
+            <h3 className="text-3xl font-semibold">{serviceName}</h3>
             {userData ? (
                 <>
                     {/* Email field - common to both services */}
