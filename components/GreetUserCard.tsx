@@ -70,6 +70,14 @@ export default function GreetUserCard({ spotifyUser, googleUser, playlists }: Gr
             <CardDescription className="text-3xl mt-2">
                 Sync your playlists between connected services
             </CardDescription>
+            <div className="mt-4 flex gap-3">
+                <Link href="/">
+                    <Button variant="outline">Back to Home</Button>
+                </Link>
+                <Button variant="destructive" onClick={handleClearCookies}>
+                    Log out of all services
+                </Button>
+            </div>
             {/* 2-Column Service Status Layout */}
             <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mt-6">
                 {/* Spotify Card */}
@@ -157,14 +165,6 @@ export default function GreetUserCard({ spotifyUser, googleUser, playlists }: Gr
                         </>
                     )}
                 </div>
-            </div>
-            <div className="mt-4 flex gap-3">
-                <Link href="/">
-                    <Button variant="outline">Back to Home</Button>
-                </Link>
-                <Button variant="destructive" onClick={handleClearCookies}>
-                    Log out of all services
-                </Button>
             </div>
         </CardHeader>
         <CardContent>
