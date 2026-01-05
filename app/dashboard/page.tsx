@@ -7,15 +7,15 @@ import GreetUserCard from "@/components/GreetUserCard";
 import PlaylistViewer from "@/components/playlist-viewer";
 
 export default async function Dashboard() {
-    const userResult = await _getCurrentUserDetails();
+    const spotifyUserResult = await _getCurrentUserDetails();
     
     // Show "not signed in" view if user is null
-    if (!userResult.ok) {
+    if (!spotifyUserResult.ok) {
         return (
             <PleaseSignIn musicProvider="Spotify" />
         );
     }
-    const user = userResult.data;
+    const user = spotifyUserResult.data;
 
     const playlistsResult = await _fetchUsersPlaylists();
     const playlists = playlistsResult.ok ? playlistsResult.data : [];
