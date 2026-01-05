@@ -12,12 +12,12 @@ export default function Home() {
           View all playlists
         </Button>
       </Link>
-      <Link href="/api/spotify/auth">
+      <Link href="/api/spotify/auth" prefetch={false}>
         <Button variant="default" size="lg">
           Login with Spotify
         </Button>
       </Link>
-      <Link href="/api/youtube/auth">
+      <Link href="/api/youtube/auth" prefetch={false}>
         <Button variant="default" size="lg">
           Login with Google
         </Button>
