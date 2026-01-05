@@ -123,17 +123,11 @@ export default function GreetUserCard({ spotifyUser, googleUser, playlists }: Gr
                     Log out of all services
                 </Button>
             </div>
+        </CardHeader>
+        <CardContent>
             {/* 2-Column Service Status Layout */}
             <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mt-6">
                 {serviceOrder.map(service => renderServiceCard(service))}
-            </div>
-        </CardHeader>
-        <CardContent>
-            <div className="flex items-center gap-6">
-                <div className="flex flex-col">
-                    <span className="text-3xl font-bold text-primary">More card content coming soon!</span>
-                    <span className="text-sm text-muted-foreground mt-1">More features and improvements to come...</span>
-                </div>
             </div>
         </CardContent>
     </Card>
