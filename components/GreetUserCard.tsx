@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/
 import { Button } from "./ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { redirectToSpotifyAuth } from "@/lib/spotify/spotify-pkce";
 
 interface GreetUserCardProps {
     spotifyUser: SpotifyUser | null;
@@ -120,16 +119,11 @@ export default function GreetUserCard({ spotifyUser, googleUser, playlists }: Gr
                     ) : (
                         <>
                             <p className="text-sm text-muted-foreground">Not connected</p>
-                            {/* TODO: Update Spotify api route auth link */}
-                            <Link href="/">
+                            <Link href="/api/spotify/auth">
                                 <Button variant="outline" size="sm" className="w-full">
                                     Sign in to Spotify
                                 </Button>
                             </Link>
-                            {/* TODO: Remove client side redirect to Spotify auth */}
-                            <Button variant="outline" size="sm" className="w-full" onClick={redirectToSpotifyAuth}>
-                                sing in to Spotify
-                            </Button>
                         </>
                     )}
                 </div>
