@@ -18,3 +18,25 @@ export function deleteAuthCookies(response: any) {
     response.cookies.delete(GOOGLE_ACCESS_TOKEN_KEY);
     response.cookies.delete(GOOGLE_REFRESH_TOKEN_KEY);
 }
+
+/**
+ * Deletes Spotify access tokens from response cookies.
+ * Call this in your API Route when logging out or revoking access.
+ * 
+ * @param {Response | NextResponse} response - The response object to mutate.
+ */
+export function deleteSpotifyAuthCookies(response: any) {
+    response.cookies.delete(SPOTIFY_ACCESS_TOKEN_KEY);
+    response.cookies.delete(SPOTIFY_REFRESH_TOKEN_KEY);
+}
+
+/**
+ * Deletes Google access tokens from response cookies.
+ * Call this in your API Route when logging out or revoking access.
+ * 
+ * @param {Response | NextResponse} response - The response object to mutate.
+ */
+export function deleteGoogleAuthCookies(response: any) {
+    response.cookies.delete(GOOGLE_ACCESS_TOKEN_KEY);
+    response.cookies.delete(GOOGLE_REFRESH_TOKEN_KEY);
+}
