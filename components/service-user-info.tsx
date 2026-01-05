@@ -11,12 +11,12 @@ interface ServiceUserInfoProps {
   service: "spotify" | "youtube-music";
   serviceName: string; // Display name e.g., "Spotify", "YouTube Music"
   userData: SpotifyUser | GoogleUserInfo | null;
-  onLogin: () => void; // Login handler
+  authUrl: string; // Login handler
   onLogout: () => Promise<void>; // Logout handler
   extraFields?: { label: string; value: string | number }[]; // Optional extra data like playlist count
 }
 
-export default function ServiceUserInfo({ service, serviceName, userData, onLogin, onLogout, extraFields }: ServiceUserInfoProps) {
+export default function ServiceUserInfo({ service, serviceName, userData, authUrl, onLogout, extraFields }: ServiceUserInfoProps) {
     return (
         <div key={service} className="flex flex-col gap-1 p-4 border rounded-lg bg-card">
             <h3 className="text-lg font-semibold">{serviceName}</h3>
@@ -62,7 +62,7 @@ export default function ServiceUserInfo({ service, serviceName, userData, onLogi
                     <p className="text-sm text-muted-foreground">Not connected</p>
                     <LoginServiceButton
                         serviceName={serviceName}
-                        onClick={onLogin}
+                        authUrl={authUrl}
                     />
                 </>
             )}
