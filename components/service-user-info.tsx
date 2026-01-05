@@ -4,7 +4,8 @@ import { GoogleUserInfo } from "@/lib/constants/google";
 import { SpotifyUser } from "@/lib/constants/spotify";
 import { LogoutServiceButton } from "./logout-service-button";
 import { LoginServiceButton } from "./login-service-button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card";
+import { Badge } from "./ui/badge";
 
 interface ServiceUserInfoProps {
   service: "spotify" | "youtube-music";
@@ -26,8 +27,12 @@ export default function ServiceUserInfo({
   return (
     <Card className="border-muted">
         <CardHeader>
-            <CardTitle className="text-2xl font-bold">{serviceName}</CardTitle>
-            <CardDescription className="text-sm text-muted-foreground">{userData ? "Connected" : "Not connected"}</CardDescription>
+            <CardTitle className="text-2xl font-bold flex items-center gap-3">
+              {serviceName}
+              <Badge variant={userData ? "default" : "secondary"}>
+                {userData ? "Connected" : "Not connected"}
+              </Badge>
+            </CardTitle>
         </CardHeader>
         {userData && (
           <CardContent className="space-y-3">
