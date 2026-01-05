@@ -1,5 +1,8 @@
 // /lib/youtube/auth.ts
 import { OAuth2Client } from "google-auth-library";
+import { GOOGLE_ACCESS_TOKEN_KEY, GoogleUserInfo } from "../constants/google";
+import { Result } from "../types";
+import { cookies } from "next/headers";
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -94,4 +97,42 @@ export async function refreshYoutubeAccessToken(
             (credentials.expiry_date - Date.now()) / 1000
         ),
     };
+}
+
+export async function getGoogleUserInfo(): Promise<Result<GoogleUserInfo>> {
+    const cookieStore = await cookies();
+    const googleAccessToken = cookieStore.get(GOOGLE_ACCESS_TOKEN_KEY);
+    if (!googleAccessToken) {
+        const errorMessage = `[getGoogleUserInfo] No ${GOOGLE_ACCESS_TOKEN_KEY} found in cookies`;
+        return {
+            ok: false,
+            error: errorMessage
+        }
+    }
+
+    const response = await fetch(
+        "https://www.googleapis.com/oauth2/v2/userinfo",
+        {
+            headers: {
+                Authorization: `Bearer ${googleAccessToken.value}`,
+            },
+            // Prevent accidental caching during dev
+            cache: "no-store",
+        }
+    );
+
+    if (!response.ok) {
+        const text = await response.text();
+        const errorMessage = `[getGoogleUserInfo] Failed to fetch Google user info: ${text}`;
+        return {
+            ok: false,
+            error: errorMessage
+        }
+    }
+
+    const data: GoogleUserInfo = await response.json();
+    return {
+        ok: true,
+        data: data
+    }
 }
