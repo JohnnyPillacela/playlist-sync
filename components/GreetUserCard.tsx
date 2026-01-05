@@ -48,6 +48,21 @@ export default function GreetUserCard({ spotifyUser, googleUser, playlists }: Gr
         }
     };
 
+    const handleClearGoogleCookies = async () => {
+        try {
+            const response = await fetch('/api/dev/clear-cookies/google', {
+                method: 'POST',
+            });
+
+            if (response.ok) {
+                // Refresh the page after clearing cookies
+                router.refresh();
+            }
+        } catch (error) {
+            console.error('Failed to clear Google cookies:', error);
+        }
+    };
+
     return (
         <Card>
         <CardHeader>
@@ -121,6 +136,15 @@ export default function GreetUserCard({ spotifyUser, googleUser, playlists }: Gr
                                     <span className="text-base">{googleUser.name}</span>
                                 </div>
                             )}
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                className="w-fit mt-1 self-end text-xs px-2 py-1 h-7"
+                                onClick={handleClearGoogleCookies}
+                            >
+                                Log out of Google
+                            </Button>
+
                         </>
                     ) : (
                         <>
