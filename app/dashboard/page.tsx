@@ -5,25 +5,37 @@ import { _fetchUsersPlaylists } from "@/lib/spotify/playlists";
 import PleaseSignIn from "@/components/please-sign-in";
 import GreetUserCard from "@/components/GreetUserCard";
 import PlaylistViewer from "@/components/playlist-viewer";
+import { getGoogleUserInfo } from "@/lib/youtube/auth";
 
 export default async function Dashboard() {
     const spotifyUserResult = await _getCurrentUserDetails();
+    const googleUserResult = await getGoogleUserInfo();
     
-    // Show "not signed in" view if user is null
-    if (!spotifyUserResult.ok) {
+    // Show "not signed in" view only if BOTH services are not authenticated
+    if (!spotifyUserResult.ok && !googleUserResult.ok) {
         return (
-            <PleaseSignIn musicProvider="Spotify" />
+            <PleaseSignIn musicProvider="Spotify or Google" />
         );
     }
-    const user = spotifyUserResult.data;
+    
+    // Extract user data from authenticated service(s)
+    const spotifyUser = spotifyUserResult.ok ? spotifyUserResult.data : null;
+    const googleUser = googleUserResult.ok ? googleUserResult.data : null;
 
-    const playlistsResult = await _fetchUsersPlaylists();
+    // Fetch Spotify playlists only if Spotify is authenticated
+    const playlistsResult = spotifyUserResult.ok 
+        ? await _fetchUsersPlaylists() 
+        : { ok: false as const, error: 'Spotify not authenticated' };
     const playlists = playlistsResult.ok ? playlistsResult.data : [];
 
     return (
         <div className="min-h-screen bg-emerald-50">
             <div className="w-3/4 mx-auto mt-8 mb-8">
-                <GreetUserCard user={user} playlists={playlists.length} />
+                <GreetUserCard 
+                    spotifyUser={spotifyUser} 
+                    googleUser={googleUser}
+                    playlists={playlists.length} 
+                />
             </div>
 
             <PlaylistViewer playlists={playlists} />
