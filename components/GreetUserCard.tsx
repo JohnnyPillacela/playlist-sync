@@ -63,25 +63,21 @@ export default function GreetUserCard({ spotifyUser, googleUser, playlists }: Gr
         }
     };
 
-    return (
-        <Card>
-        <CardHeader>
-            <CardTitle className="text-5xl font-bold">Playlist Sync Dashboard!</CardTitle>
-            <CardDescription className="text-3xl mt-2">
-                Sync your playlists between connected services
-            </CardDescription>
-            <div className="mt-4 flex gap-3">
-                <Link href="/">
-                    <Button variant="outline">Back to Home</Button>
-                </Link>
-                <Button variant="destructive" onClick={handleClearCookies}>
-                    Log out of all services
-                </Button>
-            </div>
-            {/* 2-Column Service Status Layout */}
-            <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mt-6">
-                {/* Spotify Card */}
-                <div className="flex flex-col gap-1 p-4 border rounded-lg bg-card">
+    // Build array with authenticated services first
+    const serviceOrder: Array<'spotify' | 'google'> = [];
+
+    // Add authenticated services first
+    if (spotifyUser) serviceOrder.push('spotify');
+    if (googleUser) serviceOrder.push('google');
+
+    // Add unauthenticated services
+    if (!spotifyUser) serviceOrder.push('spotify');
+    if (!googleUser) serviceOrder.push('google');
+
+    const renderServiceCard = (service: 'spotify' | 'google') => {
+        if (service === 'spotify') {
+            return (
+                <div key="spotify" className="flex flex-col gap-1 p-4 border rounded-lg bg-card">
                     <h3 className="text-lg font-semibold">Spotify</h3>
                     {spotifyUser ? (
                         <>
@@ -127,9 +123,10 @@ export default function GreetUserCard({ spotifyUser, googleUser, playlists }: Gr
                         </>
                     )}
                 </div>
-
-                {/* Google/YouTube Card */}
-                <div className="flex flex-col gap-1 p-4 border rounded-lg bg-card">
+            );
+        } else {
+            return (
+                <div key="google" className="flex flex-col gap-1 p-4 border rounded-lg bg-card">
                     <h3 className="text-lg font-semibold">Google (YouTube Music)</h3>
                     {googleUser ? (
                         <>
@@ -164,6 +161,28 @@ export default function GreetUserCard({ spotifyUser, googleUser, playlists }: Gr
                         </>
                     )}
                 </div>
+            );
+        }
+    };
+
+    return (
+        <Card>
+        <CardHeader>
+            <CardTitle className="text-5xl font-bold">Playlist Sync Dashboard!</CardTitle>
+            <CardDescription className="text-3xl mt-2">
+                Sync your playlists between connected services
+            </CardDescription>
+            <div className="mt-4 flex gap-3">
+                <Link href="/">
+                    <Button variant="outline">Back to Home</Button>
+                </Link>
+                <Button variant="destructive" onClick={handleClearCookies}>
+                    Log out of all services
+                </Button>
+            </div>
+            {/* 2-Column Service Status Layout */}
+            <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mt-6">
+                {serviceOrder.map(service => renderServiceCard(service))}
             </div>
         </CardHeader>
         <CardContent>
