@@ -4,20 +4,12 @@
 
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { redirectToSpotifyAuth } from "@/lib/spotify/spotify-pkce";
 
 export default function Home() {
   const router = useRouter();
 
-  const handleSpotifyLogin = async () => {
-    try {
-        console.log('Starting Spotify authorization...');
-        await redirectToSpotifyAuth();
-        console.log('Authorization function completed');
-    } catch (error) {
-        console.error('Authorization failed:', error);
-        alert(`Authorization failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+  const handleSpotifyLogin = () => {
+    window.location.href = '/api/spotify/auth';
   };
 
   const handleGoogleLogin = () => {
