@@ -39,9 +39,9 @@ export default function GreetUserCard({ spotifyUser, googleUser, playlists }: Gr
     return (
         <Card>
         <CardHeader>
-            <CardTitle className="text-5xl font-bold">Welcome back, {displayName}!</CardTitle>
-            <CardDescription className="text-xl mt-2">
-                Here's your playlist overview
+            <CardTitle className="text-5xl font-bold">Playlist Sync Dashboard!</CardTitle>
+            <CardDescription className="text-3xl mt-2">
+                Sync your playlists between connected services
             </CardDescription>
             <div className="flex flex-wrap items-center gap-4 mt-3 text-base text-muted-foreground">
                 {spotifyUser?.email && (
