@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/
 import { Button } from "./ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import ServiceUserInfo from "@/components/service-user-info";
 
 interface GreetUserCardProps {
     spotifyUser: SpotifyUser | null;
@@ -64,103 +65,45 @@ export default function GreetUserCard({ spotifyUser, googleUser, playlists }: Gr
     };
 
     // Build array with authenticated services first
-    const serviceOrder: Array<'spotify' | 'google'> = [];
+    const serviceOrder: Array<'spotify' | 'youtube-music'> = [];
 
     // Add authenticated services first
     if (spotifyUser) serviceOrder.push('spotify');
-    if (googleUser) serviceOrder.push('google');
+    if (googleUser) serviceOrder.push('youtube-music');
 
     // Add unauthenticated services
     if (!spotifyUser) serviceOrder.push('spotify');
-    if (!googleUser) serviceOrder.push('google');
+    if (!googleUser) serviceOrder.push('youtube-music');
 
-    const renderServiceCard = (service: 'spotify' | 'google') => {
+    const renderServiceCard = (service: 'spotify' | 'youtube-music') => {
         if (service === 'spotify') {
             return (
-                <div key="spotify" className="flex flex-col gap-1 p-4 border rounded-lg bg-card">
-                    <h3 className="text-lg font-semibold">Spotify</h3>
-                    {spotifyUser ? (
-                        <>
-                            <div className="flex flex-col gap-1">
-                                <span className="text-sm text-muted-foreground">Email</span>
-                                <span className="text-base">{spotifyUser.email}</span>
-                            </div>
-                            {spotifyUser.country && (
-                                <div className="flex flex-col gap-1">
-                                    <span className="text-sm text-muted-foreground">Country</span>
-                                    <span className="text-base">{spotifyUser.country}</span>
-                                </div>
-                            )}
-                            <div className="flex flex-col gap-1">
-                                <span className="text-sm text-muted-foreground">Subscription</span>
-                                <span className="text-base font-medium">
-                                    {spotifyUser.product === 'premium' ? 'Premium' : 'Free'}
-                                </span>
-                            </div>
-                            <div className="flex flex-col gap-1">
-                                <span className="text-sm text-muted-foreground">Playlists</span>
-                                <span className="text-base font-medium">
-                                    {playlists}
-                                </span>
-                            </div>
-                            <Button
-                                variant="destructive"
-                                size="sm"
-                                className="w-fit mt-1 self-end text-xs px-2 py-1 h-7"
-                                onClick={handleClearSpotifyCookies}
-                            >
-                                Log out of Spotify
-                            </Button>
-                        </>
-                    ) : (
-                        <>
-                            <p className="text-sm text-muted-foreground">Not connected</p>
-                            <Link href="/api/spotify/auth">
-                                <Button variant="outline" size="sm" className="w-full">
-                                    Sign in to Spotify
-                                </Button>
-                            </Link>
-                        </>
-                    )}
-                </div>
-            );
+                <ServiceUserInfo
+                    key="spotify"
+                    service="spotify"
+                    serviceName="Spotify"
+                    userData={spotifyUser}
+                    authUrl="/api/spotify/auth"
+                    onLogout={handleClearSpotifyCookies}
+                    extraFields={[
+                        { label: "Playlists", value: playlists },
+                        {
+                            label: "Subscription",
+                            value: spotifyUser?.product === "premium" ? "Premium" : "Free",
+                        },
+                    ]}
+                />
+            )
         } else {
             return (
-                <div key="google" className="flex flex-col gap-1 p-4 border rounded-lg bg-card">
-                    <h3 className="text-lg font-semibold">Google (YouTube Music)</h3>
-                    {googleUser ? (
-                        <>
-                            <div className="flex flex-col gap-1">
-                                <span className="text-sm text-muted-foreground">Email</span>
-                                <span className="text-base">{googleUser.email}</span>
-                            </div>
-                            {googleUser.name && (
-                                <div className="flex flex-col gap-1">
-                                    <span className="text-sm text-muted-foreground">Name</span>
-                                    <span className="text-base">{googleUser.name}</span>
-                                </div>
-                            )}
-                            <Button
-                                variant="destructive"
-                                size="sm"
-                                className="w-fit mt-1 self-end text-xs px-2 py-1 h-7"
-                                onClick={handleClearGoogleCookies}
-                            >
-                                Log out of Google
-                            </Button>
-
-                        </>
-                    ) : (
-                        <>
-                            <p className="text-sm text-muted-foreground">Not connected</p>
-                            <Link href="/api/youtube/auth">
-                                <Button variant="outline" size="sm" className="w-full">
-                                    Sign in to Google
-                                </Button>
-                            </Link>
-                        </>
-                    )}
-                </div>
+                <ServiceUserInfo
+                    key="youtube-music"
+                    service="youtube-music"
+                    serviceName="YouTube Music"
+                    userData={googleUser}
+                    authUrl="/api/youtube/auth"
+                    onLogout={handleClearGoogleCookies}
+                />
             );
         }
     };
