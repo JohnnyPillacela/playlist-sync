@@ -83,7 +83,9 @@ export default function GreetUserCard({ spotifyUser, googleUser, playlists }: Gr
                     service="spotify"
                     serviceName="Spotify"
                     userData={spotifyUser}
-                    authUrl="/api/spotify/auth"
+                    onLogin={() => {
+                        window.location.href = '/api/spotify/auth';
+                    }}
                     onLogout={handleClearSpotifyCookies}
                     extraFields={[
                         { label: "Playlists", value: playlists },
@@ -101,7 +103,9 @@ export default function GreetUserCard({ spotifyUser, googleUser, playlists }: Gr
                     service="youtube-music"
                     serviceName="YouTube Music"
                     userData={googleUser}
-                    authUrl="/api/youtube/auth"
+                    onLogin={() => {
+                        window.location.href = '/api/youtube/auth';
+                    }}
                     onLogout={handleClearGoogleCookies}
                 />
             );
