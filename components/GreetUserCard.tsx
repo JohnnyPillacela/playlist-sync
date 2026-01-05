@@ -73,6 +73,7 @@ export default function GreetUserCard({ spotifyUser, googleUser, playlists }: Gr
                     ) : (
                         <>
                             <p className="text-sm text-muted-foreground">Not connected</p>
+                            // TODO: Update Spotify api route auth link
                             <Link href="/">
                                 <Button variant="outline" size="sm" className="w-full">
                                     Sign in to Spotify
