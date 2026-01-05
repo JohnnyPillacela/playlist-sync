@@ -163,7 +163,7 @@ export default function GreetUserCard({ spotifyUser, googleUser, playlists }: Gr
                     <Button variant="outline">Back to Home</Button>
                 </Link>
                 <Button variant="destructive" onClick={handleClearCookies}>
-                    Clear Cookies
+                    Log out of all services
                 </Button>
             </div>
         </CardHeader>
