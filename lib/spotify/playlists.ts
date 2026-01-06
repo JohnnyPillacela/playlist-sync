@@ -1,10 +1,7 @@
 // /lib/spotify/playlists.ts
 
-import { _getCurrentUserDetails } from "./auth";
-import { cookies } from "next/headers";
 import { getServerSDK } from "./sdk";
 import { MaxInt, Page, SimplifiedPlaylist, Track } from "@spotify/web-api-ts-sdk";
-import { SPOTIFY_ACCESS_TOKEN_KEY } from "../constants/spotify";
 import { Result } from "../types";
 
 export async function _fetchPlaylistTracks(playlistID: string, spotifyAccessToken: string) {
