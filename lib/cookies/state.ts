@@ -9,14 +9,10 @@ import { GOOGLE_ACCESS_TOKEN_KEY, GOOGLE_REFRESH_TOKEN_KEY } from "../constants/
  * 
  * @param {Response | NextResponse} response - The response object to mutate.
  */
-export function deleteAuthCookies(response: any) {
-    // Spotify tokens (customize the key names if needed)
-    response.cookies.delete(SPOTIFY_ACCESS_TOKEN_KEY);
-    response.cookies.delete(SPOTIFY_REFRESH_TOKEN_KEY);
+export function deleteServiceProvidersTokens(response: any) {
+    deleteSpotifyAuthCookies(response);
 
-    // Google tokens (customize the key names if needed)
-    response.cookies.delete(GOOGLE_ACCESS_TOKEN_KEY);
-    response.cookies.delete(GOOGLE_REFRESH_TOKEN_KEY);
+    deleteGoogleAuthCookies(response);
 }
 
 /**
