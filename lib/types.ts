@@ -20,3 +20,8 @@ export const AUTH_ERRORS = {
     GOOGLE_NO_TOKEN_FOUND: 'google_no_access_token_found',
     GOOGLE_ACCESS_TOKEN_EXPIRED: 'google_access_token_expired',
 } as const;
+
+export const SDK_ERRORS = {
+    YOUTUBE_SDK_NOT_INITIALIZED: 'youtube_sdk_not_initialized',
+    SPOTIFY_SDK_NOT_INITIALIZED: 'spotify_sdk_not_initialized',
+} as const;
