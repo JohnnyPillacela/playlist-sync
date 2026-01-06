@@ -23,10 +23,10 @@ export default async function Dashboard() {
     const googleUser = googleUserResult.ok ? googleUserResult.data : null;
 
     // Fetch Spotify playlists only if Spotify is authenticated
-    const playlistsResult = spotifyUserResult.ok 
+    const spotifyPlaylistsResult = spotifyUserResult.ok 
         ? await _fetchUsersPlaylists() 
         : { ok: false as const, error: 'Spotify not authenticated' };
-    const playlists = playlistsResult.ok ? playlistsResult.data : [];
+    const playlists = spotifyPlaylistsResult.ok ? spotifyPlaylistsResult.data : [];
 
     return (
         <div className="min-h-screen bg-emerald-50">
