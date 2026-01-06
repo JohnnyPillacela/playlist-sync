@@ -17,8 +17,9 @@ const GOOGLE_SCOPES = [
 
 /**
  * Create a reusable OAuth2 client
+ * Exported for use in SDK initialization and auth flows
  */
-function createOAuth2Client(): OAuth2Client {
+export function createOAuth2Client(): OAuth2Client {
     if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !GOOGLE_REDIRECT_URI) {
         throw new Error("Missing Google OAuth environment variables");
     }
