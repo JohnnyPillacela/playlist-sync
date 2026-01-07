@@ -19,8 +19,6 @@ interface PlaylistTableProps {
 
 export default function PlaylistTable({ playlists, provider }: PlaylistTableProps) {
   const providerName = provider === 'spotify' ? 'Spotify' : 'YouTube Music';
-  const itemLabel = provider === 'youtube-music' ? 'video' : 'song';
-  const itemLabelPlural = provider === 'youtube-music' ? 'videos' : 'songs';
 
   return (
     <Card className="shadow-lg w-full">
@@ -34,7 +32,7 @@ export default function PlaylistTable({ playlists, provider }: PlaylistTableProp
               <TableHead className="text-left">No.</TableHead>
               <TableHead className="text-left">Thumbnail</TableHead>
               <TableHead>Playlist Name</TableHead>
-              <TableHead className="text-right">{itemLabelPlural.charAt(0).toUpperCase() + itemLabelPlural.slice(1)}</TableHead>
+              <TableHead className="text-right">Songs</TableHead>
               <TableHead className="text-right">ID</TableHead>
             </TableRow>
           </TableHeader>
@@ -54,7 +52,7 @@ export default function PlaylistTable({ playlists, provider }: PlaylistTableProp
                   <TableCell className="font-medium">{playlist.name}</TableCell>
                   <TableCell className="text-right text-muted-foreground">
                     {totalItems}{" "}
-                    {totalItems === 1 ? itemLabel : itemLabelPlural}
+                    {totalItems === 1 ? "song" : "songs"}
                   </TableCell>
                   <TableCell className="text-right text-muted-foreground">
                     {playlist.id}
