@@ -37,5 +37,5 @@ export type NormalizedPlaylist = {
 export type PlaylistProviderData = {
     service: 'spotify' | 'youtube-music';
     isAuthenticated: boolean;
-    playlists: NormalizedPlaylist[];
+    playlists?: NormalizedPlaylist[] | null;
 };
