@@ -25,3 +25,17 @@ export const SDK_ERRORS = {
     YOUTUBE_SDK_NOT_INITIALIZED: 'youtube_sdk_not_initialized',
     SPOTIFY_SDK_NOT_INITIALIZED: 'spotify_sdk_not_initialized',
 } as const;
+
+export type NormalizedPlaylist = {
+    id: string;
+    name: string;
+    trackCount: number;
+    thumbnailUrl: string;
+    provider: 'spotify' | 'youtube-music';
+};
+
+export type PlaylistProviderData = {
+    provider: 'spotify' | 'youtube-music';
+    isAuthenticated: boolean;
+    playlists: NormalizedPlaylist[];
+};
