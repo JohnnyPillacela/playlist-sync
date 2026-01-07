@@ -52,6 +52,19 @@ export default function PlaylistViewer({ playlists }: PlaylistViewerProps) {
         fetchTracks(); // Call the function
     }, [playlistId]); // Run whenever playlistId changes
 
+    if (playlists.length === 0) {
+        return (
+            <Empty>
+                <EmptyHeader>
+                    <EmptyMedia>
+                        <ListMusic className="w-16 h-16" />
+                    </EmptyMedia>
+                    <EmptyTitle>You have no playlists</EmptyTitle>
+                </EmptyHeader>
+            </Empty>
+        );
+    }
+
     return (
         <>
             <div className="w-3/4 mx-auto mt-4">
