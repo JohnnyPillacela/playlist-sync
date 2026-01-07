@@ -12,10 +12,9 @@ import ServiceUserInfo from "@/components/service-user-info";
 interface GreetUserCardProps {
     spotifyUser: SpotifyUser | null;
     googleUser: GoogleUserInfo | null;
-    playlists: number;
 }
 
-export default function GreetUserCard({ spotifyUser, googleUser, playlists }: GreetUserCardProps) {
+export default function GreetUserCard({ spotifyUser, googleUser }: GreetUserCardProps) {
     const router = useRouter();
 
     const handleClearCookies = async () => {
@@ -86,7 +85,6 @@ export default function GreetUserCard({ spotifyUser, googleUser, playlists }: Gr
                     authUrl="/api/spotify/auth"
                     onLogout={handleClearSpotifyCookies}
                     extraFields={[
-                        { label: "Playlists", value: playlists },
                         {
                             label: "Subscription",
                             value: spotifyUser?.product === "premium" ? "Premium" : "Free",

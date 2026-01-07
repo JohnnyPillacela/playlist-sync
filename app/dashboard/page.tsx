@@ -56,7 +56,6 @@ export default async function Dashboard() {
                 <GreetUserCard 
                     spotifyUser={spotifyUser} 
                     googleUser={googleUser}
-                    playlists={spotifyPlaylists.length} 
                 />
             </div>
 
