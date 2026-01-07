@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import Image from "next/image";
 import { NormalizedPlaylist } from "@/lib/types";
+import { ListMusic } from "lucide-react";
 
 interface PlaylistTableProps {
   playlists: NormalizedPlaylist[];
@@ -50,12 +51,20 @@ export default function PlaylistTable({
                     <TableCell className="font-medium">{index + 1}</TableCell>
                     <TableCell className="flex justify-center">
                       <div className="w-20 h-20 overflow-hidden">
-                        <Image
-                          src={thumbnailUrl}
-                          alt={playlist.name}
-                          width={80}
-                          height={80}
-                        />
+                        {thumbnailUrl ? (
+                          <Image
+                            src={thumbnailUrl}
+                            alt={playlist.name}
+                            width={80}
+                            height={80}
+                            unoptimized={provider === "youtube-music"}
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                            }}
+                          />
+                        ) : (
+                          <ListMusic className="w-20 h-20 text-muted-foreground" />
+                        )}
                       </div>
                     </TableCell>
                     <TableCell className="font-medium">
