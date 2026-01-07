@@ -1,11 +1,13 @@
 // app/dashboard/page.tsx
 
 import { _getCurrentUserDetails } from "@/lib/spotify/auth";
-import { _fetchUsersPlaylists } from "@/lib/spotify/playlists";
+import { normalizedSpotifyPlaylist } from "@/lib/spotify/playlists";
 import PleaseSignIn from "@/components/please-sign-in";
 import GreetUserCard from "@/components/GreetUserCard";
 import PlaylistViewer from "@/components/playlist-viewer";
 import { getGoogleUserInfo } from "@/lib/youtube/auth";
+import { normalizedYoutubePlaylist } from "@/lib/youtube/playlists";
+import { PlaylistProviderData } from "@/lib/types";
 
 export default async function Dashboard() {
     const spotifyUserResult = await _getCurrentUserDetails();
@@ -24,9 +26,29 @@ export default async function Dashboard() {
 
     // Fetch Spotify playlists only if Spotify is authenticated
     const spotifyPlaylistsResult = spotifyUserResult.ok 
-        ? await _fetchUsersPlaylists() 
-        : { ok: false as const, error: 'Spotify not authenticated' };
-    const playlists = spotifyPlaylistsResult.ok ? spotifyPlaylistsResult.data : [];
+        ? await normalizedSpotifyPlaylist() 
+        : { ok: false as const, error: 'Could not fetch Spotify playlists' };
+    const spotifyPlaylists = spotifyPlaylistsResult.ok ? spotifyPlaylistsResult.data : [];
+
+    // Fetch YouTube playlists only if Google is authenticated
+    const youtubePlaylistsResult = googleUserResult.ok 
+        ? await normalizedYoutubePlaylist() 
+        : { ok: false as const, error: 'Could not fetch YouTube playlists' };
+    const normalizedYoutubePlaylists = youtubePlaylistsResult.ok ? youtubePlaylistsResult.data : [];
+
+    const spotifyData: PlaylistProviderData = {
+        service: 'spotify',
+        isAuthenticated: spotifyUserResult.ok,
+        playlists: spotifyPlaylists
+    }
+
+    const youtubeData: PlaylistProviderData = {
+        service: 'youtube-music',
+        isAuthenticated: googleUserResult.ok,
+        playlists: normalizedYoutubePlaylists
+    }
+
+    const providerData: PlaylistProviderData[] = [spotifyData, youtubeData];
 
     return (
         <div className="min-h-screen bg-emerald-50">
@@ -34,11 +56,11 @@ export default async function Dashboard() {
                 <GreetUserCard 
                     spotifyUser={spotifyUser} 
                     googleUser={googleUser}
-                    playlists={playlists.length} 
+                    playlists={spotifyPlaylists.length} 
                 />
             </div>
 
-            <PlaylistViewer playlists={playlists} />
+            <PlaylistViewer providerData={providerData} />
 
         </div>
     )

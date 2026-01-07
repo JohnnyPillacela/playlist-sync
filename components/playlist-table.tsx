@@ -10,13 +10,22 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import Image from "next/image";
-import { SimplifiedPlaylist } from "@spotify/web-api-ts-sdk";
+import { NormalizedPlaylist } from "@/lib/types";
 
-export default function PlaylistTable({ playlists }: { playlists: SimplifiedPlaylist[] }) {
+interface PlaylistTableProps {
+  playlists: NormalizedPlaylist[];
+  provider: 'spotify' | 'youtube-music';
+}
+
+export default function PlaylistTable({ playlists, provider }: PlaylistTableProps) {
+  const providerName = provider === 'spotify' ? 'Spotify' : 'YouTube Music';
+  const itemLabel = provider === 'youtube-music' ? 'video' : 'song';
+  const itemLabelPlural = provider === 'youtube-music' ? 'videos' : 'songs';
+
   return (
-    <Card className="w-3/4 mx-auto shadow-lg">
+    <Card className="shadow-lg w-full">
       <CardHeader>
-        <CardTitle>Your Playlists</CardTitle>
+        <CardTitle>Your {providerName} Playlists</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>
@@ -25,14 +34,14 @@ export default function PlaylistTable({ playlists }: { playlists: SimplifiedPlay
               <TableHead className="text-left">No.</TableHead>
               <TableHead className="text-left">Thumbnail</TableHead>
               <TableHead>Playlist Name</TableHead>
-              <TableHead className="text-right">Songs</TableHead>
+              <TableHead className="text-right">{itemLabelPlural.charAt(0).toUpperCase() + itemLabelPlural.slice(1)}</TableHead>
               <TableHead className="text-right">ID</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {playlists.map((playlist: SimplifiedPlaylist, index: number = 0) => {
-              const totalSongs = playlist.tracks?.total || 0;
-              const thumbnailUrl = playlist.images?.[0]?.url || 'Undefined';
+            {playlists.map((playlist: NormalizedPlaylist, index: number = 0) => {
+              const totalItems = playlist.trackCount || 0;
+              const thumbnailUrl = playlist.thumbnailUrl || 'Undefined';
 
               return (
                 <TableRow key={playlist.id}>
@@ -44,8 +53,8 @@ export default function PlaylistTable({ playlists }: { playlists: SimplifiedPlay
                   </TableCell>
                   <TableCell className="font-medium">{playlist.name}</TableCell>
                   <TableCell className="text-right text-muted-foreground">
-                    {totalSongs}{" "}
-                    {totalSongs === 1 ? "song" : "songs"}
+                    {totalItems}{" "}
+                    {totalItems === 1 ? itemLabel : itemLabelPlural}
                   </TableCell>
                   <TableCell className="text-right text-muted-foreground">
                     {playlist.id}
