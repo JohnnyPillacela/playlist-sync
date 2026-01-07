@@ -2,18 +2,36 @@
 'use client';
 
 import PlaylistTable from "./playlist-table";
-import { PlaylistProviderData } from "@/lib/types";
+import { NormalizedPlaylist, PlaylistProviderData } from "@/lib/types";
 import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "./ui/empty";
-import { ListMusic, LogIn } from "lucide-react";
+import { ListMusic, Loader2, LogIn } from "lucide-react";
 import { Button } from "./ui/button";
 import Link from "next/link";
+import { normalizedYoutubePlaylist } from "@/lib/youtube/playlists";
+import { useEffect, useState } from "react";
 
 interface PlaylistViewerProps {
     providerData: PlaylistProviderData[];
 }
 
-export default function PlaylistViewer({ providerData }: PlaylistViewerProps) {
+async function getYoutubeUserPlaylists() {
+    const response = await fetch('/api/youtube/playlists');
+    if (!response.ok) {
+        return { error: 'Failed to fetch YouTube user playlists' };
+    }
+    return response.json();
+}
+
+async function getSpotifyUserPlaylists() {
+    const response = await fetch('/api/spotify/playlists');
+    if (!response.ok) {
+        return { error: 'Failed to fetch Spotify user playlists' };
+    }
+    return response.json();
+}
+
+export default function PlaylistViewer({providerData}: PlaylistViewerProps) {
     // Build array with authenticated services first (matching GreetUserCard logic)
     const serviceOrder: Array<'spotify' | 'youtube-music'> = [];
     
@@ -29,7 +47,33 @@ export default function PlaylistViewer({ providerData }: PlaylistViewerProps) {
     if (!spotifyProvider?.isAuthenticated) serviceOrder.push('spotify');
     if (!youtubeProvider?.isAuthenticated) serviceOrder.push('youtube-music');
 
-    const renderProviderSection = (service: 'spotify' | 'youtube-music') => {
+    const [spotifyUserPlaylists, setSpotifyUserPlaylists] = useState<NormalizedPlaylist[]>([]);
+    const [youtubeUserPlaylists, setYoutubeUserPlaylists] = useState<NormalizedPlaylist[]>([]);
+
+    const [spotifyLoading, setSpotifyLoading] = useState(false);
+    const [youtubeLoading, setYoutubeLoading] = useState(false);
+
+    useEffect(() => {
+        if (spotifyProvider?.isAuthenticated) {
+            setSpotifyLoading(true);
+            getSpotifyUserPlaylists()
+                .then(setSpotifyUserPlaylists)
+                .finally(() => setSpotifyLoading(false));
+        }
+        
+        if (youtubeProvider?.isAuthenticated) {
+            setYoutubeLoading(true);
+            getYoutubeUserPlaylists()
+                .then(setYoutubeUserPlaylists)
+                .finally(() => setYoutubeLoading(false));
+        }
+    }, [spotifyProvider?.isAuthenticated, youtubeProvider?.isAuthenticated]);
+
+    const renderProviderSection = (
+        service: 'spotify' | 'youtube-music',
+        playlists: NormalizedPlaylist[],
+        isLoading: boolean,
+    ) => {
         const provider = service === 'spotify' ? spotifyProvider : youtubeProvider;
         const providerName = service === 'spotify' ? 'Spotify' : 'YouTube Music';
         const authUrl = service === 'spotify' ? '/api/spotify/auth' : '/api/youtube/auth';
@@ -58,8 +102,25 @@ export default function PlaylistViewer({ providerData }: PlaylistViewerProps) {
             );
         }
         
-        // State 2: Authenticated but no playlists
-        if (provider.playlists.length === 0) {
+        // State 2: Authenticated but still loading
+        if (isLoading) {
+            return (
+                <Card key={service} className="shadow-lg w-full">
+                    <CardHeader>
+                        <CardTitle>Your {providerName} Playlists</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        {/* Loading spinner or skeleton */}
+                        <div className="flex justify-center items-center p-8">
+                            <Loader2 className="w-16 h-16 animate-spin text-primary" />
+                        </div>
+                    </CardContent>
+                </Card>
+            );
+        }
+
+        // State 3: Authenticated with no playlists
+        if (playlists.length === 0) {
             return (
                 <Card key={service} className="shadow-lg w-full">
                     <CardHeader>
@@ -79,11 +140,11 @@ export default function PlaylistViewer({ providerData }: PlaylistViewerProps) {
             );
         }
         
-        // State 3: Authenticated with playlists
+        // State 4: Authenticated with playlists
         return (
             <PlaylistTable 
                 key={service}
-                playlists={provider.playlists} 
+                playlists={playlists} 
                 provider={service} 
             />
         );
@@ -93,7 +154,11 @@ export default function PlaylistViewer({ providerData }: PlaylistViewerProps) {
         <div className="w-3/4 mx-auto mt-4 flex flex-row gap-4">
             {serviceOrder.map(service => (
                 <div key={service} className="flex-1 min-w-0">
-                    {renderProviderSection(service)}
+                    {renderProviderSection(
+                        service,
+                        service === 'spotify' ? spotifyUserPlaylists : youtubeUserPlaylists,
+                        service === 'spotify' ? spotifyLoading : youtubeLoading
+                    )}
                 </div>
             ))}
         </div>

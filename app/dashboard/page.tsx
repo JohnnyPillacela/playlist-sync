@@ -24,31 +24,15 @@ export default async function Dashboard() {
     const spotifyUser = spotifyUserResult.ok ? spotifyUserResult.data : null;
     const googleUser = googleUserResult.ok ? googleUserResult.data : null;
 
-    // Fetch Spotify playlists only if Spotify is authenticated
-    const spotifyPlaylistsResult = spotifyUserResult.ok 
-        ? await normalizedSpotifyPlaylist() 
-        : { ok: false as const, error: 'Could not fetch Spotify playlists' };
-    const spotifyPlaylists = spotifyPlaylistsResult.ok ? spotifyPlaylistsResult.data : [];
-
-    // Fetch YouTube playlists only if Google is authenticated
-    const youtubePlaylistsResult = googleUserResult.ok 
-        ? await normalizedYoutubePlaylist() 
-        : { ok: false as const, error: 'Could not fetch YouTube playlists' };
-    const normalizedYoutubePlaylists = youtubePlaylistsResult.ok ? youtubePlaylistsResult.data : [];
-
-    const spotifyData: PlaylistProviderData = {
+    const spotifyProviderData: PlaylistProviderData = {
         service: 'spotify',
         isAuthenticated: spotifyUserResult.ok,
-        playlists: spotifyPlaylists
     }
-
-    const youtubeData: PlaylistProviderData = {
+    const youtubeProviderData: PlaylistProviderData = {
         service: 'youtube-music',
         isAuthenticated: googleUserResult.ok,
-        playlists: normalizedYoutubePlaylists
     }
-
-    const providerData: PlaylistProviderData[] = [spotifyData, youtubeData];
+    const providerData: PlaylistProviderData[] = [spotifyProviderData, youtubeProviderData];
 
     return (
         <div className="min-h-screen bg-emerald-50">
@@ -58,6 +42,8 @@ export default async function Dashboard() {
                     googleUser={googleUser}
                 />
             </div>
+
+
 
             <PlaylistViewer providerData={providerData} />
 
