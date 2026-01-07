@@ -57,15 +57,17 @@ export async function normalizedYoutubePlaylist(): Promise<Result<NormalizedPlay
 
     const youtubePlaylists = youtubePlaylistsResult.data;
 
-    const normalizedPlaylists: NormalizedPlaylist[] = youtubePlaylists.map((playlist) => {
-        return {
-            id: playlist.id,
-            name: playlist.snippet?.title || 'Untitled Playlist',
-            trackCount: playlist.contentDetails?.itemCount || 0,
-            thumbnailUrl: playlist.snippet?.thumbnails?.default?.url || 'Undefined',
-            provider: 'youtube-music',
-        }
-    })
+    const normalizedPlaylists: NormalizedPlaylist[] = youtubePlaylists
+        .filter((playlist) => playlist.id != null) // Filter out playlists without IDs
+        .map((playlist) => {
+            return {
+                id: playlist.id!, // Use non-null assertion since we filtered above
+                name: playlist.snippet?.title || 'Untitled Playlist',
+                trackCount: playlist.contentDetails?.itemCount || 0,
+                thumbnailUrl: playlist.snippet?.thumbnails?.default?.url || 'Undefined',
+                provider: 'youtube-music',
+            }
+        })
 
     return {
         ok: true,
