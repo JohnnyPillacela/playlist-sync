@@ -1,7 +1,7 @@
 // /lib/youtube/playlists.ts
 
 import { youtube_v3 } from "googleapis/build/src/apis/youtube/v3";
-import { Result } from "../types";
+import { NormalizedPlaylist, Result } from "../types";
 import { getYoutubeSDK } from "./sdk";
 
 export async function getYoutubeUserPlaylists(): Promise<Result<youtube_v3.Schema$Playlist[]>> {
@@ -42,5 +42,33 @@ export async function getYoutubeUserPlaylists(): Promise<Result<youtube_v3.Schem
     return {
         ok: true,
         data: youtubePlaylists,
+    }
+}
+
+export async function normalizedYoutubePlaylist(): Promise<Result<NormalizedPlaylist[]>> {
+    const youtubePlaylistsResult = await getYoutubeUserPlaylists();
+
+    if (!youtubePlaylistsResult.ok) {
+        return {
+            ok: false,
+            error: youtubePlaylistsResult.error,
+        }
+    }
+
+    const youtubePlaylists = youtubePlaylistsResult.data;
+
+    const normalizedPlaylists: NormalizedPlaylist[] = youtubePlaylists.map((playlist) => {
+        return {
+            id: playlist.id,
+            name: playlist.snippet?.title || 'Untitled Playlist',
+            trackCount: playlist.contentDetails?.itemCount || 0,
+            thumbnailUrl: playlist.snippet?.thumbnails?.default?.url || 'Undefined',
+            provider: 'youtube-music',
+        }
+    })
+
+    return {
+        ok: true,
+        data: normalizedPlaylists,
     }
 }

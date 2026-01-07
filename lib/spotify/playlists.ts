@@ -2,7 +2,7 @@
 
 import { getServerSDK } from "./sdk";
 import { MaxInt, Page, SimplifiedPlaylist, Track } from "@spotify/web-api-ts-sdk";
-import { Result } from "../types";
+import { NormalizedPlaylist, Result } from "../types";
 
 export async function _fetchPlaylistTracks(playlistID: string, spotifyAccessToken: string) {
     const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistID}/tracks`, {
@@ -42,10 +42,10 @@ export async function _fetchPlaylistTracksSDK(playlistID: string): Promise<Resul
         const tracks = page.items
             .map(item => item.track as Track)
             .filter(track => track !== null);
-        
+
         allTracks.push(...tracks);
 
-        if (!page.next){
+        if (!page.next) {
             break;
         }
 
@@ -76,5 +76,33 @@ export async function _fetchUsersPlaylists(): Promise<Result<SimplifiedPlaylist[
     return {
         ok: true,
         data: simplifiedPlaylists
+    }
+}
+
+export async function normalizedSpotifyPlaylist(): Promise<Result<NormalizedPlaylist[]>> {
+    const spotifyPlaylistsResult = await _fetchUsersPlaylists();
+
+    if (!spotifyPlaylistsResult.ok) {
+        return {
+            ok: false,
+            error: spotifyPlaylistsResult.error
+        }
+    }
+
+    const spotifyPlaylists = spotifyPlaylistsResult.data;
+
+    const normalizedPlaylists: NormalizedPlaylist[] = spotifyPlaylists.map((playlist) => {
+        return {
+            id: playlist.id,
+            name: playlist.name,
+            trackCount: playlist.tracks?.total || 0,
+            thumbnailUrl: playlist.images?.[0]?.url || 'Undefined',
+            provider: 'spotify'
+        }
+    })
+
+    return {
+        ok: true,
+        data: normalizedPlaylists
     }
 }
