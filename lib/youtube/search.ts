@@ -15,6 +15,6 @@ interface YouTubeSearchResult {
     isAudioOnly: boolean;
 }
 
-export async function searchTrack() {
-
+export async function searchTrack({ trackName, artistNames, albumName, prioritizeAudio }: YouTubeSearchOptions) {
+    const query = `"${artistNames[0]} ${trackName} audio"`;
 }
