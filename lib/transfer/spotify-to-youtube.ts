@@ -39,6 +39,9 @@ async function transfer({spotifyPlaylistId, playlistName}: TransferRequest){
         }
     }
 
+    const matchedTracks: string[] = [];
+    const unmatchesTracks: string[] = [];
+
     playlistTrackResult.data.forEach((track: Track) => {
         const trackName: string = track.name;
         const trackAlbumName: string = track.album.name;
