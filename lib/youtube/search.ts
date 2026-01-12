@@ -2,8 +2,8 @@
 
 interface YouTubeSearchOptions {
     trackName: string;
-    artistNames: string[];
-    albumName?: string;
+    trackArtists: string[];
+    trackAlbumName?: string;
     prioritizeAudio?: boolean; // default true
 }
 
@@ -15,8 +15,8 @@ interface YouTubeSearchResult {
     isAudioOnly: boolean;
 }
 
-export async function searchYouTubeForTrack({ trackName, artistNames, albumName, prioritizeAudio }: YouTubeSearchOptions) {
-    const query = `"${artistNames[0]} ${trackName} audio"`;
+export async function searchYouTubeForTrack(searchOptions: YouTubeSearchOptions) {
+    const query = `"${searchOptions.trackArtists[0]} ${searchOptions.trackName} audio"`;
 
     // TODO: Call youtube API's using query to search for track
     // TODO: Build helper functions to calculate track similarity
