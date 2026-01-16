@@ -28,6 +28,8 @@ export const SDK_ERRORS = {
     SPOTIFY_API_ERROR: 'spotify_api_error',
     YOUTUBE_QUOTA_EXCEEDED: 'youtube_quota_exceeded',
     SPOTIFY_QUOTA_EXCEEDED: 'spotify_quota_exceeded',
+    YOUTUBE_RATE_LIMIT: 'youtube_rate_limit',
+    SPOTIFY_RATE_LIMIT: 'spotify_rate_limit',
 } as const;
 
 export const GEN_ERRORS = {
