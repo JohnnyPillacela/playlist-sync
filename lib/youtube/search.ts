@@ -23,72 +23,59 @@ export async function searchYouTubeForTrack(searchOptions: YouTubeSearchOptions)
     const youtubeSDKResult = await getYoutubeSDK();
 
     if (!youtubeSDKResult.ok) {
-        return {
-            ok: false,
-            error: SDK_ERRORS.YOUTUBE_SDK_NOT_INITIALIZED
-        }
+        return { ok: false, error: SDK_ERRORS.YOUTUBE_SDK_NOT_INITIALIZED };
     }
 
     const youtubeSDK = youtubeSDKResult.data;
     const searchQuery = buildSearchQuery(searchOptions);
 
+    // Call YouTube API (only wrap the API call)
+    let searchResponse;
     try {
-        const searchResponse = await youtubeSDK.search.list({
+        searchResponse = await youtubeSDK.search.list({
             part: ['snippet'],
             q: searchQuery,
             type: ['video'],
             maxResults: 1,
         });
-    
-        // 3. Handle Error Response
-        if (!searchResponse.data?.items) {
-            return { 
-                ok: false, 
-                error: SDK_ERRORS.YOUTUBE_API_ERROR
-            };
-        }
-    
-        if (searchResponse.data.items.length === 0) {
-            return {
-                ok: false,
-                error: GEN_ERRORS.NO_RESULTS
-            }
-        }
-    
-        // 4. Score search results
-        const searchResults: YouTubeSearchResult[] = searchResponse.data.items.map((item) => ({
-            videoId: item.id?.videoId || '',
-            title: item.snippet?.title || '',
-            channelTitle: item.snippet?.channelTitle || '',
-            confidence: 0.8, // TODO: Build helper functions to calculate track similarity
-            searchDuration: Date.now() - startTime,
-        }));
-    
-        // 5. Return best match
-        const sorted = searchResults.sort((a, b) => b.confidence - a.confidence);
-        const bestMatch: YouTubeSearchResult = sorted[0];
-    
-        return {
-            ok: true,
-            data: bestMatch
-        };
     } catch (error: any) {
-        // Handle quota exceeded error
-        if (error?.code === 403 && error?.message?.includes('quota')) {
-            console.error('❌ YouTube API quota exceeded!');
-            return {
-                ok: false,
-                error: SDK_ERRORS.YOUTUBE_QUOTA_EXCEEDED
-            };
-        }
-        
-        console.error('YouTube API error:', error);
-        return {
-            ok: false,
-            error: SDK_ERRORS.YOUTUBE_API_ERROR
-        };
+        return handleYouTubeError(error);
     }
 
+    // Validate response
+    if (!searchResponse.data?.items) {
+        return { ok: false, error: SDK_ERRORS.YOUTUBE_API_ERROR };
+    }
+
+    if (searchResponse.data.items.length === 0) {
+        return { ok: false, error: GEN_ERRORS.NO_RESULTS };
+    }
+
+    // Map results to our format
+    const searchResults: YouTubeSearchResult[] = searchResponse.data.items.map((item) => ({
+        videoId: item.id?.videoId || '',
+        title: item.snippet?.title || '',
+        channelTitle: item.snippet?.channelTitle || '',
+        confidence: 0.8, // TODO: Build helper functions to calculate track similarity
+        searchDuration: Date.now() - startTime,
+    }));
+
+    // Return best match (sorted by confidence)
+    const sorted = searchResults.sort((a, b) => b.confidence - a.confidence);
+    
+    return { ok: true, data: sorted[0] };
+}
+
+/**
+ * Handles YouTube API errors and returns appropriate Result
+ */
+function handleYouTubeError(error: any): Result<YouTubeSearchResult> {
+    if (error?.code === 403 && error?.message?.includes('quota')) {
+        console.error('❌ YouTube API quota exceeded!');
+        return { ok: false, error: 'youtube_quota_exceeded' };
+    }
+    console.error('❌ YouTube API error:', error);
+    return { ok: false, error: error.message };
 }
 
 /**
