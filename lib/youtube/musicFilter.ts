@@ -3,6 +3,7 @@
 import { youtube_v3 } from "googleapis/build/src/apis/youtube/v3";
 import { Result } from "../types";
 import { getYoutubeSDK } from "./sdk";
+import { handleYouTubeAPIError } from "./errorHandler";
 
 /**
  * Pull up to `maxItemsToInspect` videoIds from a playlist.
@@ -21,12 +22,17 @@ export async function getPlaylistVideoIds(
     let pageToken: string | undefined;
 
     while (videoIds.length < maxItemsToInspect) {
-        const resp = (await youtube.playlistItems.list({
-            part: ["contentDetails"], // contentDetails.videoId is the simplest
-            playlistId,
-            maxResults: 50,
-            pageToken,
-        })).data;
+        let resp;
+        try {
+            resp = (await youtube.playlistItems.list({
+                part: ["contentDetails"], // contentDetails.videoId is the simplest
+                playlistId,
+                maxResults: 50,
+                pageToken,
+            })).data;
+        } catch (error: any) {
+            return handleYouTubeAPIError(error);
+        }
 
         for (const item of resp.items ?? []) {
             const vid = item.contentDetails?.videoId;
@@ -59,11 +65,16 @@ export async function getVideoCategoryIds(
     for (let i = 0; i < videoIds.length; i += chunkSize) {
         const chunk = videoIds.slice(i, i + chunkSize);
 
-        const resp = (await youtube.videos.list({
-            part: ["snippet"],
-            id: chunk,
-            maxResults: 50,
-        })).data;
+        let resp;
+        try {
+            resp = (await youtube.videos.list({
+                part: ["snippet"],
+                id: chunk,
+                maxResults: 50,
+            })).data;
+        } catch (error: any) {
+            return handleYouTubeAPIError(error);
+        }
 
         for (const v of resp.items ?? []) {
             const id = v.id;

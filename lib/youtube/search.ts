@@ -1,6 +1,7 @@
 // lib/youtube/search
 
 import { GEN_ERRORS, Result, SDK_ERRORS } from "../types";
+import { handleYouTubeAPIError } from "./errorHandler";
 import { getYoutubeSDK } from "./sdk";
 
 interface YouTubeSearchOptions {
@@ -39,7 +40,7 @@ export async function searchYouTubeForTrack(searchOptions: YouTubeSearchOptions)
             maxResults: 1,
         });
     } catch (error: any) {
-        return handleYouTubeError(error);
+        return handleYouTubeAPIError(error);
     }
 
     // Validate response
@@ -64,18 +65,6 @@ export async function searchYouTubeForTrack(searchOptions: YouTubeSearchOptions)
     const sorted = searchResults.sort((a, b) => b.confidence - a.confidence);
     
     return { ok: true, data: sorted[0] };
-}
-
-/**
- * Handles YouTube API errors and returns appropriate Result
- */
-function handleYouTubeError(error: any): Result<YouTubeSearchResult> {
-    if (error?.code === 403 && error?.message?.includes('quota')) {
-        console.error('❌ YouTube API quota exceeded!');
-        return { ok: false, error: 'youtube_quota_exceeded' };
-    }
-    console.error('❌ YouTube API error:', error);
-    return { ok: false, error: error.message };
 }
 
 /**

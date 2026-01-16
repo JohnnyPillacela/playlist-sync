@@ -4,6 +4,7 @@ import { youtube_v3 } from "googleapis/build/src/apis/youtube/v3";
 import { NormalizedPlaylist, Result } from "../types";
 import { getYoutubeSDK } from "./sdk";
 import { isMusicPlaylist } from "./musicFilter";
+import { handleYouTubeAPIError } from "./errorHandler";
 
 // Simple concurrency limiter (no dependency)
 async function mapWithConcurrency<T, R>(
@@ -41,12 +42,17 @@ export async function getYoutubeUserPlaylists(): Promise<Result<youtube_v3.Schem
 
     // Loop through all pages of playlists
     while (true) {
-        const response: youtube_v3.Schema$PlaylistListResponse = (await youtubeSdk.playlists.list({
-            part: ['snippet', 'contentDetails'],
-            mine: true,
-            maxResults: 50,
-            pageToken: pageToken,
-        })).data;
+        let response: youtube_v3.Schema$PlaylistListResponse;
+        try {
+            response = (await youtubeSdk.playlists.list({
+                part: ['snippet', 'contentDetails'],
+                mine: true,
+                maxResults: 50,
+                pageToken: pageToken,
+            })).data;
+        } catch (error: any) {
+            return handleYouTubeAPIError(error);
+        }
 
         // Add items from this page to the youtubePlaylists array
         if (response.items) {
