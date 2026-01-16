@@ -26,12 +26,15 @@ export const SDK_ERRORS = {
     SPOTIFY_SDK_NOT_INITIALIZED: 'spotify_sdk_not_initialized',
     YOUTUBE_API_ERROR: 'youtube_api_error',
     SPOTIFY_API_ERROR: 'spotify_api_error',
+    YOUTUBE_QUOTA_EXCEEDED: 'youtube_quota_exceeded',
+    SPOTIFY_QUOTA_EXCEEDED: 'spotify_quota_exceeded',
 } as const;
 
 export const GEN_ERRORS = {
     NOT_FOUND: 'not_found',
     LOW_CONFIDENCE: 'low_confidence',
     API_ERROR: 'api_error',
+    NO_RESULTS: 'no_results',
 } as const;
 
 export type NormalizedPlaylist = {
