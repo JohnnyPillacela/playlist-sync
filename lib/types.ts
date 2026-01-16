@@ -24,6 +24,14 @@ export const AUTH_ERRORS = {
 export const SDK_ERRORS = {
     YOUTUBE_SDK_NOT_INITIALIZED: 'youtube_sdk_not_initialized',
     SPOTIFY_SDK_NOT_INITIALIZED: 'spotify_sdk_not_initialized',
+    YOUTUBE_API_ERROR: 'youtube_api_error',
+    SPOTIFY_API_ERROR: 'spotify_api_error',
+} as const;
+
+export const GEN_ERRORS = {
+    NOT_FOUND: 'not_found',
+    LOW_CONFIDENCE: 'low_confidence',
+    API_ERROR: 'api_error',
 } as const;
 
 export type NormalizedPlaylist = {
