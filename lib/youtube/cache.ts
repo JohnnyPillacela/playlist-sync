@@ -1,0 +1,61 @@
+// lib/youtube/cache.ts
+
+import { youtube_v3 } from 'googleapis';
+import { LRUCache } from '../cache/cache';
+import { YouTubeSearchResult } from './search';
+
+/**
+ * Cache for YouTube search results.
+ * 
+ * Key format: `youtube:search:{searchQuery}`
+ * Example: `youtube:search:The Beatles Hey Jude audio`
+ * 
+ * Use case:
+ * - Caches YouTube API search results based on the actual query string sent to the API
+ * - Keys are generated using buildCacheKey('youtube:search', [searchQuery])
+ * - Query strings are normalized and deduplicated automatically by buildSearchQuery()
+ * - This ensures repeated searches for the same query (regardless of user) don't make redundant API calls
+ * - This cache is NOT user-specific - all users share the same cached search results
+ * - Saves on YouTube API quota and reduces latency for popular searches
+ */
+const youtubeSearchCache = new LRUCache<YouTubeSearchResult>(1000, 60);
+
+/**
+ * Cache for a user's YouTube playlists metadata.
+ * 
+ * Key format: `youtube:playlists:{userId}`
+ * Example: `youtube:playlists:abc123`
+ * 
+ * Use case:
+ * - Caches a user's complete playlist library from YouTube Music/YouTube
+ * - Keys are generated using buildCacheKey('youtube:playlists', [userId])
+ * - User-specific: Each user's playlist library is independently cached
+ * - Prevents repeated API calls when listing a user's playlists
+ * - Saves on YouTube API quota and improves user experience
+ */
+const youtubePlaylistCache = new LRUCache<youtube_v3.Schema$Playlist[]>(1000, 60);
+
+/**
+ * Cache for specific YouTube playlist track data, scoped by user and playlist.
+ * 
+ * Key format: `youtube:tracks:{userId}:{playlistId}`
+ * Example: `youtube:tracks:abc123:PLxyz789`
+ * 
+ * Use case:
+ * - Caches the track list (songs) for a specific playlist belonging to a specific user
+ * - Keys are generated using buildCacheKey('youtube:tracks', [userId, playlistId])
+ * - Double-scoped: Both user-specific AND playlist-specific
+ * - Prevents repeated API calls when viewing the same playlist
+ * - Saves on YouTube API quota for frequently accessed playlists
+ */
+const youtubeTrackCache = new LRUCache<youtube_v3.Schema$PlaylistItem[]>(1000, 60);
+
+/**
+ * Singleton LRU cache instance for YouTube search results.
+ * Configuration: 1000 entries max, 60 minute TTL
+ */
+export const youtubeCache = {
+    search: youtubeSearchCache,
+    playlists: youtubePlaylistCache,
+    tracks: youtubeTrackCache,
+} as const;
