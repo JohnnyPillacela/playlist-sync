@@ -30,9 +30,11 @@ export async function getYoutubeSDK(): Promise<Result<youtube_v3.Youtube>> {
     });
 
     // Return authenticated YouTube SDK instance
+    // rootUrl is explicitly set to fix Next.js 16 dev server base URL resolution issue
     const youtube = google.youtube({
         version: 'v3',
-        auth
+        auth,
+        rootUrl: 'https://www.googleapis.com',
     });
 
     return {
