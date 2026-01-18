@@ -21,16 +21,15 @@ import { YouTubeSearchResult } from './search';
 const youtubeSearchCache = new LRUCache<YouTubeSearchResult>(1000, 60);
 
 /**
- * Cache for a user's YouTube playlists metadata.
+ * Cache for YouTube playlists metadata.
  * 
- * Key format: `youtube:playlists:{userId}`
- * Example: `youtube:playlists:abc123`
+ * Key format: `youtube:playlists:{userToken}`
+ * Example: `youtube:playlists:abc12345`
  * 
  * Use case:
- * - Caches a user's complete playlist library from YouTube Music/YouTube
- * - Keys are generated using buildCacheKey('youtube:playlists', [userId])
- * - User-specific: Each user's playlist library is independently cached
- * - Prevents repeated API calls when listing a user's playlists
+ * - Caches the complete playlist library from YouTube Music/YouTube per user
+ * - User-specific based on access token to prevent cross-user data leaks
+ * - Prevents repeated API calls when listing playlists
  * - Saves on YouTube API quota and improves user experience
  */
 const youtubePlaylistCache = new LRUCache<youtube_v3.Schema$Playlist[]>(1000, 60);
@@ -51,6 +50,21 @@ const youtubePlaylistCache = new LRUCache<youtube_v3.Schema$Playlist[]>(1000, 60
 const youtubeTrackCache = new LRUCache<youtube_v3.Schema$PlaylistItem[]>(1000, 60);
 
 /**
+ * Cache for normalized YouTube playlists (filtered for music playlists only).
+ * 
+ * Key format: `youtube:normalized-playlists:{userToken}`
+ * Example: `youtube:normalized-playlists:abc12345`
+ * 
+ * Use case:
+ * - Caches the normalized, music-filtered playlist data per user
+ * - User-specific based on access token to prevent cross-user data leaks
+ * - This is expensive to compute (requires checking each playlist for music content)
+ * - Prevents repeated music filtering operations
+ * - Saves significant API quota and processing time
+ */
+const youtubeNormalizedPlaylistCache = new LRUCache<any[]>(1000, 60);
+
+/**
  * Singleton LRU cache instance for YouTube search results.
  * Configuration: 1000 entries max, 60 minute TTL
  */
@@ -58,4 +72,5 @@ export const youtubeCache = {
     search: youtubeSearchCache,
     playlists: youtubePlaylistCache,
     tracks: youtubeTrackCache,
+    normalizedPlaylists: youtubeNormalizedPlaylistCache,
 } as const;
