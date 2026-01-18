@@ -5,6 +5,17 @@ import { NormalizedPlaylist, Result } from "../types";
 import { getYoutubeSDK } from "./sdk";
 import { isMusicPlaylist } from "./musicFilter";
 import { handleYouTubeAPIError } from "./errorHandler";
+import { youtubeCache } from "./cache";
+import { cookies } from "next/headers";
+import { GOOGLE_ACCESS_TOKEN_KEY } from "../constants/google";
+
+// Get a user-specific cache key suffix based on their access token
+async function getUserCacheKey(): Promise<string> {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(GOOGLE_ACCESS_TOKEN_KEY)?.value;
+    // Use last 8 chars of token as identifier (unique per user, no extra API call needed)
+    return token ? token.slice(-8) : 'anonymous';
+}
 
 // Simple concurrency limiter (no dependency)
 async function mapWithConcurrency<T, R>(
@@ -28,6 +39,21 @@ async function mapWithConcurrency<T, R>(
 }
 
 export async function getYoutubeUserPlaylists(): Promise<Result<youtube_v3.Schema$Playlist[]>> {
+    const userKey = await getUserCacheKey();
+    const cacheKey = `youtube:playlists:${userKey}`;
+
+    // Check cache first
+    const cachedPlaylists = youtubeCache.playlists.get(cacheKey);
+    if (cachedPlaylists) {
+        console.log(`[YouTube Playlists] Cache hit`);
+        return {
+            ok: true,
+            data: cachedPlaylists,
+        }
+    }
+
+    console.log(`[YouTube Playlists] Cache miss, fetching from API...`);
+
     const youtubeSDKResult: Result<youtube_v3.Youtube> = await getYoutubeSDK();
     if (!youtubeSDKResult.ok) {
         return {
@@ -67,6 +93,10 @@ export async function getYoutubeUserPlaylists(): Promise<Result<youtube_v3.Schem
         pageToken = response.nextPageToken;
     }
 
+    // Store in cache before returning
+    youtubeCache.playlists.set(cacheKey, youtubePlaylists);
+    console.log(`[YouTube Playlists] Cached ${youtubePlaylists.length} playlists`);
+
     return {
         ok: true,
         data: youtubePlaylists,
@@ -74,6 +104,21 @@ export async function getYoutubeUserPlaylists(): Promise<Result<youtube_v3.Schem
 }
 
 export async function normalizedYoutubePlaylist(): Promise<Result<NormalizedPlaylist[]>> {
+    const userKey = await getUserCacheKey();
+    const cacheKey = `youtube:normalized-playlists:${userKey}`;
+
+    // Check cache first
+    const cachedNormalizedPlaylists = youtubeCache.normalizedPlaylists.get(cacheKey);
+    if (cachedNormalizedPlaylists) {
+        console.log(`[YouTube Normalized Playlists] Cache hit`);
+        return {
+            ok: true,
+            data: cachedNormalizedPlaylists,
+        }
+    }
+
+    console.log(`[YouTube Normalized Playlists] Cache miss, processing...`);
+
     const youtubePlaylistsResult = await getYoutubeUserPlaylists();
 
     if (!youtubePlaylistsResult.ok) {
@@ -115,6 +160,10 @@ export async function normalizedYoutubePlaylist(): Promise<Result<NormalizedPlay
             thumbnailUrl: playlist.snippet?.thumbnails?.default?.url || "Undefined",
             provider: "youtube-music",
         }));
+
+    // Store in cache before returning
+    youtubeCache.normalizedPlaylists.set(cacheKey, normalizedPlaylists);
+    console.log(`[YouTube Normalized Playlists] Cached ${normalizedPlaylists.length} normalized playlists`);
 
     return {
         ok: true,
