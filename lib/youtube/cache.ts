@@ -17,6 +17,7 @@ import { YouTubeSearchResult } from './search';
  * - This ensures repeated searches for the same query (regardless of user) don't make redundant API calls
  * - This cache is NOT user-specific - all users share the same cached search results
  * - Saves on YouTube API quota and reduces latency for popular searches
+ * - Note: The 'cameFromCache' field is always false when stored, and set to true when retrieved
  */
 const youtubeSearchCache = new LRUCache<YouTubeSearchResult>(1000, 60);
 
