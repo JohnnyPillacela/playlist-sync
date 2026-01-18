@@ -1,8 +1,10 @@
 // lib/youtube/search
 
+import { buildCacheKey } from "../cache/keyBuilder";
 import { GEN_ERRORS, Result, SDK_ERRORS } from "../types";
 import { handleYouTubeAPIError } from "./errorHandler";
 import { getYoutubeSDK } from "./sdk";
+import { youtubeCache } from "./cache";
 
 interface YouTubeSearchOptions {
     trackName: string;
@@ -19,8 +21,26 @@ export interface YouTubeSearchResult {
     searchDuration: number; // milliseconds
 }
 
+const YOUTUBE_SEARCH = 'youtube:search';
+
 export async function searchYouTubeForTrack(searchOptions: YouTubeSearchOptions): Promise<Result<YouTubeSearchResult>> {
     const startTime = Date.now();
+    const searchQuery = buildSearchQuery(searchOptions);
+
+    const cacheKey = buildCacheKey(YOUTUBE_SEARCH, [searchQuery]);
+    const cachedResult = youtubeCache.search.get(cacheKey);
+
+    if (cachedResult) {
+        console.log('Cached result found for search query:', searchQuery);
+        return { 
+            ok: true, 
+            data: {
+                ...cachedResult,
+                searchDuration: Date.now() - startTime,
+            } 
+        };
+    }
+
     const youtubeSDKResult = await getYoutubeSDK();
 
     if (!youtubeSDKResult.ok) {
@@ -28,7 +48,6 @@ export async function searchYouTubeForTrack(searchOptions: YouTubeSearchOptions)
     }
 
     const youtubeSDK = youtubeSDKResult.data;
-    const searchQuery = buildSearchQuery(searchOptions);
 
     // Call YouTube API (only wrap the API call)
     let searchResponse;
@@ -63,7 +82,10 @@ export async function searchYouTubeForTrack(searchOptions: YouTubeSearchOptions)
 
     // Return best match (sorted by confidence)
     const sorted = searchResults.sort((a, b) => b.confidence - a.confidence);
-    
+
+    // Cache the result
+    youtubeCache.search.set(cacheKey, sorted[0]);
+
     return { ok: true, data: sorted[0] };
 }
 
