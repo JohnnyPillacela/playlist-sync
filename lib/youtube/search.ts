@@ -19,6 +19,7 @@ export interface YouTubeSearchResult {
     channelTitle: string;
     confidence: number; // 0-1 score
     searchDuration: number; // milliseconds
+    cameFromCache: boolean; // whether this result came from cache
 }
 
 const YOUTUBE_SEARCH = 'youtube:search';
@@ -31,15 +32,20 @@ export async function searchYouTubeForTrack(searchOptions: YouTubeSearchOptions)
     const cachedResult = youtubeCache.search.get(cacheKey);
 
     if (cachedResult) {
-        console.log('Cached result found for search query:', searchQuery);
+        console.log('✅ CACHE HIT for query:', searchQuery);
+        const stats = youtubeCache.search.getStats();
+        console.log('📊 Cache stats:', stats);
         return { 
             ok: true, 
             data: {
                 ...cachedResult,
                 searchDuration: Date.now() - startTime,
+                cameFromCache: true,
             } 
         };
     }
+
+    console.log('❌ CACHE MISS - Making YouTube API call for:', searchQuery);
 
     const youtubeSDKResult = await getYoutubeSDK();
 
@@ -78,6 +84,7 @@ export async function searchYouTubeForTrack(searchOptions: YouTubeSearchOptions)
         channelTitle: item.snippet?.channelTitle || '',
         confidence: 0.8, // TODO: Build helper functions to calculate track similarity
         searchDuration: Date.now() - startTime,
+        cameFromCache: false,
     }));
 
     // Return best match (sorted by confidence)
