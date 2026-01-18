@@ -1,0 +1,26 @@
+// lib/spotify/cache.ts
+
+import { LRUCache } from '../cache/cache';
+
+// Cache for general Spotify search results (tracks, artists, albums, etc)
+const spotifySearchCache = new LRUCache<any>(500, 30);
+
+// Cache for Spotify playlist metadata (playlists, their attributes)
+const spotifyPlaylistCache = new LRUCache<any>(500, 30);
+
+// Cache for specific Spotify track data
+const spotifyTrackCache = new LRUCache<any>(500, 30);
+
+/**
+ * Singleton LRU cache instance for Spotify use cases.
+ * Configuration: 500 entries max, 30 minute TTL (minutes).
+ * 
+ * spotifySearchCache:       For general Spotify search results.
+ * spotifyPlaylistCache:     For caching Spotify playlist metadata.
+ * spotifyTrackCache:        For caching specific Spotify track data.
+ */
+export const spotifyCache = {
+    search: spotifySearchCache,
+    playlist: spotifyPlaylistCache,
+    track: spotifyTrackCache,
+} as const;
