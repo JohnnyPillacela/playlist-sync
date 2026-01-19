@@ -121,6 +121,13 @@ export async function isMusicPlaylist(
         if (!cat) continue; // unavailable/deleted/private videos won't resolve
         inspected++;
         if (cat === "10") musicCount++;
+
+        if (inspected >= minInspected) {
+            const ratio = musicCount / inspected;
+            if (ratio >= minMusicRatio) {
+              return { ok: true, data: true };
+            }
+        }
     }
 
     // If we can't categorize enough items, don't confidently label it music
