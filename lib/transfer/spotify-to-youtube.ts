@@ -4,6 +4,8 @@ import { _fetchPlaylistTracksSDK } from "../spotify/playlists";
 import { Track } from "@spotify/web-api-ts-sdk";
 import { searchYouTubeForTrack, YouTubeSearchResult } from "../youtube/search";
 import { GEN_ERRORS, Result, SDK_ERRORS } from "../types";
+import { getYoutubeCacheStats } from "../youtube/cache";
+import { CacheStats } from "../cache/cache";
 
 interface TransferRequest {
     spotifyPlaylistId: string;
@@ -36,6 +38,7 @@ interface TransferResult {
         error: string;
     }>
     duration: number // milliseconds
+    cacheStats?: CacheStats; // Search cache performance statistics
 }
 
 export async function transfer({ spotifyPlaylistId, playlistName }: TransferRequest): Promise<Result<TransferResult>> {
@@ -85,6 +88,8 @@ export async function transfer({ spotifyPlaylistId, playlistName }: TransferRequ
 
     }
 
+    const cacheStats = getYoutubeCacheStats();
+
     return {
         ok: true,
         data: {
@@ -95,7 +100,8 @@ export async function transfer({ spotifyPlaylistId, playlistName }: TransferRequ
             matchedTracks: matchedTracks,
             unmatchedTracks: unmatchedTracks,
             failedToAdd: [],
-            duration: Date.now() - startTime
+            duration: Date.now() - startTime,
+            cacheStats: cacheStats.search, // Include search cache stats
         }
     };
 };
