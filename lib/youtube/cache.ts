@@ -19,7 +19,7 @@ import { YouTubeSearchResult } from './search';
  * - Saves on YouTube API quota and reduces latency for popular searches
  * - Note: The 'cameFromCache' field is always false when stored, and set to true when retrieved
  */
-const youtubeSearchCache = new LRUCache<YouTubeSearchResult>(1000, 60);
+const youtubeSearchCache = new LRUCache<YouTubeSearchResult>(1000, 60 * 24); // 24 hours
 
 /**
  * Cache for YouTube playlists metadata.
@@ -33,7 +33,7 @@ const youtubeSearchCache = new LRUCache<YouTubeSearchResult>(1000, 60);
  * - Prevents repeated API calls when listing playlists
  * - Saves on YouTube API quota and improves user experience
  */
-const youtubePlaylistCache = new LRUCache<youtube_v3.Schema$Playlist[]>(1000, 60);
+const youtubePlaylistCache = new LRUCache<youtube_v3.Schema$Playlist[]>(1000, 60 * 24); // 24 hours
 
 /**
  * Cache for specific YouTube playlist track data, scoped by user and playlist.
@@ -48,7 +48,7 @@ const youtubePlaylistCache = new LRUCache<youtube_v3.Schema$Playlist[]>(1000, 60
  * - Prevents repeated API calls when viewing the same playlist
  * - Saves on YouTube API quota for frequently accessed playlists
  */
-const youtubeTrackCache = new LRUCache<youtube_v3.Schema$PlaylistItem[]>(1000, 60);
+const youtubeTrackCache = new LRUCache<youtube_v3.Schema$PlaylistItem[]>(1000, 60 * 24); // 24 hours
 
 /**
  * Cache for normalized YouTube playlists (filtered for music playlists only).
@@ -63,7 +63,7 @@ const youtubeTrackCache = new LRUCache<youtube_v3.Schema$PlaylistItem[]>(1000, 6
  * - Prevents repeated music filtering operations
  * - Saves significant API quota and processing time
  */
-const youtubeNormalizedPlaylistCache = new LRUCache<any[]>(1000, 60);
+const youtubeNormalizedPlaylistCache = new LRUCache<any[]>(1000, 60 * 24); // 24 hours
 
 /**
  * Singleton LRU cache instance for YouTube search results.
