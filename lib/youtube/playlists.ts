@@ -131,25 +131,23 @@ export async function normalizedYoutubePlaylist(): Promise<Result<NormalizedPlay
     const youtubePlaylists = youtubePlaylistsResult.data
         .filter((playlist) => playlist.id != null); // Filter out playlists without IDs
 
-    // Decide which playlists are "music" by inspecting items
-    const checks = await mapWithConcurrency(
-        youtubePlaylists,
-        4, // tweak: 2–6 is usually safe
-        async (playlist) => {
-            const id = playlist.id!;
-            const res = await isMusicPlaylist(id, {
-                maxItemsToInspect: 100,
-                minMusicRatio: 0.7,
-                minInspected: 10,
-            });
+    const checks: Array<{ playlist: any; isMusic: boolean }> = [];
 
-            if (!res.ok) {
-                // you can choose to treat errors as non-music or bubble up
-                return { playlist, isMusic: false };
-            }
-            return { playlist, isMusic: res.data };
+    for (const playlist of youtubePlaylists) {
+        const id = playlist.id!;
+        const res = await isMusicPlaylist(id, {
+            maxItemsToInspect: 5,
+            minMusicRatio: 0.7,
+            minInspected: 3,
+        });
+    
+        if (!res.ok) {
+            // Don't hide errors as "not music" — bubble them up
+            return { ok: false, error: res.error };
         }
-    );
+    
+        checks.push({ playlist, isMusic: res.data });
+    }
 
     const normalizedPlaylists: NormalizedPlaylist[] = checks
         .filter((playlist) => playlist.isMusic)
