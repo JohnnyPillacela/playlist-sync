@@ -8,27 +8,41 @@ import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "./ui/empty";
 import { ListMusic, Loader2, LogIn } from "lucide-react";
 import { Button } from "./ui/button";
 import Link from "next/link";
-import { normalizedYoutubePlaylist } from "@/lib/youtube/playlists";
 import { useEffect, useState } from "react";
 
 interface PlaylistViewerProps {
     providerData: PlaylistProviderData[];
 }
 
-async function getYoutubeUserPlaylists() {
-    const response = await fetch('/api/youtube/playlists');
-    if (!response.ok) {
-        return { error: 'Failed to fetch YouTube user playlists' };
+async function getYoutubeUserPlaylists(): Promise<NormalizedPlaylist[] | null> {
+    try {
+        const response = await fetch('/api/youtube/playlists');
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error('Error fetching YouTube user playlists:', errorData);
+            return null; // Error occurred, return null to indicate failure
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching YouTube user playlists:', error);
+        return null; // Network error, return null to indicate failure
     }
-    return response.json();
+
 }
 
-async function getSpotifyUserPlaylists() {
-    const response = await fetch('/api/spotify/playlists');
-    if (!response.ok) {
-        return { error: 'Failed to fetch Spotify user playlists' };
+async function getSpotifyUserPlaylists(): Promise<NormalizedPlaylist[] | null> {
+    try {
+        const response = await fetch('/api/spotify/playlists');
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error('Error fetching Spotify user playlists:', errorData);
+            return null; // Error occurred, return null to indicate failure
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching Spotify user playlists:', error);
+        return null; // Network error, return null to indicate failure
     }
-    return response.json();
 }
 
 export default function PlaylistViewer({providerData}: PlaylistViewerProps) {
@@ -38,6 +52,9 @@ export default function PlaylistViewer({providerData}: PlaylistViewerProps) {
     // Find provider data
     const spotifyProvider = providerData.find((provider) => provider.service === "spotify");
     const youtubeProvider = providerData.find((provider) => provider.service === "youtube-music");
+
+    const [spotifyError, setSpotifyError] = useState<string | null>(null);
+    const [youtubeError, setYoutubeError] = useState<string | null>(null);
     
     // Add authenticated services first
     if (spotifyProvider?.isAuthenticated) serviceOrder.push('spotify');
@@ -53,26 +70,53 @@ export default function PlaylistViewer({providerData}: PlaylistViewerProps) {
     const [spotifyLoading, setSpotifyLoading] = useState(false);
     const [youtubeLoading, setYoutubeLoading] = useState(false);
 
+    // NOTE: Manually managing loading/error/data state for multiple endpoints gets complex fast.
+    // With SWR, all this code below would be replaced with two simple hooks:
+    //   const youtube = useSWR(youtubeProvider?.isAuthenticated ? '/api/youtube/playlists' : null, fetcher);
+    //   const spotify = useSWR(spotifyProvider?.isAuthenticated ? '/api/spotify/playlists' : null, fetcher);
+    // SWR handles loading, errors, retries, and caching automatically. Consider upgrading when ready.
     useEffect(() => {
-        if (spotifyProvider?.isAuthenticated) {
-            setSpotifyLoading(true);
-            getSpotifyUserPlaylists()
-                .then(setSpotifyUserPlaylists)
-                .finally(() => setSpotifyLoading(false));
+        async function fetchPlaylists() {
+            if (spotifyProvider?.isAuthenticated) {
+                setSpotifyLoading(true);
+                setSpotifyError(null);
+                
+                const playlists = await getSpotifyUserPlaylists();
+                
+                if (playlists === null) {
+                    setSpotifyError('Failed to load Spotify playlists');
+                    setSpotifyUserPlaylists([]);
+                } else {
+                    setSpotifyUserPlaylists(playlists);
+                }
+                
+                setSpotifyLoading(false);
+            }
+            
+            if (youtubeProvider?.isAuthenticated) {
+                setYoutubeLoading(true);
+                setYoutubeError(null);
+                
+                const playlists = await getYoutubeUserPlaylists();
+                
+                if (playlists === null) {
+                    setYoutubeError('Failed to load YouTube Music playlists');
+                    setYoutubeUserPlaylists([]);
+                } else {
+                    setYoutubeUserPlaylists(playlists);
+                }
+                
+                setYoutubeLoading(false);
+            }
         }
-        
-        if (youtubeProvider?.isAuthenticated) {
-            setYoutubeLoading(true);
-            getYoutubeUserPlaylists()
-                .then(setYoutubeUserPlaylists)
-                .finally(() => setYoutubeLoading(false));
-        }
+        fetchPlaylists();
     }, [spotifyProvider?.isAuthenticated, youtubeProvider?.isAuthenticated]);
 
     const renderProviderSection = (
         service: 'spotify' | 'youtube-music',
         playlists: NormalizedPlaylist[],
         isLoading: boolean,
+        error: string | null,
     ) => {
         const provider = service === 'spotify' ? spotifyProvider : youtubeProvider;
         const providerName = service === 'spotify' ? 'Spotify' : 'YouTube Music';
@@ -101,8 +145,35 @@ export default function PlaylistViewer({providerData}: PlaylistViewerProps) {
                 </Card>
             );
         }
+
+        // State 2: Error occurred
+        if (error) {
+            return (
+                <Card key={service} className="shadow-lg w-full">
+                    <CardHeader>
+                        <CardTitle>Your {providerName} Playlists</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <Empty>
+                            <EmptyHeader>
+                                <EmptyMedia>
+                                    <div className="text-red-500">
+                                        <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                    </div>
+                                </EmptyMedia>
+                                <EmptyTitle>Failed to load playlists</EmptyTitle>
+                                <p className="text-sm text-muted-foreground mt-2">{error}</p>
+                            </EmptyHeader>
+                        </Empty>
+                    </CardContent>
+                </Card>
+            );
+        }
         
-        // State 2: Authenticated but still loading
+        // State 3: Authenticated but still loading
         if (isLoading) {
             return (
                 <Card key={service} className="shadow-lg w-full">
@@ -119,7 +190,7 @@ export default function PlaylistViewer({providerData}: PlaylistViewerProps) {
             );
         }
 
-        // State 3: Authenticated with no playlists
+        // State 4: Authenticated with no playlists
         if (playlists.length === 0) {
             return (
                 <Card key={service} className="shadow-lg w-full">
@@ -140,7 +211,7 @@ export default function PlaylistViewer({providerData}: PlaylistViewerProps) {
             );
         }
         
-        // State 4: Authenticated with playlists
+        // State 5: Authenticated with playlists
         return (
             <PlaylistTable 
                 key={service}
@@ -157,7 +228,8 @@ export default function PlaylistViewer({providerData}: PlaylistViewerProps) {
                     {renderProviderSection(
                         service,
                         service === 'spotify' ? spotifyUserPlaylists : youtubeUserPlaylists,
-                        service === 'spotify' ? spotifyLoading : youtubeLoading
+                        service === 'spotify' ? spotifyLoading : youtubeLoading,
+                        service === 'spotify' ? spotifyError : youtubeError
                     )}
                 </div>
             ))}
