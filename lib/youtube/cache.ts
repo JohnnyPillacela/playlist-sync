@@ -75,3 +75,15 @@ export const youtubeCache = {
     tracks: youtubeTrackCache,
     normalizedPlaylists: youtubeNormalizedPlaylistCache,
 } as const;
+
+/**
+ * Get comprehensive cache statistics for monitoring
+ */
+export function getYoutubeCacheStats() {
+    return {
+        search: youtubeSearchCache.getStats(),
+        playlists: youtubePlaylistCache.getStats(),
+        tracks: youtubeTrackCache.getStats(),
+        normalizedPlaylists: youtubeNormalizedPlaylistCache.getStats(),
+    };
+}
