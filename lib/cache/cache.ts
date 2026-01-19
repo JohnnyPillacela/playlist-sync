@@ -66,6 +66,11 @@ export class LRUCache<T = any> {
         // Check if entry has expired (lru-cache handles TTL automatically, but we track timestamp too)
         const now = Date.now();
         if (now - entry.timestamp > this.ttlMs) {
+            // NOTE: We eagerly delete expired entries here. This means stale cache fallback
+            // strategies (e.g., serving stale data when API quota is exceeded) won't work
+            // unless the entry hasn't been accessed since expiry. If stale-while-revalidate
+            // or stale-if-error patterns are needed, consider NOT deleting here and instead
+            // letting LRU eviction handle cleanup, or add a grace period for stale entries.
             this.cache.delete(key);
             this.misses++;
             return null;
@@ -73,6 +78,21 @@ export class LRUCache<T = any> {
 
         this.hits++;
         return entry.value;
+    }
+
+    /**
+     * Retrieve a cached value even if expired (for fallback scenarios).
+     * Returns null only if the entry doesn't exist at all.
+     * Does NOT update hit/miss statistics.
+     * 
+     * IMPORTANT: This only works if the expired entry has NOT been accessed via get()
+     * since expiry, because get() eagerly deletes expired entries. Use cases:
+     * - Direct fallback without calling get() first
+     * - Stale-if-error patterns where error occurs before cache check
+     */
+    getIgnoringExpiry(key: string): T | null {
+        const entry = this.cache.peek(key); // peek doesn't update LRU order
+        return entry ? entry.value : null;
     }
 
     /**
