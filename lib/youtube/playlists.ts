@@ -8,6 +8,11 @@ import { handleYouTubeAPIError } from "./errorHandler";
 import { youtubeCache } from "./cache";
 import { cookies } from "next/headers";
 import { GOOGLE_ACCESS_TOKEN_KEY } from "../constants/google";
+import { PLAYLISTS_TTL_SECONDS, YOUTUBE, NORMALIZED_PLAYLISTS_TTL_SECONDS, CACHE_MESSAGES } from "../cache/constants";
+import { redis } from "../cache/redis";
+
+const YOUTUBE_PLAYLISTS_NAME = '[YouTube Playlists]';
+const YOUTUBE_NORMALIZED_PLAYLISTS_NAME = '[YouTube Normalized Playlists]';
 
 // Get a user-specific cache key suffix based on their access token
 async function getUserCacheKey(): Promise<string> {
@@ -40,20 +45,35 @@ async function mapWithConcurrency<T, R>(
 
 export async function getYoutubeUserPlaylists(): Promise<Result<youtube_v3.Schema$Playlist[]>> {
     const userKey = await getUserCacheKey();
-    const cacheKey = `youtube:playlists:${userKey}`;
+    const cacheKey = `${YOUTUBE.PLAYLIST_NAMESPACE}:${userKey}`;
 
-    // Check cache first
-    const cachedPlaylists = youtubeCache.playlists.get(cacheKey);
-    if (cachedPlaylists) {
-        console.log(`[YouTube Playlists] Cache hit`);
+    // 1. Check in-memory LRU cache first
+    const memoryCachedPlaylists = youtubeCache.playlists.get(cacheKey);
+    if (memoryCachedPlaylists) {
+        console.log(`${YOUTUBE_PLAYLISTS_NAME} ${CACHE_MESSAGES.IN_MEMORY_CACHE_HIT}`);
         return {
             ok: true,
-            data: cachedPlaylists,
+            data: memoryCachedPlaylists,
         }
     }
 
-    console.log(`[YouTube Playlists] Cache miss, fetching from API...`);
+    console.log(`${YOUTUBE_PLAYLISTS_NAME} ${CACHE_MESSAGES.IN_MEMORY_CACHE_MISS}`);
 
+    // 2. Check Redis cache next
+    const redisCachedPlaylists = await redis.get<youtube_v3.Schema$Playlist[]>(cacheKey);
+    if (redisCachedPlaylists) {
+        console.log(`${YOUTUBE_PLAYLISTS_NAME} ${CACHE_MESSAGES.REDIS_CACHE_HIT}`);
+        youtubeCache.playlists.set(cacheKey, redisCachedPlaylists); // warm LRU
+        return {
+            ok: true,
+            data: redisCachedPlaylists,
+        }
+    }
+
+    console.log(`${YOUTUBE_PLAYLISTS_NAME} ${CACHE_MESSAGES.REDIS_CACHE_MISS}`);
+    console.log(`${YOUTUBE_PLAYLISTS_NAME} ${CACHE_MESSAGES.FETCHING_FROM_API}`);
+
+    // 3. Fetch from API
     const youtubeSDKResult: Result<youtube_v3.Youtube> = await getYoutubeSDK();
     if (!youtubeSDKResult.ok) {
         return {
@@ -93,9 +113,14 @@ export async function getYoutubeUserPlaylists(): Promise<Result<youtube_v3.Schem
         pageToken = response.nextPageToken;
     }
 
-    // Store in cache before returning
+    // Store in Redis and in-memory LRU cache before returning
+    await redis.set(cacheKey, youtubePlaylists, {
+        ex: PLAYLISTS_TTL_SECONDS,
+    });
+    
     youtubeCache.playlists.set(cacheKey, youtubePlaylists);
-    console.log(`[YouTube Playlists] Cached ${youtubePlaylists.length} playlists`);
+    
+    console.log(`${YOUTUBE_PLAYLISTS_NAME} Cached ${youtubePlaylists.length} playlists`);
 
     return {
         ok: true,
@@ -105,20 +130,35 @@ export async function getYoutubeUserPlaylists(): Promise<Result<youtube_v3.Schem
 
 export async function normalizedYoutubePlaylist(): Promise<Result<NormalizedPlaylist[]>> {
     const userKey = await getUserCacheKey();
-    const cacheKey = `youtube:normalized-playlists:${userKey}`;
+    const cacheKey = `${YOUTUBE.NORMALIZED_PLAYLISTS_NAMESPACE}:${userKey}`;
 
-    // Check cache first
-    const cachedNormalizedPlaylists = youtubeCache.normalizedPlaylists.get(cacheKey);
-    if (cachedNormalizedPlaylists) {
-        console.log(`[YouTube Normalized Playlists] Cache hit`);
+    // 1. Check in-memory LRU cache first
+    const memoryCachedNormalizedPlaylists = youtubeCache.normalizedPlaylists.get(cacheKey);
+    if (memoryCachedNormalizedPlaylists) {
+        console.log(`${YOUTUBE_NORMALIZED_PLAYLISTS_NAME} ${CACHE_MESSAGES.IN_MEMORY_CACHE_HIT}`);
         return {
             ok: true,
-            data: cachedNormalizedPlaylists,
+            data: memoryCachedNormalizedPlaylists,
         }
     }
 
-    console.log(`[YouTube Normalized Playlists] Cache miss, processing...`);
+    console.log(`${YOUTUBE_NORMALIZED_PLAYLISTS_NAME} ${CACHE_MESSAGES.IN_MEMORY_CACHE_MISS}`);
 
+    // 2. Check Redis cache next
+    const redisCachedNormalizedPlaylists = await redis.get<NormalizedPlaylist[]>(cacheKey);
+    if (redisCachedNormalizedPlaylists) {
+        console.log(`${YOUTUBE_NORMALIZED_PLAYLISTS_NAME} ${CACHE_MESSAGES.REDIS_CACHE_HIT}`);
+        youtubeCache.normalizedPlaylists.set(cacheKey, redisCachedNormalizedPlaylists); // warm LRU
+        return {
+            ok: true,
+            data: redisCachedNormalizedPlaylists,
+        }
+    }
+
+    console.log(`${YOUTUBE_NORMALIZED_PLAYLISTS_NAME} ${CACHE_MESSAGES.REDIS_CACHE_MISS}`);
+    console.log(`${YOUTUBE_NORMALIZED_PLAYLISTS_NAME} ${CACHE_MESSAGES.FETCHING_FROM_API}`);
+
+    // 3. Fetch from API
     const youtubePlaylistsResult = await getYoutubeUserPlaylists();
 
     if (!youtubePlaylistsResult.ok) {
@@ -159,9 +199,14 @@ export async function normalizedYoutubePlaylist(): Promise<Result<NormalizedPlay
             provider: "youtube-music",
         }));
 
-    // Store in cache before returning
+    // Store in Redis and in-memory LRU cache before returning
+    await redis.set(cacheKey, normalizedPlaylists, {
+        ex: NORMALIZED_PLAYLISTS_TTL_SECONDS,
+    });
+    
     youtubeCache.normalizedPlaylists.set(cacheKey, normalizedPlaylists);
-    console.log(`[YouTube Normalized Playlists] Cached ${normalizedPlaylists.length} normalized playlists`);
+    
+    console.log(`${YOUTUBE_NORMALIZED_PLAYLISTS_NAME} Cached ${normalizedPlaylists.length} normalized playlists`);
 
     return {
         ok: true,
