@@ -10,6 +10,7 @@ import { cookies } from "next/headers";
 import { GOOGLE_ACCESS_TOKEN_KEY } from "../constants/google";
 import { PLAYLISTS_TTL_SECONDS, YOUTUBE, NORMALIZED_PLAYLISTS_TTL_SECONDS, CACHE_MESSAGES } from "../cache/constants";
 import { redis } from "../cache/redis";
+import { LRUCache } from "lru-cache";
 
 const YOUTUBE_PLAYLISTS_NAME = '[YouTube Playlists]';
 const YOUTUBE_NORMALIZED_PLAYLISTS_NAME = '[YouTube Normalized Playlists]';
@@ -70,7 +71,6 @@ export async function getYoutubeUserPlaylists(): Promise<Result<youtube_v3.Schem
         }
     }
 
-    console.log(`${YOUTUBE_PLAYLISTS_NAME} ${CACHE_MESSAGES.REDIS_CACHE_MISS}`);
     console.log(`${YOUTUBE_PLAYLISTS_NAME} ${CACHE_MESSAGES.FETCHING_FROM_API}`);
 
     // 3. Fetch from API
@@ -119,7 +119,7 @@ export async function getYoutubeUserPlaylists(): Promise<Result<youtube_v3.Schem
     });
     
     youtubeCache.playlists.set(cacheKey, youtubePlaylists);
-    
+
     console.log(`${YOUTUBE_PLAYLISTS_NAME} Cached ${youtubePlaylists.length} playlists`);
 
     return {
@@ -212,4 +212,46 @@ export async function normalizedYoutubePlaylist(): Promise<Result<NormalizedPlay
         ok: true,
         data: normalizedPlaylists,
     }
+}
+
+async function getFromCaches<T extends {}>(
+    cacheKey: string,
+    callerNamespace: string,
+    lruCache: LRUCache<string, T>
+): Promise<T | null> {
+
+    // 1. LRU (L1)
+    try {
+        const memoryHit = lruCache.get(cacheKey);
+        if (memoryHit) {
+            console.log(`${callerNamespace} ${CACHE_MESSAGES.IN_MEMORY_CACHE_HIT}`);
+            return memoryHit;
+        }
+        console.log(`${callerNamespace} ${CACHE_MESSAGES.IN_MEMORY_CACHE_MISS}`);
+    } catch (err) {
+        console.warn(`${callerNamespace} LRU get failed - MANUAL CHECK`, err);
+    }
+
+    // 2. Redis (L2)
+    try {
+        const redisHit = await redis.get<T>(cacheKey);
+        if (redisHit) {
+            console.log(`${callerNamespace} ${CACHE_MESSAGES.REDIS_CACHE_HIT}`);
+
+            // 🔥 Important: warm LRU, best-effort
+            try {
+                lruCache.set(cacheKey, redisHit);
+            } catch (err) {
+                console.warn(`${callerNamespace} LRU warm failed`, err);
+            }
+
+            return redisHit;
+        }
+
+        console.log(`${callerNamespace} ${CACHE_MESSAGES.REDIS_CACHE_MISS}`);
+    } catch (err) {
+        console.warn(`${callerNamespace} Redis get failed - MANUAL CHECK`, err);
+    }
+
+    return null;
 }
