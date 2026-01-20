@@ -5,6 +5,7 @@ export const CACHE_KEY_SEPARATOR = ':';
 // GENERIC TTLs
 export const PLAYLISTS_TTL_SECONDS = 60 * 60 * 24; // 24 hours
 export const NORMALIZED_PLAYLISTS_TTL_SECONDS = 60 * 60 * 24; // 24 hours
+export const YOUTUBE_SEARCH_TTL_SECONDS = 60 * 60 * 24; // 24 hours
 const IN_MEMORY_CACHE_HIT = '[In-memory LRU cache] hit';
 const IN_MEMORY_CACHE_MISS = '[In-memory LRU cache] miss';
 const REDIS_CACHE_HIT = '[Redis cache] hit';
