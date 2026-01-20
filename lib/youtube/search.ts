@@ -1,10 +1,11 @@
 // lib/youtube/search
 
-import { buildCacheKey } from "../cache/keyBuilder";
+import { buildKnowledgeCacheKey } from "../cache/keyBuilder";
 import { GEN_ERRORS, Result, SDK_ERRORS } from "../types";
 import { handleYouTubeAPIError } from "./errorHandler";
 import { getYoutubeSDK } from "./sdk";
 import { youtubeCache } from "./cache";
+import { YOUTUBE } from "../cache/constants";
 
 interface YouTubeSearchOptions {
     trackName: string;
@@ -22,26 +23,25 @@ export interface YouTubeSearchResult {
     cameFromCache: boolean; // whether this result came from cache
 }
 
-const YOUTUBE_SEARCH = 'youtube:search';
-
 export async function searchYouTubeForTrack(searchOptions: YouTubeSearchOptions): Promise<Result<YouTubeSearchResult>> {
     const startTime = Date.now();
-    const searchQuery = buildSearchQuery(searchOptions);
+    const canonical = buildCanonicalTrackQuery(searchOptions.trackName, searchOptions.trackArtists);
+    const cacheKey = buildKnowledgeCacheKey(YOUTUBE.SEARCH_NAMESPACE, [canonical.artist, canonical.title]);
+    const searchQuery = buildSearchQueryFromCanonical(canonical, searchOptions.prioritizeAudio);
 
-    const cacheKey = buildCacheKey(YOUTUBE_SEARCH, [searchQuery]);
     const cachedResult = youtubeCache.search.get(cacheKey);
 
     if (cachedResult) {
         console.log('✅ CACHE HIT for query:', searchQuery);
         const stats = youtubeCache.search.getStats();
         console.log('📊 Cache stats:', stats);
-        return { 
-            ok: true, 
+        return {
+            ok: true,
             data: {
                 ...cachedResult,
                 searchDuration: Date.now() - startTime,
                 cameFromCache: true,
-            } 
+            }
         };
     }
 
@@ -96,36 +96,56 @@ export async function searchYouTubeForTrack(searchOptions: YouTubeSearchOptions)
     return { ok: true, data: sorted[0] };
 }
 
-/**
- * Builds an optimized search query for YouTube from track information.
- * Strategy: Use artist and track name, add "audio" keyword for better music results
- */
-function buildSearchQuery(searchOptions: YouTubeSearchOptions): string {
-    const { trackName, trackArtists, prioritizeAudio = true } = searchOptions;
-    
-    // Clean track name: remove common suffixes that might hurt search
-    const cleanedTrackName = cleanTrackName(trackName);
-    
-    // Use primary artist (first in array) for main query
-    const primaryArtist = trackArtists[0] || '';
-    
-    // Build base query with artist and track
-    let query = `${primaryArtist} ${cleanedTrackName}`;
-    
-    // Add "audio" or "official audio" to prioritize music over other content
+
+
+// -------------------------
+// Canonical normalization
+// -------------------------
+
+interface CanonicalTrackQuery {
+    artist: string;
+    title: string;
+}
+
+function normalizeArtist(artist: string): string {
+    return artist
+        .toLowerCase()
+        .replace(/feat\.|ft\.|featuring|x|&/g, '')
+        .replace(/[^\w\s]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function normalizeTitle(title: string): string {
+    return title
+        .toLowerCase()
+        .replace(/\(.*?\)|\[.*?\]/g, '') // remove remix/remaster/live
+        .replace(/-.*$/g, '')            // remove dash suffixes
+        .replace(/[^\w\s]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function buildCanonicalTrackQuery(
+    trackName: string,
+    artists: string[]
+): CanonicalTrackQuery {
+    const canonicalTrackQuery: CanonicalTrackQuery = {
+        artist: normalizeArtist(artists[0] || ''),
+        title: normalizeTitle(trackName),
+    };
+    return canonicalTrackQuery;
+}
+
+function buildSearchQueryFromCanonical(
+    canonical: CanonicalTrackQuery,
+    prioritizeAudio: boolean = true
+): string {
+    let query = `${canonical.artist} ${canonical.title}`;
+
     if (prioritizeAudio) {
         query += ' audio';
     }
-    
-    return query;
-}
 
-/**
- * Basic cleanup of track name for V1.
- * Just normalizes whitespace - keeps all metadata, numbers, symbols intact.
- * Can be enhanced later based on actual search results.
- */
-function cleanTrackName(trackName: string): string {
-    // Normalize multiple spaces to single space and trim
-    return trackName.replace(/\s+/g, ' ').trim();
+    return query;
 }
