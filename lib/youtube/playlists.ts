@@ -10,7 +10,7 @@ import { cookies } from "next/headers";
 import { GOOGLE_ACCESS_TOKEN_KEY } from "../constants/google";
 import { PLAYLISTS_TTL_SECONDS, YOUTUBE, NORMALIZED_PLAYLISTS_TTL_SECONDS, CACHE_MESSAGES } from "../cache/constants";
 import { redis } from "../cache/redis";
-import { LRUCache } from "lru-cache";
+import { LRUCache } from "../cache/cache";
 
 const YOUTUBE_PLAYLISTS_NAME = '[YouTube Playlists]';
 const YOUTUBE_NORMALIZED_PLAYLISTS_NAME = '[YouTube Normalized Playlists]';
@@ -117,7 +117,7 @@ export async function getYoutubeUserPlaylists(): Promise<Result<youtube_v3.Schem
     await redis.set(cacheKey, youtubePlaylists, {
         ex: PLAYLISTS_TTL_SECONDS,
     });
-    
+
     youtubeCache.playlists.set(cacheKey, youtubePlaylists);
 
     console.log(`${YOUTUBE_PLAYLISTS_NAME} Cached ${youtubePlaylists.length} playlists`);
@@ -180,12 +180,12 @@ export async function normalizedYoutubePlaylist(): Promise<Result<NormalizedPlay
             minMusicRatio: 0.7,
             minInspected: 3,
         });
-    
+
         if (!res.ok) {
             // Don't hide errors as "not music" — bubble them up
             return { ok: false, error: res.error };
         }
-    
+
         checks.push({ playlist, isMusic: res.data });
     }
 
@@ -203,9 +203,9 @@ export async function normalizedYoutubePlaylist(): Promise<Result<NormalizedPlay
     await redis.set(cacheKey, normalizedPlaylists, {
         ex: NORMALIZED_PLAYLISTS_TTL_SECONDS,
     });
-    
+
     youtubeCache.normalizedPlaylists.set(cacheKey, normalizedPlaylists);
-    
+
     console.log(`${YOUTUBE_NORMALIZED_PLAYLISTS_NAME} Cached ${normalizedPlaylists.length} normalized playlists`);
 
     return {
@@ -223,10 +223,10 @@ export async function normalizedYoutubePlaylist(): Promise<Result<NormalizedPlay
  * @param lruCache - The LRU cache to get the data from.
  * @returns The data from the caches.
  */
-async function getFromCaches<T extends {}>(
+async function getFromCaches<T>(
     cacheKey: string,
     callerNamespace: string,
-    lruCache: LRUCache<string, T>
+    lruCache: LRUCache<T>
 ): Promise<T | null> {
 
     // 1. LRU (L1)
