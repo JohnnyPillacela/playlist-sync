@@ -10,6 +10,7 @@ import { getFromCaches, setCaches } from "../cache/layers";
 import { spotifyCache } from "./cache";
 
 const SPOTIFY_PLAYLIST_TRACKS_NAME = '[Spotify Playlist Tracks]';
+const SPOTIFY_PLAYLISTS_NAME = '[Spotify Playlists]';
 
 // Get a user-specific cache key suffix based on their access token
 async function getUserCacheKey(): Promise<string> {
@@ -92,6 +93,19 @@ export async function _fetchPlaylistTracksSDK(playlistID: string): Promise<Resul
 }
 
 export async function _fetchUsersPlaylists(): Promise<Result<SimplifiedPlaylist[]>> {
+    const userKey = await getUserCacheKey();
+    const cacheKey = `${SPOTIFY_PLAYLISTS_NAME}:${userKey}`;
+
+    const cachedPlaylists = await getFromCaches<SimplifiedPlaylist[]>(cacheKey, SPOTIFY_PLAYLISTS_NAME, spotifyCache.playlists);
+    if (cachedPlaylists) {
+        return {
+            ok: true,
+            data: cachedPlaylists
+        }
+    }
+
+    console.log(`${SPOTIFY_PLAYLISTS_NAME} ${CACHE_MESSAGES.FETCHING_FROM_API}`);
+
     const sdkResult = await getServerSDK();
     if (!sdkResult.ok) {
         return {
@@ -105,6 +119,11 @@ export async function _fetchUsersPlaylists(): Promise<Result<SimplifiedPlaylist[
     const response: Page<SimplifiedPlaylist> = await sdk.currentUser.playlists.playlists(50);
 
     const simplifiedPlaylists: SimplifiedPlaylist[] = response.items;
+
+    // Set in caches before returning
+    await setCaches(cacheKey, SPOTIFY_PLAYLISTS_NAME, spotifyCache.playlists, simplifiedPlaylists, PLAYLISTS_TTL_SECONDS);
+
+    console.log(`${SPOTIFY_PLAYLISTS_NAME} Cached ${simplifiedPlaylists.length} playlists`);
 
     return {
         ok: true,
