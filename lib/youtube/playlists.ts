@@ -48,26 +48,16 @@ export async function getYoutubeUserPlaylists(): Promise<Result<youtube_v3.Schem
     const userKey = await getUserCacheKey();
     const cacheKey = `${YOUTUBE.PLAYLIST_NAMESPACE}:${userKey}`;
 
-    // 1. Check in-memory LRU cache first
-    const memoryCachedPlaylists = youtubeCache.playlists.get(cacheKey);
-    if (memoryCachedPlaylists) {
-        console.log(`${YOUTUBE_PLAYLISTS_NAME} ${CACHE_MESSAGES.IN_MEMORY_CACHE_HIT}`);
+    // Check LRU and Redis caches - returns from either LRU or Redis if found or null if not found
+    const cachedPlaylists = await getFromCaches<youtube_v3.Schema$Playlist[]>(
+        cacheKey,
+        YOUTUBE_PLAYLISTS_NAME,
+        youtubeCache.playlists
+    );
+    if (cachedPlaylists) {
         return {
             ok: true,
-            data: memoryCachedPlaylists,
-        }
-    }
-
-    console.log(`${YOUTUBE_PLAYLISTS_NAME} ${CACHE_MESSAGES.IN_MEMORY_CACHE_MISS}`);
-
-    // 2. Check Redis cache next
-    const redisCachedPlaylists = await redis.get<youtube_v3.Schema$Playlist[]>(cacheKey);
-    if (redisCachedPlaylists) {
-        console.log(`${YOUTUBE_PLAYLISTS_NAME} ${CACHE_MESSAGES.REDIS_CACHE_HIT}`);
-        youtubeCache.playlists.set(cacheKey, redisCachedPlaylists); // warm LRU
-        return {
-            ok: true,
-            data: redisCachedPlaylists,
+            data: cachedPlaylists,
         }
     }
 
@@ -132,30 +122,19 @@ export async function normalizedYoutubePlaylist(): Promise<Result<NormalizedPlay
     const userKey = await getUserCacheKey();
     const cacheKey = `${YOUTUBE.NORMALIZED_PLAYLISTS_NAMESPACE}:${userKey}`;
 
-    // 1. Check in-memory LRU cache first
-    const memoryCachedNormalizedPlaylists = youtubeCache.normalizedPlaylists.get(cacheKey);
-    if (memoryCachedNormalizedPlaylists) {
-        console.log(`${YOUTUBE_NORMALIZED_PLAYLISTS_NAME} ${CACHE_MESSAGES.IN_MEMORY_CACHE_HIT}`);
+    // Check LRU and Redis caches - returns from either LRU or Redis if found or null if not found
+    const cachedNormalizedPlaylists = await getFromCaches<NormalizedPlaylist[]>(
+        cacheKey,
+        YOUTUBE_NORMALIZED_PLAYLISTS_NAME,
+        youtubeCache.normalizedPlaylists
+    );
+    if (cachedNormalizedPlaylists) {
         return {
             ok: true,
-            data: memoryCachedNormalizedPlaylists,
+            data: cachedNormalizedPlaylists,
         }
     }
 
-    console.log(`${YOUTUBE_NORMALIZED_PLAYLISTS_NAME} ${CACHE_MESSAGES.IN_MEMORY_CACHE_MISS}`);
-
-    // 2. Check Redis cache next
-    const redisCachedNormalizedPlaylists = await redis.get<NormalizedPlaylist[]>(cacheKey);
-    if (redisCachedNormalizedPlaylists) {
-        console.log(`${YOUTUBE_NORMALIZED_PLAYLISTS_NAME} ${CACHE_MESSAGES.REDIS_CACHE_HIT}`);
-        youtubeCache.normalizedPlaylists.set(cacheKey, redisCachedNormalizedPlaylists); // warm LRU
-        return {
-            ok: true,
-            data: redisCachedNormalizedPlaylists,
-        }
-    }
-
-    console.log(`${YOUTUBE_NORMALIZED_PLAYLISTS_NAME} ${CACHE_MESSAGES.REDIS_CACHE_MISS}`);
     console.log(`${YOUTUBE_NORMALIZED_PLAYLISTS_NAME} ${CACHE_MESSAGES.FETCHING_FROM_API}`);
 
     // 3. Fetch from API
