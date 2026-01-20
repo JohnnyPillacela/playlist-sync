@@ -67,7 +67,7 @@ const youtubeNormalizedPlaylistCache = new LRUCache<any[]>(1000, 60 * 24); // 24
 
 /**
  * Singleton LRU cache instance for YouTube search results.
- * Configuration: 1000 entries max, 60 minute TTL
+ * Configuration: 1000 entries max, 24 hour TTL
  */
 export const youtubeCache = {
     search: youtubeSearchCache,
