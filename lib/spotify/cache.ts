@@ -21,6 +21,6 @@ const spotifyTrackCache = new LRUCache<any>(500, 30);
  */
 export const spotifyCache = {
     search: spotifySearchCache,
-    playlist: spotifyPlaylistCache,
-    track: spotifyTrackCache,
+    playlists: spotifyPlaylistCache,
+    tracks: spotifyTrackCache,
 } as const;

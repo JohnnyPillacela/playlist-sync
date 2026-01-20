@@ -3,6 +3,21 @@
 import { getServerSDK } from "./sdk";
 import { MaxInt, Page, SimplifiedPlaylist, Track } from "@spotify/web-api-ts-sdk";
 import { NormalizedPlaylist, Result } from "../types";
+import { cookies } from "next/headers";
+import { SPOTIFY_ACCESS_TOKEN_KEY } from "../constants/spotify";
+import { CACHE_MESSAGES, PLAYLISTS_TTL_SECONDS, SPOTIFY } from "../cache/constants";
+import { getFromCaches, setCaches } from "../cache/layers";
+import { spotifyCache } from "./cache";
+
+const SPOTIFY_PLAYLIST_TRACKS_NAME = '[Spotify Playlist Tracks]';
+
+// Get a user-specific cache key suffix based on their access token
+async function getUserCacheKey(): Promise<string> {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(SPOTIFY_ACCESS_TOKEN_KEY)?.value;
+    // Use last 8 chars of token as identifier (unique per user, no extra API call needed)
+    return token ? token.slice(-8) : 'anonymous';
+}
 
 export async function _fetchPlaylistTracks(playlistID: string, spotifyAccessToken: string) {
     const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistID}/tracks`, {
@@ -17,6 +32,19 @@ export async function _fetchPlaylistTracks(playlistID: string, spotifyAccessToke
 }
 
 export async function _fetchPlaylistTracksSDK(playlistID: string): Promise<Result<Track[]>> {
+    const userKey = await getUserCacheKey();
+    const cacheKey = `${SPOTIFY.PLAYLIST_TRACKS_NAMESPACE}:${userKey}`;
+
+    const cachedTracks = await getFromCaches<Track[]>(cacheKey, SPOTIFY_PLAYLIST_TRACKS_NAME, spotifyCache.tracks);
+    if (cachedTracks) {
+        return {
+            ok: true,
+            data: cachedTracks
+        }
+    }
+
+    console.log(`${SPOTIFY_PLAYLIST_TRACKS_NAME} ${CACHE_MESSAGES.FETCHING_FROM_API}`);
+
     const sdkResult = await getServerSDK();
     if (!sdkResult.ok) {
         return {
@@ -51,6 +79,11 @@ export async function _fetchPlaylistTracksSDK(playlistID: string): Promise<Resul
 
         offset += limit;
     }
+
+    // Set in caches before returning
+    await setCaches(cacheKey, SPOTIFY_PLAYLIST_TRACKS_NAME, spotifyCache.tracks, allTracks, PLAYLISTS_TTL_SECONDS);
+
+    console.log(`${SPOTIFY_PLAYLIST_TRACKS_NAME} Cached ${allTracks.length} tracks`);
 
     return {
         ok: true,
