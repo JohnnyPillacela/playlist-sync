@@ -103,12 +103,8 @@ export async function getYoutubeUserPlaylists(): Promise<Result<youtube_v3.Schem
         pageToken = response.nextPageToken;
     }
 
-    // Store in Redis and in-memory LRU cache before returning
-    await redis.set(cacheKey, youtubePlaylists, {
-        ex: PLAYLISTS_TTL_SECONDS,
-    });
-
-    youtubeCache.playlists.set(cacheKey, youtubePlaylists);
+    // Set in caches before returning
+    await setCaches(cacheKey, YOUTUBE_PLAYLISTS_NAME, youtubeCache.playlists, youtubePlaylists, PLAYLISTS_TTL_SECONDS);
 
     console.log(`${YOUTUBE_PLAYLISTS_NAME} Cached ${youtubePlaylists.length} playlists`);
 
@@ -178,12 +174,8 @@ export async function normalizedYoutubePlaylist(): Promise<Result<NormalizedPlay
             provider: "youtube-music",
         }));
 
-    // Store in Redis and in-memory LRU cache before returning
-    await redis.set(cacheKey, normalizedPlaylists, {
-        ex: NORMALIZED_PLAYLISTS_TTL_SECONDS,
-    });
-
-    youtubeCache.normalizedPlaylists.set(cacheKey, normalizedPlaylists);
+    // Set in caches before returning
+    await setCaches(cacheKey, YOUTUBE_NORMALIZED_PLAYLISTS_NAME, youtubeCache.normalizedPlaylists, normalizedPlaylists, NORMALIZED_PLAYLISTS_TTL_SECONDS);
 
     console.log(`${YOUTUBE_NORMALIZED_PLAYLISTS_NAME} Cached ${normalizedPlaylists.length} normalized playlists`);
 
@@ -252,7 +244,7 @@ async function getFromCaches<T>(
  * @param lruCache - The LRU cache to set the data to.
  * @param data - The data to set.
  * @param ttlSeconds - The TTL in seconds.
- * @returns The data from the caches.
+ * @returns void.
  */
 async function setCaches<T extends {}>(
     cacheKey: string,
