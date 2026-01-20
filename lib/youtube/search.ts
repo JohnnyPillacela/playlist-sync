@@ -5,7 +5,8 @@ import { GEN_ERRORS, Result, SDK_ERRORS } from "../types";
 import { handleYouTubeAPIError } from "./errorHandler";
 import { getYoutubeSDK } from "./sdk";
 import { youtubeCache } from "./cache";
-import { YOUTUBE } from "../cache/constants";
+import { CACHE_MESSAGES, YOUTUBE, YOUTUBE_SEARCH_TTL_SECONDS } from "../cache/constants";
+import { getFromCaches, setCaches } from "../cache/layers";
 
 interface YouTubeSearchOptions {
     trackName: string;
@@ -23,29 +24,28 @@ export interface YouTubeSearchResult {
     cameFromCache: boolean; // whether this result came from cache
 }
 
+const YOUTUBE_SEARCH_NAME = '[YouTube Search]';
+
 export async function searchYouTubeForTrack(searchOptions: YouTubeSearchOptions): Promise<Result<YouTubeSearchResult>> {
     const startTime = Date.now();
     const canonical = buildCanonicalTrackQuery(searchOptions.trackName, searchOptions.trackArtists);
     const cacheKey = buildKnowledgeCacheKey(YOUTUBE.SEARCH_NAMESPACE, [canonical.artist, canonical.title]);
     const searchQuery = buildSearchQueryFromCanonical(canonical, searchOptions.prioritizeAudio);
 
-    const cachedResult = youtubeCache.search.get(cacheKey);
-
+    // Check LRU and Redis caches - returns from either LRU or Redis if found or null if not found
+    const cachedResult = await getFromCaches<YouTubeSearchResult>(cacheKey, YOUTUBE_SEARCH_NAME, youtubeCache.search);
     if (cachedResult) {
-        console.log('✅ CACHE HIT for query:', searchQuery);
-        const stats = youtubeCache.search.getStats();
-        console.log('📊 Cache stats:', stats);
-        return {
-            ok: true,
+        return { 
+            ok: true, 
             data: {
                 ...cachedResult,
                 searchDuration: Date.now() - startTime,
                 cameFromCache: true,
-            }
-        };
+            } 
+        }
     }
 
-    console.log('❌ CACHE MISS - Making YouTube API call for:', searchQuery);
+    console.log(`${YOUTUBE_SEARCH_NAME} ${CACHE_MESSAGES.FETCHING_FROM_API}`);
 
     const youtubeSDKResult = await getYoutubeSDK();
 
@@ -90,8 +90,10 @@ export async function searchYouTubeForTrack(searchOptions: YouTubeSearchOptions)
     // Return best match (sorted by confidence)
     const sorted = searchResults.sort((a, b) => b.confidence - a.confidence);
 
-    // Cache the result
-    youtubeCache.search.set(cacheKey, sorted[0]);
+    // Set in caches before returning
+    await setCaches(cacheKey, YOUTUBE_SEARCH_NAME, youtubeCache.search, sorted[0], YOUTUBE_SEARCH_TTL_SECONDS);
+
+    console.log(`${YOUTUBE_SEARCH_NAME} Cached ${sorted[0]}`);
 
     return { ok: true, data: sorted[0] };
 }
