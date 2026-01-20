@@ -214,6 +214,15 @@ export async function normalizedYoutubePlaylist(): Promise<Result<NormalizedPlay
     }
 }
 
+
+/**
+ * Get data from caches. Should swallow errors and return null if not found.
+ * Best-effort warm LRU cache if found in Redis.
+ * @param cacheKey - The key to get the data from.
+ * @param callerNamespace - The namespace of the caller.
+ * @param lruCache - The LRU cache to get the data from.
+ * @returns The data from the caches.
+ */
 async function getFromCaches<T extends {}>(
     cacheKey: string,
     callerNamespace: string,
