@@ -243,3 +243,37 @@ async function getFromCaches<T>(
 
     return null;
 }
+
+
+/**
+ * Set data in caches.
+ * @param cacheKey - The key to set the data to.
+ * @param callerNamespace - The namespace of the caller.
+ * @param lruCache - The LRU cache to set the data to.
+ * @param data - The data to set.
+ * @param ttlSeconds - The TTL in seconds.
+ * @returns The data from the caches.
+ */
+async function setCaches<T extends {}>(
+    cacheKey: string,
+    callerNamespace: string,
+    lruCache: LRUCache<T>,
+    data: T,
+    ttlSeconds: number
+): Promise<void> {
+
+    // L1: In-memory LRU (fast, best-effort)
+    try {
+        lruCache.set(cacheKey, data);
+    } catch (err) {
+        console.warn(`${callerNamespace} LRU set failed`, err);
+    }
+
+    // L2: Redis (durable, best-effort)
+    try {
+        await redis.set(cacheKey, data, { ex: ttlSeconds });
+    } catch (err) {
+        console.warn(`${callerNamespace} Redis set failed`, err);
+    }
+}
+
