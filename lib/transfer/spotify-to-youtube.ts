@@ -48,7 +48,7 @@ export async function transfer({ spotifyPlaylistId, playlistName }: TransferRequ
     if (!playlistTrackResult.ok) {
         return {
             ok: false,
-            error: SDK_ERRORS.SPOTIFY_API_ERROR
+            error: playlistTrackResult.error
         }
     }
 
