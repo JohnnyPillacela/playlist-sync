@@ -92,7 +92,7 @@ export async function getPlaylistTracks(playlistID: string): Promise<Result<Trac
     }
 }
 
-export async function _fetchUsersPlaylists(): Promise<Result<SimplifiedPlaylist[]>> {
+export async function getSpotifyUserPlaylists(): Promise<Result<SimplifiedPlaylist[]>> {
     const userKey = await getUserCacheKey();
     const cacheKey = `${SPOTIFY_PLAYLISTS_NAME}:${userKey}`;
 
@@ -132,7 +132,7 @@ export async function _fetchUsersPlaylists(): Promise<Result<SimplifiedPlaylist[
 }
 
 export async function normalizedSpotifyPlaylist(): Promise<Result<NormalizedPlaylist[]>> {
-    const spotifyPlaylistsResult = await _fetchUsersPlaylists();
+    const spotifyPlaylistsResult = await getSpotifyUserPlaylists();
 
     if (!spotifyPlaylistsResult.ok) {
         return {
