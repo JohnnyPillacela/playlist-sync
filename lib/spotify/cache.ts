@@ -1,6 +1,7 @@
 // lib/spotify/cache.ts
 
 import { LRUCache } from '../cache/cache';
+import { NormalizedPlaylist } from '../types';
 
 // Cache for general Spotify search results (tracks, artists, albums, etc)
 const spotifySearchCache = new LRUCache<any>(500, 30);
@@ -10,6 +11,9 @@ const spotifyPlaylistCache = new LRUCache<any>(500, 30);
 
 // Cache for specific Spotify track data
 const spotifyTrackCache = new LRUCache<any>(500, 30);
+
+// Cache for Normalized Spotify playlists
+const spotifyNormalizedPlaylistCache = new LRUCache<NormalizedPlaylist[]>(1000, 60 * 24) // 24 hours
 
 /**
  * Singleton LRU cache instance for Spotify use cases.
@@ -23,4 +27,5 @@ export const spotifyCache = {
     search: spotifySearchCache,
     playlists: spotifyPlaylistCache,
     tracks: spotifyTrackCache,
+    normalizedPlaylists: spotifyNormalizedPlaylistCache,
 } as const;
