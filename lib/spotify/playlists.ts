@@ -20,7 +20,7 @@ async function getUserCacheKey(): Promise<string> {
     return token ? token.slice(-8) : 'anonymous';
 }
 
-export async function _fetchPlaylistTracks(playlistID: string, spotifyAccessToken: string) {
+export async function fetchPlaylistTracksOLD(playlistID: string, spotifyAccessToken: string) {
     const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistID}/tracks`, {
         method: 'GET',
         headers: {
