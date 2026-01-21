@@ -5,6 +5,8 @@ import { cookies } from 'next/headers';
 import { SPOTIFY_ACCESS_TOKEN_KEY, SPOTIFY_REFRESH_TOKEN_KEY } from '../constants/spotify';
 import { AUTH_ERRORS, Result } from '../types';
 
+const SPOTIFY_SDK_INIT = "[SPOTIFY_SDK_INIT]";
+
 /**
  * Creates a Spotify SDK instance using the Spotify access token from cookies.
  * This allows us to use the SDK for API calls while keeping our custom PKCE auth flow.
@@ -18,6 +20,7 @@ export async function getServerSDK(): Promise<Result<SpotifyApi>> {
   const spotifyRefreshToken = cookieStore.get(SPOTIFY_REFRESH_TOKEN_KEY)?.value;
 
   if (!spotifyAccessToken) {
+    console.error(`${SPOTIFY_SDK_INIT} ${AUTH_ERRORS.SPOTIFY_NO_TOKEN_FOUND}`)
     return {
       ok: false,
       error: AUTH_ERRORS.SPOTIFY_NO_TOKEN_FOUND,
