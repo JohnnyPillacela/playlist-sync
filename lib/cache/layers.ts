@@ -27,7 +27,7 @@ export const getFromCaches = async <T extends {}>(
         }
         console.log(`${callerNamespace} ${CACHE_MESSAGES.IN_MEMORY_CACHE_MISS}`);
     } catch (err) {
-        console.warn(`${callerNamespace} LRU get failed - MANUAL CHECK`, err);
+        console.warn(`${callerNamespace} LRU get failed`, err);
     }
 
     // 2. Redis (L2)
@@ -48,7 +48,8 @@ export const getFromCaches = async <T extends {}>(
 
         console.log(`${callerNamespace} ${CACHE_MESSAGES.REDIS_CACHE_MISS}`);
     } catch (err) {
-        console.warn(`${callerNamespace} Redis get failed - MANUAL CHECK`, err);
+        console.warn(`${callerNamespace} Redis get failed`);
+        console.warn(err);
     }
 
     return null;
