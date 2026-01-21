@@ -32,7 +32,7 @@ export async function _fetchPlaylistTracks(playlistID: string, spotifyAccessToke
     return data;
 }
 
-export async function _fetchPlaylistTracksSDK(playlistID: string): Promise<Result<Track[]>> {
+export async function getPlaylistTracks(playlistID: string): Promise<Result<Track[]>> {
     const userKey = await getUserCacheKey();
     const cacheKey = `${SPOTIFY.PLAYLIST_TRACKS_NAMESPACE}:${userKey}`;
 

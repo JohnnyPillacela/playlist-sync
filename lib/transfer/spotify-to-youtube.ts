@@ -1,6 +1,6 @@
 // lib/transfer/spotify-to-youtube
 
-import { _fetchPlaylistTracksSDK } from "../spotify/playlists";
+import { getPlaylistTracks } from "../spotify/playlists";
 import { Track } from "@spotify/web-api-ts-sdk";
 import { searchYouTubeForTrack, YouTubeSearchResult } from "../youtube/search";
 import { GEN_ERRORS, Result, SDK_ERRORS } from "../types";
@@ -43,7 +43,7 @@ interface TransferResult {
 
 export async function transfer({ spotifyPlaylistId, playlistName }: TransferRequest): Promise<Result<TransferResult>> {
     const startTime = Date.now();
-    const playlistTrackResult = await _fetchPlaylistTracksSDK(spotifyPlaylistId);
+    const playlistTrackResult = await getPlaylistTracks(spotifyPlaylistId);
 
     if (!playlistTrackResult.ok) {
         return {
