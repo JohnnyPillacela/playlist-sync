@@ -5,12 +5,13 @@ import { MaxInt, Page, SimplifiedPlaylist, Track } from "@spotify/web-api-ts-sdk
 import { NormalizedPlaylist, Result } from "../types";
 import { cookies } from "next/headers";
 import { SPOTIFY_ACCESS_TOKEN_KEY } from "../constants/spotify";
-import { CACHE_MESSAGES, PLAYLISTS_TTL_SECONDS, SPOTIFY } from "../cache/constants";
+import { CACHE_MESSAGES, NORMALIZED_PLAYLISTS_TTL_SECONDS, PLAYLISTS_TTL_SECONDS, SPOTIFY } from "../cache/constants";
 import { getFromCaches, setCaches } from "../cache/layers";
 import { spotifyCache } from "./cache";
 
 const SPOTIFY_PLAYLIST_TRACKS_NAME = '[Spotify Playlist Tracks]';
 const SPOTIFY_PLAYLISTS_NAME = '[Spotify Playlists]';
+const SPOTIFY_NORMALIZED_PLAYLISTS_NAME = '[Spotify Normalized Playlists]';
 
 // Get a user-specific cache key suffix based on their access token
 async function getUserCacheKey(): Promise<string> {
@@ -132,6 +133,24 @@ export async function getSpotifyUserPlaylists(): Promise<Result<SimplifiedPlayli
 }
 
 export async function normalizedSpotifyPlaylist(): Promise<Result<NormalizedPlaylist[]>> {
+    const userKey = await getUserCacheKey();
+    const cacheKey = `${SPOTIFY.NORMALIZED_PLAYLISTS_NAMESPACE}:${userKey}`;
+
+    // Check LRU and Redis caches - returns from either LRU or Redis if found or null if not found
+    const cachedNormalizedPlaylists = await getFromCaches<NormalizedPlaylist[]>(
+        cacheKey,
+        SPOTIFY_NORMALIZED_PLAYLISTS_NAME,
+        spotifyCache.normalizedPlaylists,
+    );
+    if (cachedNormalizedPlaylists) {
+        return {
+            ok: true,
+            data: cachedNormalizedPlaylists,
+        }
+    }
+
+    console.log(`${SPOTIFY_NORMALIZED_PLAYLISTS_NAME} ${CACHE_MESSAGES.FETCHING_FROM_API}`);
+
     const spotifyPlaylistsResult = await getSpotifyUserPlaylists();
 
     if (!spotifyPlaylistsResult.ok) {
@@ -152,6 +171,12 @@ export async function normalizedSpotifyPlaylist(): Promise<Result<NormalizedPlay
             provider: 'spotify'
         }
     })
+
+    // Set in caches before returning
+    await setCaches(cacheKey, SPOTIFY_NORMALIZED_PLAYLISTS_NAME, spotifyCache.normalizedPlaylists, normalizedPlaylists, NORMALIZED_PLAYLISTS_TTL_SECONDS);
+
+    console.log(`${SPOTIFY_NORMALIZED_PLAYLISTS_NAME} Cached ${normalizedPlaylists.length} normalized playlists`);
+
 
     return {
         ok: true,
