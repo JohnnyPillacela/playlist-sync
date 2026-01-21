@@ -14,7 +14,7 @@ function normalize(str: string | null | undefined): string {
         .trim();
 }
 
-function hash(str: string): string {
+export function hash(str: string): string {
     return createHash('sha256').update(str).digest('hex');
 }
 

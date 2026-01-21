@@ -3,11 +3,11 @@
 import { getServerSDK } from "./sdk";
 import { MaxInt, Page, SimplifiedPlaylist, Track } from "@spotify/web-api-ts-sdk";
 import { NormalizedPlaylist, Result } from "../types";
-import { cookies } from "next/headers";
-import { SPOTIFY_ACCESS_TOKEN_KEY } from "../constants/spotify";
 import { CACHE_MESSAGES, NORMALIZED_PLAYLISTS_TTL_SECONDS, PLAYLISTS_TTL_SECONDS, SPOTIFY } from "../cache/constants";
 import { getFromCaches, setCaches } from "../cache/layers";
 import { spotifyCache } from "./cache";
+import { _getCurrentUserDetails } from "./auth";
+import { hash } from "../cache/keyBuilder";
 
 const SPOTIFY_PLAYLIST_TRACKS_NAME = '[Spotify Playlist Tracks]';
 const SPOTIFY_PLAYLISTS_NAME = '[Spotify Playlists]';
@@ -15,10 +15,12 @@ const SPOTIFY_NORMALIZED_PLAYLISTS_NAME = '[Spotify Normalized Playlists]';
 
 // Get a user-specific cache key suffix based on their access token
 async function getUserCacheKey(): Promise<string> {
-    const cookieStore = await cookies();
-    const token = cookieStore.get(SPOTIFY_ACCESS_TOKEN_KEY)?.value;
-    // Use last 8 chars of token as identifier (unique per user, no extra API call needed)
-    return token ? token.slice(-8) : 'anonymous';
+    const currentUserDetailsResult = await _getCurrentUserDetails();
+    if (!currentUserDetailsResult.ok) {
+        return '';
+    }
+    const currentUserDetails = currentUserDetailsResult.data;
+    return hash(currentUserDetails.id);
 }
 
 export async function fetchPlaylistTracksOLD(playlistID: string, spotifyAccessToken: string) {
@@ -95,7 +97,7 @@ export async function getPlaylistTracks(playlistID: string): Promise<Result<Trac
 
 export async function getSpotifyUserPlaylists(): Promise<Result<SimplifiedPlaylist[]>> {
     const userKey = await getUserCacheKey();
-    const cacheKey = `${SPOTIFY_PLAYLISTS_NAME}:${userKey}`;
+    const cacheKey = `${SPOTIFY.PLAYLIST_NAMESPACE}:${userKey}`;
 
     const cachedPlaylists = await getFromCaches<SimplifiedPlaylist[]>(cacheKey, SPOTIFY_PLAYLISTS_NAME, spotifyCache.playlists);
     if (cachedPlaylists) {

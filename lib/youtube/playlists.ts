@@ -6,20 +6,22 @@ import { getYoutubeSDK } from "./sdk";
 import { isMusicPlaylist } from "./musicFilter";
 import { handleYouTubeAPIError } from "./errorHandler";
 import { youtubeCache } from "./cache";
-import { cookies } from "next/headers";
-import { GOOGLE_ACCESS_TOKEN_KEY } from "../constants/google";
 import { PLAYLISTS_TTL_SECONDS, YOUTUBE, NORMALIZED_PLAYLISTS_TTL_SECONDS, CACHE_MESSAGES } from "../cache/constants";
 import { getFromCaches, setCaches } from "../cache/layers";
+import { getGoogleUserInfo } from "./auth";
+import { hash } from "../cache/keyBuilder";
 
 const YOUTUBE_PLAYLISTS_NAME = '[YouTube Playlists]';
 const YOUTUBE_NORMALIZED_PLAYLISTS_NAME = '[YouTube Normalized Playlists]';
 
 // Get a user-specific cache key suffix based on their access token
 async function getUserCacheKey(): Promise<string> {
-    const cookieStore = await cookies();
-    const token = cookieStore.get(GOOGLE_ACCESS_TOKEN_KEY)?.value;
-    // Use last 8 chars of token as identifier (unique per user, no extra API call needed)
-    return token ? token.slice(-8) : 'anonymous';
+    const currentUserDetailsResult = await getGoogleUserInfo();
+    if (!currentUserDetailsResult.ok) {
+        return '';
+    }
+    const currentUserDetails = currentUserDetailsResult.data;
+    return hash(currentUserDetails.id);
 }
 
 // Simple concurrency limiter (no dependency)
