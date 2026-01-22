@@ -8,21 +8,10 @@ import { handleYouTubeAPIError } from "./errorHandler";
 import { youtubeCache } from "./cache";
 import { PLAYLISTS_TTL_SECONDS, YOUTUBE, NORMALIZED_PLAYLISTS_TTL_SECONDS, CACHE_MESSAGES } from "../cache/constants";
 import { getFromCaches, setCaches } from "../cache/layers";
-import { getGoogleUserInfo } from "./auth";
-import { hash } from "../cache/keyBuilder";
+import { getUserCacheKey } from "./cache";
 
 const YOUTUBE_PLAYLISTS_NAME = '[YouTube Playlists]';
 const YOUTUBE_NORMALIZED_PLAYLISTS_NAME = '[YouTube Normalized Playlists]';
-
-// Get a user-specific cache key suffix based on their access token
-async function getUserCacheKey(): Promise<string> {
-    const currentUserDetailsResult = await getGoogleUserInfo();
-    if (!currentUserDetailsResult.ok) {
-        return '';
-    }
-    const currentUserDetails = currentUserDetailsResult.data;
-    return hash(currentUserDetails.id);
-}
 
 // Simple concurrency limiter (no dependency)
 async function mapWithConcurrency<T, R>(

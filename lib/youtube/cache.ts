@@ -3,6 +3,8 @@
 import { youtube_v3 } from 'googleapis';
 import { LRUCache } from '../cache/cache';
 import { YouTubeSearchResult } from './search';
+import { getGoogleUserInfo } from './auth';
+import { hash } from '../cache/keyBuilder';
 
 /**
  * Cache for YouTube search results.
@@ -86,4 +88,14 @@ export function getYoutubeCacheStats() {
         tracks: youtubeTrackCache.getStats(),
         normalizedPlaylists: youtubeNormalizedPlaylistCache.getStats(),
     };
+}
+
+// Get a user-specific cache key suffix based on their access token
+export async function getUserCacheKey(): Promise<string> {
+    const currentUserDetailsResult = await getGoogleUserInfo();
+    if (!currentUserDetailsResult.ok) {
+        return '';
+    }
+    const currentUserDetails = currentUserDetailsResult.data;
+    return hash(currentUserDetails.id);
 }
