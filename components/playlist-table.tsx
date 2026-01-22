@@ -44,7 +44,7 @@ export default function PlaylistTable({
             {playlists.map(
               (playlist: NormalizedPlaylist, index: number = 0) => {
                 const totalItems = playlist.trackCount || 0;
-                const thumbnailUrl = playlist.thumbnailUrl || "Undefined";
+                const thumbnailUrl = playlist.thumbnailUrl || null;
 
                 return (
                   <TableRow key={playlist.id}>

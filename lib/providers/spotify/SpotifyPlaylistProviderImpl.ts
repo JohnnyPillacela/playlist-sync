@@ -44,7 +44,7 @@ export class SpotifyPlaylistProviderImpl implements PlaylistProvider {
                 id: playlist.id,
                 name: playlist.name,
                 trackCount: playlist.tracks?.total || 0,
-                thumbnailUrl: playlist.images?.[0]?.url || 'Undefined',
+                thumbnailUrl: playlist.images?.[0]?.url,
                 provider: 'spotify'
             }
         })
