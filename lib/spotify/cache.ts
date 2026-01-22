@@ -1,7 +1,9 @@
 // lib/spotify/cache.ts
 
 import { LRUCache } from '../cache/cache';
+import { hash } from '../cache/keyBuilder';
 import { NormalizedPlaylist } from '../types';
+import { _getCurrentUserDetails } from './auth';
 
 // Cache for general Spotify search results (tracks, artists, albums, etc)
 const spotifySearchCache = new LRUCache<any>(500, 30);
@@ -29,3 +31,13 @@ export const spotifyCache = {
     tracks: spotifyTrackCache,
     normalizedPlaylists: spotifyNormalizedPlaylistCache,
 } as const;
+
+// Get a user-specific cache key suffix based on their access token
+export const getUserCacheKey = async (): Promise<string> => {
+    const currentUserDetailsResult = await _getCurrentUserDetails();
+    if (!currentUserDetailsResult.ok) {
+        return '';
+    }
+    const currentUserDetails = currentUserDetailsResult.data;
+    return hash(currentUserDetails.id);
+}

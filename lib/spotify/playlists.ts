@@ -6,22 +6,11 @@ import { NormalizedPlaylist, Result } from "../types";
 import { CACHE_MESSAGES, NORMALIZED_PLAYLISTS_TTL_SECONDS, PLAYLISTS_TTL_SECONDS, SPOTIFY } from "../cache/constants";
 import { getFromCaches, setCaches } from "../cache/layers";
 import { spotifyCache } from "./cache";
-import { _getCurrentUserDetails } from "./auth";
-import { hash } from "../cache/keyBuilder";
+import { getUserCacheKey } from "./cache";
 
 const SPOTIFY_PLAYLIST_TRACKS_NAME = '[Spotify Playlist Tracks]';
 const SPOTIFY_PLAYLISTS_NAME = '[Spotify Playlists]';
 const SPOTIFY_NORMALIZED_PLAYLISTS_NAME = '[Spotify Normalized Playlists]';
-
-// Get a user-specific cache key suffix based on their access token
-async function getUserCacheKey(): Promise<string> {
-    const currentUserDetailsResult = await _getCurrentUserDetails();
-    if (!currentUserDetailsResult.ok) {
-        return '';
-    }
-    const currentUserDetails = currentUserDetailsResult.data;
-    return hash(currentUserDetails.id);
-}
 
 export async function fetchPlaylistTracksOLD(playlistID: string, spotifyAccessToken: string) {
     const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistID}/tracks`, {
