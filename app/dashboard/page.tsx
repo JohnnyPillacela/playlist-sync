@@ -1,12 +1,10 @@
 // app/dashboard/page.tsx
 
 import { _getCurrentUserDetails } from "@/lib/spotify/auth";
-import { normalizedSpotifyPlaylist } from "@/lib/spotify/playlists";
 import PleaseSignIn from "@/components/please-sign-in";
 import GreetUserCard from "@/components/GreetUserCard";
 import PlaylistViewer from "@/components/playlist-viewer";
 import { getGoogleUserInfo } from "@/lib/youtube/auth";
-import { normalizedYoutubePlaylist } from "@/lib/youtube/playlists";
 import { PlaylistProviderData } from "@/lib/types";
 
 export default async function Dashboard() {
