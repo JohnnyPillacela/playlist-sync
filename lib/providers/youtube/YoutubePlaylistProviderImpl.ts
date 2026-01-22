@@ -1,12 +1,14 @@
 // /lib/providers/youtube/YoutubePlaylistProviderImpl.ts
 
-import { CACHE_MESSAGES, NORMALIZED_PLAYLISTS_TTL_SECONDS, PROVIDER_CALLERS, YOUTUBE } from "@/lib/cache/constants";
+import { CACHE_MESSAGES, NORMALIZED_PLAYLISTS_TTL_SECONDS, PLAYLISTS_TTL_SECONDS, PROVIDER_CALLERS, YOUTUBE } from "@/lib/cache/constants";
 import { PlaylistProvider } from "../PlaylistProvider";
 import { Result, NormalizedPlaylist } from "@/lib/types";
 import { getUserCacheKey, youtubeCache } from "@/lib/youtube/cache";
 import { getFromCaches, setCaches } from "@/lib/cache/layers";
-import { getYoutubeUserPlaylists } from "@/lib/youtube/playlists";
 import { isMusicPlaylist } from "@/lib/youtube/musicFilter";
+import { youtube_v3 } from "googleapis/build/src/apis/youtube/v3";
+import { getYoutubeSDK } from "@/lib/youtube/sdk";
+import { handleYouTubeAPIError } from "@/lib/youtube/errorHandler";
 
 export class YoutubePlaylistProviderImpl implements PlaylistProvider {
     async getUserPlaylists(): Promise<Result<NormalizedPlaylist[]>> {
@@ -30,21 +32,21 @@ export class YoutubePlaylistProviderImpl implements PlaylistProvider {
         console.log(`${PROVIDER_CALLERS.YOUTUBE_PLAYLISTS} ${CACHE_MESSAGES.FETCHING_FROM_API}`);
 
         // 3. Fetch from API
-        const youtubePlaylistsResult = await getYoutubeUserPlaylists();
+        const rawPlaylistsResult = await this.getRawPlaylistsFromAPI();
     
-        if (!youtubePlaylistsResult.ok) {
+        if (!rawPlaylistsResult.ok) {
             return {
                 ok: false,
-                error: youtubePlaylistsResult.error,
+                error: rawPlaylistsResult.error,
             }
         }
     
-        const youtubePlaylists = youtubePlaylistsResult.data
+        const rawPlaylists = rawPlaylistsResult.data
             .filter((playlist) => playlist.id != null); // Filter out playlists without IDs
     
         const checks: Array<{ playlist: any; isMusic: boolean }> = [];
     
-        for (const playlist of youtubePlaylists) {
+        for (const playlist of rawPlaylists) {
             const id = playlist.id!;
             const res = await isMusicPlaylist(id, {
                 maxItemsToInspect: 5,
@@ -80,5 +82,75 @@ export class YoutubePlaylistProviderImpl implements PlaylistProvider {
             data: normalizedPlaylists,
         }        
         
+    }
+
+    private async getRawPlaylistsFromAPI(): Promise<Result<youtube_v3.Schema$Playlist[]>> {
+        const userKey = await getUserCacheKey();
+        const cacheKey = `${YOUTUBE.PLAYLIST_NAMESPACE}:${userKey}`;
+    
+        // Check LRU and Redis caches - returns from either LRU or Redis if found or null if not found
+        const cachedPlaylists = await getFromCaches<youtube_v3.Schema$Playlist[]>(
+            cacheKey,
+            PROVIDER_CALLERS.YOUTUBE_PLAYLISTS_RAW,
+            youtubeCache.playlists
+        );
+        if (cachedPlaylists) {
+            return {
+                ok: true,
+                data: cachedPlaylists,
+            }
+        }
+    
+        console.log(`${PROVIDER_CALLERS.YOUTUBE_PLAYLISTS_RAW} ${CACHE_MESSAGES.FETCHING_FROM_API}`);
+    
+        // 3. Fetch from API
+        const youtubeSDKResult: Result<youtube_v3.Youtube> = await getYoutubeSDK();
+        if (!youtubeSDKResult.ok) {
+            return {
+                ok: false,
+                error: youtubeSDKResult.error,
+            }
+        }
+    
+        const youtubeSdk: youtube_v3.Youtube = youtubeSDKResult.data;
+        const youtubePlaylists: youtube_v3.Schema$Playlist[] = [];
+        let pageToken: string | undefined = undefined;
+    
+        // Loop through all pages of playlists
+        while (true) {
+            let response: youtube_v3.Schema$PlaylistListResponse;
+            try {
+                response = (await youtubeSdk.playlists.list({
+                    part: ['snippet', 'contentDetails'],
+                    mine: true,
+                    maxResults: 50,
+                    pageToken: pageToken,
+                })).data;
+            } catch (error: any) {
+                return handleYouTubeAPIError(error);
+            }
+    
+            // Add items from this page to the youtubePlaylists array
+            if (response.items) {
+                youtubePlaylists.push(...response.items);
+            }
+    
+            // Check if there are more pages
+            if (!response.nextPageToken) {
+                break;
+            }
+    
+            pageToken = response.nextPageToken;
+        }
+    
+        // Set in caches before returning
+        await setCaches(cacheKey, PROVIDER_CALLERS.YOUTUBE_PLAYLISTS_RAW, youtubeCache.playlists, youtubePlaylists, PLAYLISTS_TTL_SECONDS);
+    
+        console.log(`${PROVIDER_CALLERS.YOUTUBE_PLAYLISTS_RAW} Cached ${youtubePlaylists.length} playlists`);
+    
+        return {
+            ok: true,
+            data: youtubePlaylists,
+        }
     }
 }
