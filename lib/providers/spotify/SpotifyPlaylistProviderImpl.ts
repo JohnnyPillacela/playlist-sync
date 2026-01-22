@@ -2,10 +2,11 @@
 
 import { Result, NormalizedPlaylist } from "@/lib/types";
 import { PlaylistProvider } from "../PlaylistProvider";
-import { getSpotifyUserPlaylists } from "@/lib/spotify/playlists";
 import { getUserCacheKey, spotifyCache } from "@/lib/spotify/cache";
-import { CACHE_MESSAGES, NORMALIZED_PLAYLISTS_TTL_SECONDS, PROVIDER_CALLERS, SPOTIFY } from "@/lib/cache/constants";
+import { CACHE_MESSAGES, NORMALIZED_PLAYLISTS_TTL_SECONDS, PLAYLISTS_TTL_SECONDS, PROVIDER_CALLERS, SPOTIFY } from "@/lib/cache/constants";
 import { getFromCaches, setCaches } from "@/lib/cache/layers";
+import { Page, SimplifiedPlaylist } from "@spotify/web-api-ts-sdk";
+import { getServerSDK } from "@/lib/spotify/sdk";
 
 export class SpotifyPlaylistProviderImpl implements PlaylistProvider {
 
@@ -28,18 +29,18 @@ export class SpotifyPlaylistProviderImpl implements PlaylistProvider {
     
         console.log(`${PROVIDER_CALLERS.SPOTIFY_PLAYLISTS} ${CACHE_MESSAGES.FETCHING_FROM_API}`);
 
-        const spotifyPlaylistsResult = await getSpotifyUserPlaylists();
+        const rawPlaylistsResult = await this.getRawPlaylistsFromAPI();
 
-        if (!spotifyPlaylistsResult.ok) {
+        if (!rawPlaylistsResult.ok) {
             return {
                 ok: false,
-                error: spotifyPlaylistsResult.error
+                error: rawPlaylistsResult.error
             }
         }
     
-        const spotifyPlaylists = spotifyPlaylistsResult.data;
+        const rawPlaylists = rawPlaylistsResult.data;
 
-        const normalizedPlaylists: NormalizedPlaylist[] = spotifyPlaylists.map((playlist) => {
+        const normalizedPlaylists: NormalizedPlaylist[] = rawPlaylists.map((playlist) => {
             return {
                 id: playlist.id,
                 name: playlist.name,
@@ -60,6 +61,46 @@ export class SpotifyPlaylistProviderImpl implements PlaylistProvider {
             data: normalizedPlaylists
         }
 
+    }
+
+    // ✅ Private helper - encapsulates API call
+    private async getRawPlaylistsFromAPI(): Promise<Result<SimplifiedPlaylist[]>> {
+        const userKey = await getUserCacheKey();
+        const cacheKey = `${SPOTIFY.PLAYLIST_NAMESPACE}:${userKey}`;
+    
+        const cachedPlaylists = await getFromCaches<SimplifiedPlaylist[]>(cacheKey, PROVIDER_CALLERS.SPOTIFY_PLAYLISTS_RAW, spotifyCache.playlists);
+        if (cachedPlaylists) {
+            return {
+                ok: true,
+                data: cachedPlaylists
+            }
+        }
+    
+        console.log(`${PROVIDER_CALLERS.SPOTIFY_PLAYLISTS_RAW} ${CACHE_MESSAGES.FETCHING_FROM_API}`);
+    
+        const sdkResult = await getServerSDK();
+        if (!sdkResult.ok) {
+            return {
+                ok: false,
+                error: sdkResult.error
+            }
+        }
+    
+        const sdk = sdkResult.data;
+    
+        const response: Page<SimplifiedPlaylist> = await sdk.currentUser.playlists.playlists(50);
+    
+        const simplifiedPlaylists: SimplifiedPlaylist[] = response.items;
+    
+        // Set in caches before returning
+        await setCaches(cacheKey, PROVIDER_CALLERS.SPOTIFY_PLAYLISTS_RAW, spotifyCache.playlists, simplifiedPlaylists, PLAYLISTS_TTL_SECONDS);
+    
+        console.log(`${PROVIDER_CALLERS.SPOTIFY_PLAYLISTS_RAW} Cached ${simplifiedPlaylists.length} RAW playlists`);
+    
+        return {
+            ok: true,
+            data: simplifiedPlaylists
+        }
     }
 }
 

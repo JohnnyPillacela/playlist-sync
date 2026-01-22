@@ -1,16 +1,14 @@
 // /lib/spotify/playlists.ts
 
 import { getServerSDK } from "./sdk";
-import { MaxInt, Page, SimplifiedPlaylist, Track } from "@spotify/web-api-ts-sdk";
-import { NormalizedPlaylist, Result } from "../types";
-import { CACHE_MESSAGES, NORMALIZED_PLAYLISTS_TTL_SECONDS, PLAYLISTS_TTL_SECONDS, SPOTIFY } from "../cache/constants";
+import { MaxInt, Track } from "@spotify/web-api-ts-sdk";
+import { Result } from "../types";
+import { CACHE_MESSAGES, PLAYLISTS_TTL_SECONDS, SPOTIFY } from "../cache/constants";
 import { getFromCaches, setCaches } from "../cache/layers";
 import { spotifyCache } from "./cache";
 import { getUserCacheKey } from "./cache";
 
 const SPOTIFY_PLAYLIST_TRACKS_NAME = '[Spotify Playlist Tracks]';
-const SPOTIFY_PLAYLISTS_NAME = '[Spotify Playlists]';
-const SPOTIFY_NORMALIZED_PLAYLISTS_NAME = '[Spotify Normalized Playlists]';
 
 export async function fetchPlaylistTracksOLD(playlistID: string, spotifyAccessToken: string) {
     const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistID}/tracks`, {
@@ -84,41 +82,3 @@ export async function getPlaylistTracks(playlistID: string): Promise<Result<Trac
     }
 }
 
-export async function getSpotifyUserPlaylists(): Promise<Result<SimplifiedPlaylist[]>> {
-    const userKey = await getUserCacheKey();
-    const cacheKey = `${SPOTIFY.PLAYLIST_NAMESPACE}:${userKey}`;
-
-    const cachedPlaylists = await getFromCaches<SimplifiedPlaylist[]>(cacheKey, SPOTIFY_PLAYLISTS_NAME, spotifyCache.playlists);
-    if (cachedPlaylists) {
-        return {
-            ok: true,
-            data: cachedPlaylists
-        }
-    }
-
-    console.log(`${SPOTIFY_PLAYLISTS_NAME} ${CACHE_MESSAGES.FETCHING_FROM_API}`);
-
-    const sdkResult = await getServerSDK();
-    if (!sdkResult.ok) {
-        return {
-            ok: false,
-            error: sdkResult.error
-        }
-    }
-
-    const sdk = sdkResult.data;
-
-    const response: Page<SimplifiedPlaylist> = await sdk.currentUser.playlists.playlists(50);
-
-    const simplifiedPlaylists: SimplifiedPlaylist[] = response.items;
-
-    // Set in caches before returning
-    await setCaches(cacheKey, SPOTIFY_PLAYLISTS_NAME, spotifyCache.playlists, simplifiedPlaylists, PLAYLISTS_TTL_SECONDS);
-
-    console.log(`${SPOTIFY_PLAYLISTS_NAME} Cached ${simplifiedPlaylists.length} playlists`);
-
-    return {
-        ok: true,
-        data: simplifiedPlaylists
-    }
-}
