@@ -11,7 +11,7 @@ export class SpotifyPlaylistProviderImpl implements PlaylistProvider {
 
     async getUserPlaylists(): Promise<Result<NormalizedPlaylist[]>> {
         const userKey = await getUserCacheKey();
-        const cacheKey = `${SPOTIFY.PLAYLIST_NAMESPACE}:${userKey}`;
+        const cacheKey = `${SPOTIFY.NORMALIZED_PLAYLISTS_NAMESPACE}:${userKey}`;
 
         // Check LRU and Redis caches - returns from either LRU or Redis if found or null if not found
         const cachedNormalizedPlaylists = await getFromCaches<NormalizedPlaylist[]>(
@@ -44,7 +44,7 @@ export class SpotifyPlaylistProviderImpl implements PlaylistProvider {
                 id: playlist.id,
                 name: playlist.name,
                 trackCount: playlist.tracks?.total || 0,
-                thumbnailUrl: playlist.images?.[0]?.url,
+                thumbnailUrl: playlist.images?.[0]?.url || "",
                 provider: 'spotify'
             }
         })
