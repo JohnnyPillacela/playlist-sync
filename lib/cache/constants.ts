@@ -48,4 +48,6 @@ export const CACHE_MESSAGES = {
 export const PROVIDER_CALLERS = {
     SPOTIFY_PLAYLISTS: '[Spotify Playlist Provider - getUserPlaylists()]',
     YOUTUBE_PLAYLISTS: '[YouTube Playlist Provider - getUserPlaylists()]',
+    SPOTIFY_PLAYLISTS_RAW: '[Spotify Playlist Provider - getRawPlaylistsFromAPI()]',
+    YOUTUBE_PLAYLISTS_RAW: '[YouTube Playlist Provider - getRawPlaylistsFromAPI()]',
 } as const;
