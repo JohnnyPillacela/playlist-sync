@@ -1,12 +1,13 @@
 // /api/youtube/playlists
 
 import { NextResponse } from "next/server";
-import { normalizedYoutubePlaylist } from "@/lib/youtube/playlists";
+import { YoutubePlaylistProviderImpl } from "@/lib/providers/youtube/YoutubePlaylistProviderImpl";
 
 export async function GET() {
-    const youtubePlaylistsResult = await normalizedYoutubePlaylist();
-    if (!youtubePlaylistsResult.ok) {
-        return NextResponse.json({ error: youtubePlaylistsResult.error }, { status: 500 });
+    const youtubePlaylistProvider = new YoutubePlaylistProviderImpl();
+    const normalizedPlaylistsResult = await youtubePlaylistProvider.getUserPlaylists();
+    if (!normalizedPlaylistsResult.ok) {
+        return NextResponse.json({ error: normalizedPlaylistsResult.error }, { status: 500 });
     }
-    return NextResponse.json(youtubePlaylistsResult.data);
+    return NextResponse.json(normalizedPlaylistsResult.data);
 }
