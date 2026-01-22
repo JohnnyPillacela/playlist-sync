@@ -43,3 +43,9 @@ export const CACHE_MESSAGES = {
     REDIS_CACHE_MISS,
     FETCHING_FROM_API,
 } as const;
+
+// PROVIDER CALLER NAMESPACES
+export const PROVIDER_CALLERS = {
+    SPOTIFY_PLAYLISTS: '[Spotify Playlist Provider - getUserPlaylists()]',
+    YOUTUBE_PLAYLISTS: '[YouTube Playlist Provider - getUserPlaylists()]',
+} as const;
