@@ -47,6 +47,16 @@ export type NormalizedPlaylist = {
     provider: 'spotify' | 'youtube-music';
 };
 
+export type NormalizedTrack = {
+    id: string;
+    name: string;
+    artists: string[];
+    thumbnailUrl: string;
+    album: string;
+    duration: number;
+    provider: 'spotify' | 'youtube-music';
+}
+
 export type PlaylistProviderData = {
     service: 'spotify' | 'youtube-music';
     isAuthenticated: boolean;
