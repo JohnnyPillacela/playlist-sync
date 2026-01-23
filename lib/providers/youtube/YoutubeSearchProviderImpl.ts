@@ -8,8 +8,11 @@ import { getFromCaches, setCaches } from "@/lib/cache/layers";
 import { youtubeCache } from "@/lib/youtube/cache";
 import { getYoutubeSDK } from "@/lib/youtube/sdk";
 import { handleYouTubeAPIError } from "@/lib/youtube/errorHandler";
+import { youtube_v3 } from "googleapis/build/src/apis/youtube/v3";
 
 export class YoutubeSearchProviderImpl implements SearchProvider {
+    private sdk: youtube_v3.Youtube | null = null;
+
     async search(searchOptions: SearchOptions): Promise<Result<SearchResult>> {
         const startTime = Date.now();
         const canonical = buildCanonicalTrackQuery(searchOptions.trackName, searchOptions.trackArtists);
@@ -31,7 +34,7 @@ export class YoutubeSearchProviderImpl implements SearchProvider {
     
         console.log(`${PROVIDER_CALLERS.YOUTUBE_SEARCH} ${CACHE_MESSAGES.FETCHING_FROM_API}`);
     
-        const youtubeSDKResult = await getYoutubeSDK();
+        const youtubeSDKResult = await this.getSDK();
 
         if (!youtubeSDKResult.ok) {
             return { ok: false, error: SDK_ERRORS.YOUTUBE_SDK_NOT_INITIALIZED };
@@ -83,5 +86,20 @@ export class YoutubeSearchProviderImpl implements SearchProvider {
         console.log(`${PROVIDER_CALLERS.YOUTUBE_SEARCH} Cached ${sorted[0]}`);
     
         return { ok: true, data: sorted[0] };
+    }
+
+    private async getSDK(): Promise<Result<youtube_v3.Youtube>> {
+        if (this.sdk) {
+            return { ok: true, data: this.sdk };
+        }
+
+        const youtubeSDKResult = await getYoutubeSDK();
+
+        // Cache it if successful
+        if (youtubeSDKResult.ok) {
+            this.sdk = youtubeSDKResult.data;
+        }
+        
+        return youtubeSDKResult;
     }
 }
