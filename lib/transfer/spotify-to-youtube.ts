@@ -1,11 +1,11 @@
 // lib/transfer/spotify-to-youtube
 
-import { searchYouTubeForTrack } from "../youtube/search";
 import { GEN_ERRORS, NormalizedTrack, Result, SDK_ERRORS } from "../types";
 import { getYoutubeCacheStats } from "../youtube/cache";
 import { CacheStats } from "../cache/cache";
 import { SpotifyTrackProviderImpl } from "../providers/spotify/SpotifyTrackProviderImpl";
 import { SearchResult } from "../providers/SearchProvider";
+import { YoutubeSearchProviderImpl } from "../providers/youtube/YoutubeSearchProviderImpl";
 
 interface TransferRequest {
     spotifyPlaylistId: string;
@@ -57,9 +57,10 @@ export async function transfer({ spotifyPlaylistId, playlistName }: TransferRequ
     const unmatchedTracks: Array<UnmatchedTrack> = [];
 
     const playlistTracks: NormalizedTrack[] = playlistTrackResult.data;
+    const youtubeSearchProvider = new YoutubeSearchProviderImpl();
 
     for (const track of playlistTracks) {
-        const searchYoutubeForTrackResults = await searchYouTubeForTrack({
+        const searchYoutubeForTrackResults = await youtubeSearchProvider.search({
             trackName: track.name,
             trackArtists: track.artists,
             trackAlbumName: track.album,
