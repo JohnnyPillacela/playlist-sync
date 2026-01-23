@@ -1,0 +1,75 @@
+// /lib/providers/SearchProvider.ts
+
+import { Result } from "../types";
+
+export interface SearchProvider {
+    search(searchOptions: SearchOptions): Promise<Result<SearchResult>>;
+}
+
+export interface SearchResult {
+    id: string;
+    title: string;
+    artists: string[];
+    channelTitle: string;
+    confidence: number;
+    thumbnailUrl: string;
+    albumName?: string;
+    searchDuration: number;
+    cameFromCache: boolean;
+}
+
+export interface SearchOptions {
+    trackName: string;
+    trackArtists: string[];
+    trackAlbumName?: string;
+    prioritizeAudio?: boolean; // default true
+}
+
+export interface CanonicalTrackQuery {
+    artist: string;
+    title: string;
+}
+
+
+export function normalizeArtist(artist: string): string {
+    return artist
+        .toLowerCase()
+        .replace(/feat\.|ft\.|featuring|x|&/g, '')
+        .replace(/[^\w\s]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+export function normalizeTitle(title: string): string {
+    return title
+        .toLowerCase()
+        .replace(/\(.*?\)|\[.*?\]/g, '') // remove remix/remaster/live
+        .replace(/-.*$/g, '')            // remove dash suffixes
+        .replace(/[^\w\s]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+export function buildCanonicalTrackQuery(
+    trackName: string,
+    artists: string[]
+): CanonicalTrackQuery {
+    const canonicalTrackQuery: CanonicalTrackQuery = {
+        artist: normalizeArtist(artists[0] || ''),
+        title: normalizeTitle(trackName),
+    };
+    return canonicalTrackQuery;
+}
+
+export function buildSearchQueryFromCanonical(
+    canonical: CanonicalTrackQuery,
+    prioritizeAudio: boolean = true
+): string {
+    let query = `${canonical.artist} ${canonical.title}`;
+
+    if (prioritizeAudio) {
+        query += ' audio';
+    }
+
+    return query;
+}
