@@ -8,7 +8,7 @@ import { getFromCaches, setCaches } from "@/lib/cache/layers";
 import { MaxInt, Track } from "@spotify/web-api-ts-sdk";
 import { getServerSDK } from "@/lib/spotify/sdk";
 
-class SpotifyTrackProviderImpl implements TrackProvider {
+export class SpotifyTrackProviderImpl implements TrackProvider {
     async getPlaylistTracks(playlistId: string): Promise<Result<NormalizedTrack[]>> {
         const userKey = await getUserCacheKey();
         const cacheKey = `${SPOTIFY.PLAYLIST_TRACKS_NAMESPACE}:${userKey}`;
