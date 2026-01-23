@@ -1,7 +1,7 @@
 // /app/api/spotify/playlists/[playlistId]/tracks/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
-import { getPlaylistTracks } from "@/lib/spotify/playlists";
+import { SpotifyTrackProviderImpl } from "@/lib/providers/spotify/SpotifyTrackProviderImpl";
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ playlistId: string }> }) {
     try {
@@ -14,7 +14,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             );
         }
     
-        const tracks = await getPlaylistTracks(playlistId);
+        const spotifyTrackProvider = new SpotifyTrackProviderImpl();
+        const tracks = await spotifyTrackProvider.getPlaylistTracks(playlistId);
         if (!tracks.ok) {
             return NextResponse.json(
                 { error: tracks.error },

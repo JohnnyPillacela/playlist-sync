@@ -1,11 +1,10 @@
 // lib/transfer/spotify-to-youtube
 
-import { getPlaylistTracks } from "../spotify/playlists";
-import { Track } from "@spotify/web-api-ts-sdk";
 import { searchYouTubeForTrack, YouTubeSearchResult } from "../youtube/search";
-import { GEN_ERRORS, Result, SDK_ERRORS } from "../types";
+import { GEN_ERRORS, NormalizedTrack, Result, SDK_ERRORS } from "../types";
 import { getYoutubeCacheStats } from "../youtube/cache";
 import { CacheStats } from "../cache/cache";
+import { SpotifyTrackProviderImpl } from "../providers/spotify/SpotifyTrackProviderImpl";
 
 interface TransferRequest {
     spotifyPlaylistId: string;
@@ -43,7 +42,8 @@ interface TransferResult {
 
 export async function transfer({ spotifyPlaylistId, playlistName }: TransferRequest): Promise<Result<TransferResult>> {
     const startTime = Date.now();
-    const playlistTrackResult = await getPlaylistTracks(spotifyPlaylistId);
+    const spotifyTrackProvider = new SpotifyTrackProviderImpl();
+    const playlistTrackResult = await spotifyTrackProvider.getPlaylistTracks(spotifyPlaylistId);
 
     if (!playlistTrackResult.ok) {
         return {
@@ -55,20 +55,20 @@ export async function transfer({ spotifyPlaylistId, playlistName }: TransferRequ
     const matchedTracks: Array<YouTubeSearchResult> = [];
     const unmatchedTracks: Array<UnmatchedTrack> = [];
 
-    const playlistTracks: Track[] = playlistTrackResult.data;
+    const playlistTracks: NormalizedTrack[] = playlistTrackResult.data;
 
     for (const track of playlistTracks) {
         const searchYoutubeForTrackResults = await searchYouTubeForTrack({
             trackName: track.name,
-            trackArtists: track.artists.map((artist) => artist.name),
-            trackAlbumName: track.album.name,
+            trackArtists: track.artists,
+            trackAlbumName: track.album,
             prioritizeAudio: true,
         });
 
         if (!searchYoutubeForTrackResults.ok) {
             unmatchedTracks.push({
                 name: track.name,
-                artists: track.artists.map((artist) => artist.name),
+                artists: track.artists,
                 reason: SDK_ERRORS.YOUTUBE_API_ERROR
             });
             continue; // Skip to next track
@@ -81,7 +81,7 @@ export async function transfer({ spotifyPlaylistId, playlistName }: TransferRequ
         } else {
             unmatchedTracks.push({
                 name: track.name,
-                artists: track.artists.map((artist) => artist.name),
+                artists: track.artists,
                 reason: GEN_ERRORS.LOW_CONFIDENCE
             });
         }
