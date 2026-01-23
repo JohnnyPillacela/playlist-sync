@@ -124,7 +124,7 @@ export default async function TestPage() {
                     <div className="space-y-2">
                         {tracks.map((track, idx) => (
                             <div
-                                key={track.videoId}
+                                key={track.id}
                                 className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
                             >
                                 <div className="flex-1">

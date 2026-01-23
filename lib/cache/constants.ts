@@ -55,4 +55,6 @@ export const PROVIDER_CALLERS = {
     YOUTUBE_PLAYLISTS_RAW: '[YouTube Playlist Provider - getRawPlaylistsFromAPI()]',
     SPOTIFY_PLAYLIST_TRACKS: '[Spotify Track Provider - getPlaylistTracks()]',
     YOUTUBE_PLAYLIST_TRACKS: '[YouTube Track Provider - getPlaylistTracks()]',
+    YOUTUBE_SEARCH: '[YouTube Search Provider - search()]',
+    SPOTIFY_SEARCH: '[Spotify Search Provider - search()]',
 } as const;

@@ -2,9 +2,9 @@
 
 import { youtube_v3 } from 'googleapis';
 import { LRUCache } from '../cache/cache';
-import { YouTubeSearchResult } from './search';
 import { getGoogleUserInfo } from './auth';
 import { hash } from '../cache/keyBuilder';
+import { SearchResult } from '../providers/SearchProvider';
 
 /**
  * Cache for YouTube search results.
@@ -21,7 +21,7 @@ import { hash } from '../cache/keyBuilder';
  * - Saves on YouTube API quota and reduces latency for popular searches
  * - Note: The 'cameFromCache' field is always false when stored, and set to true when retrieved
  */
-const youtubeSearchCache = new LRUCache<YouTubeSearchResult>(1000, 60 * 24); // 24 hours
+const youtubeSearchCache = new LRUCache<SearchResult>(1000, 60 * 24); // 24 hours
 
 /**
  * Cache for YouTube playlists metadata.
