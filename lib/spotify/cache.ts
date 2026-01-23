@@ -2,7 +2,7 @@
 
 import { LRUCache } from '../cache/cache';
 import { hash } from '../cache/keyBuilder';
-import { NormalizedPlaylist } from '../types';
+import { NormalizedPlaylist, NormalizedTrack } from '../types';
 import { _getCurrentUserDetails } from './auth';
 
 // Cache for general Spotify search results (tracks, artists, albums, etc)
@@ -12,7 +12,7 @@ const spotifySearchCache = new LRUCache<any>(500, 30);
 const spotifyPlaylistCache = new LRUCache<any>(500, 30);
 
 // Cache for specific Spotify track data
-const spotifyTrackCache = new LRUCache<any>(500, 30);
+const spotifyNormalizedTrackCache = new LRUCache<NormalizedTrack[]>(500, 60 * 24); // 24 hours
 
 // Cache for Normalized Spotify playlists
 const spotifyNormalizedPlaylistCache = new LRUCache<NormalizedPlaylist[]>(1000, 60 * 24) // 24 hours
@@ -23,12 +23,12 @@ const spotifyNormalizedPlaylistCache = new LRUCache<NormalizedPlaylist[]>(1000, 
  * 
  * spotifySearchCache:       For general Spotify search results.
  * spotifyPlaylistCache:     For caching Spotify playlist metadata.
- * spotifyTrackCache:        For caching specific Spotify track data.
+ * spotifyNormalizedTrackCache:        For caching specific Spotify track data.
  */
 export const spotifyCache = {
     search: spotifySearchCache,
     playlists: spotifyPlaylistCache,
-    tracks: spotifyTrackCache,
+    normalizedTracks: spotifyNormalizedTrackCache,
     normalizedPlaylists: spotifyNormalizedPlaylistCache,
 } as const;
 

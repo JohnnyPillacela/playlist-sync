@@ -11,9 +11,9 @@ import { getServerSDK } from "@/lib/spotify/sdk";
 export class SpotifyTrackProviderImpl implements TrackProvider {
     async getPlaylistTracks(playlistId: string): Promise<Result<NormalizedTrack[]>> {
         const userKey = await getUserCacheKey();
-        const cacheKey = `${SPOTIFY.PLAYLIST_TRACKS_NAMESPACE}:${userKey}`;
+        const cacheKey = `${SPOTIFY.NORMALIZED_PLAYLIST_TRACKS_NAMESPACE}:${userKey}`;
     
-        const cachedTracks = await getFromCaches<NormalizedTrack[]>(cacheKey, PROVIDER_CALLERS.SPOTIFY_PLAYLIST_TRACKS, spotifyCache.tracks);
+        const cachedTracks = await getFromCaches<NormalizedTrack[]>(cacheKey, PROVIDER_CALLERS.SPOTIFY_PLAYLIST_TRACKS, spotifyCache.normalizedTracks);
         if (cachedTracks) {
             return {
                 ok: true,
@@ -45,7 +45,7 @@ export class SpotifyTrackProviderImpl implements TrackProvider {
         })
     
         // Set in caches before returning
-        await setCaches(cacheKey, PROVIDER_CALLERS.SPOTIFY_PLAYLIST_TRACKS, spotifyCache.tracks, normalizedTracks, PLAYLISTS_TTL_SECONDS);
+        await setCaches(cacheKey, PROVIDER_CALLERS.SPOTIFY_PLAYLIST_TRACKS, spotifyCache.normalizedTracks, normalizedTracks, PLAYLISTS_TTL_SECONDS);
     
         console.log(`${PROVIDER_CALLERS.SPOTIFY_PLAYLIST_TRACKS} Cached ${normalizedTracks.length} tracks`);
     
