@@ -33,7 +33,7 @@ export async function findMatchingTrack(
     return {
         ok: true,
         data: {
-            matched: result, // TODO: hardcode this for now, but we should return empty later
+            matched: null,
             reason: GEN_ERRORS.LOW_CONFIDENCE
         }
     };
