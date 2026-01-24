@@ -11,6 +11,7 @@ export interface TransferService {
 export interface TransferRequest {
     playlistId: string;
     playlistName: string;
+    playlistDescription?: string;
 }
 
 export interface TransferResponse {
