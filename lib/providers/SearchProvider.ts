@@ -1,6 +1,6 @@
 // /lib/providers/SearchProvider.ts
 
-import { Result } from "../types";
+import { GEN_ERRORS, Result, SDK_ERRORS } from "../types";
 
 export interface SearchProvider {
     search(searchOptions: SearchOptions): Promise<Result<SearchResult>>;
@@ -23,6 +23,17 @@ export interface SearchOptions {
     trackArtists: string[];
     trackAlbumName?: string;
     prioritizeAudio?: boolean; // default true
+}
+
+export interface UnmatchedTrack {
+    name: string;
+    artists: string[];
+    reason: 
+     typeof SDK_ERRORS.YOUTUBE_API_ERROR |
+     typeof SDK_ERRORS.SPOTIFY_API_ERROR | 
+     typeof GEN_ERRORS.NOT_FOUND |
+     typeof GEN_ERRORS.LOW_CONFIDENCE |
+     typeof GEN_ERRORS.API_ERROR;
 }
 
 export interface CanonicalTrackQuery {
