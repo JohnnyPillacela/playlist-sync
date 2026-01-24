@@ -11,3 +11,13 @@ export async function GET() {
     }
     return NextResponse.json(normalizedPlaylistsResult.data);
 }
+
+export async function POST(request: Request) {
+    const { name, description } = await request.json();
+    const youtubePlaylistProvider = new YoutubePlaylistProviderImpl();
+    const playlistCreationResult = await youtubePlaylistProvider.createPlaylist(name, description);
+    if (!playlistCreationResult.ok) {
+        return NextResponse.json({ error: playlistCreationResult.error }, { status: 500 });
+    }
+    return NextResponse.json(playlistCreationResult.data);
+}
