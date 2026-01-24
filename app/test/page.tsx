@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 export default async function TestPage() {
     const testResult = await transfer({
-        spotifyPlaylistId: "5Iavgt4CvEYZ2tJXfyqNPw",
+        playlistId: "5Iavgt4CvEYZ2tJXfyqNPw",
         playlistName: "Love"
     });
 
