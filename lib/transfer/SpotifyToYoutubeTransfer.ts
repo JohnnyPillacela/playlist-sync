@@ -1,6 +1,6 @@
 // /lib/transfer/SpotifyToYoutubeTransfer.ts
 
-import { PlaylistCreationResult, PlaylistProvider } from "../providers/PlaylistProvider";
+import { AddTracksResult, PlaylistCreationResult, PlaylistProvider } from "../providers/PlaylistProvider";
 import { SearchProvider, SearchResult, UnmatchedTrack } from "../providers/SearchProvider";
 import { TrackProvider } from "../providers/TrackProvider";
 import { NormalizedTrack, Result, SDK_ERRORS } from "../types";
@@ -45,7 +45,12 @@ export class SpotifyToYoutubeTransfer implements TransferService {
         // 4. Add matched tracks to target playlist
         console.log(`[SpotifyToYoutubeTransfer] Adding matched tracks to target playlist...`);
         const trackIds: string[] = matchedTracks.map((track) => track.id);
-        // TODO: Implement this
+
+        const addTracksResult: Result<AddTracksResult> = await this.youtubePlaylistProvider.addTracksToPlaylist(createdPlaylistId, trackIds);
+        if (!addTracksResult.ok) {
+            return { ok: false, error: addTracksResult.error };
+        }
+
 
         const cacheStats = getYoutubeCacheStats();
 

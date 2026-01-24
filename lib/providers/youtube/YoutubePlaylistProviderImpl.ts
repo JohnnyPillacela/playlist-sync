@@ -11,6 +11,8 @@ import { getYoutubeSDK } from "@/lib/youtube/sdk";
 import { handleYouTubeAPIError } from "@/lib/youtube/errorHandler";
 
 export class YoutubePlaylistProviderImpl implements PlaylistProvider {
+    private sdk: youtube_v3.Youtube | null = null;
+
     async getUserPlaylists(): Promise<Result<NormalizedPlaylist[]>> {
         const userKey = await getUserCacheKey();
         const cacheKey = `${YOUTUBE.NORMALIZED_PLAYLISTS_NAMESPACE}:${userKey}`;
@@ -127,19 +129,51 @@ export class YoutubePlaylistProviderImpl implements PlaylistProvider {
         }
     }
 
-    async addTracksToPlaylist(playlistId: string, trackIds: string[]): Promise<Result<AddTracksResult>> {
+    async addTracksToPlaylist(playlistId: string, videoIds: string[]): Promise<Result<AddTracksResult>> {
         console.log(`${PROVIDER_CALLERS.YOUTUBE_PLAYLIST_ADD_TRACKS} Adding tracks to playlist ${playlistId}`);
 
-        const youtubeSDKResult = await getYoutubeSDK();
+        const youtubeSDKResult = await this.getSDK();
         if (!youtubeSDKResult.ok) {
             return { ok: false, error: youtubeSDKResult.error };
         }
         
         const sdk = youtubeSDKResult.data;
-        
+        const failed: Array<{ id: string, error: string }> = [];
+        let addedCount = 0;
+
+        // Add tracks to playlist sequentially
+        // TODO: Look into batching if yotuube API supports it
+        for (const videoId of videoIds) {
+            try {
+                await sdk.playlistItems.insert({
+                    part: ['snippet'],
+                    requestBody: {
+                        snippet: {
+                            playlistId: playlistId,
+                            resourceId: {
+                                kind: 'youtube#video',
+                                videoId: videoId,
+                            },
+                        },
+                    }
+                });
+                addedCount++;
+            } catch (error: any) {
+                console.error(`${SDK_ERRORS.YOUTUBE_PLAYLIST_ADD_TRACKS_FAILED} Error adding track ${videoId} to playlist ${playlistId}: ${error.message}`);
+                failed.push({
+                    id: videoId,
+                    error: error.message || "Unknown error",
+                })
+            }
+        }
+        console.log(`${PROVIDER_CALLERS.YOUTUBE_PLAYLIST_ADD_TRACKS} Added ${addedCount}/${videoIds.length} tracks to playlist ${playlistId}`);
+
         return {
-            ok: false,
-            error: SDK_ERRORS.YOUTUBE_PLAYLIST_ADD_TRACKS_FAILED,
+            ok: true,
+            data: {
+                addedCount: addedCount,
+                failed: failed,
+            },
         }
     }
 
@@ -211,6 +245,23 @@ export class YoutubePlaylistProviderImpl implements PlaylistProvider {
             ok: true,
             data: youtubePlaylists,
         }
+    }
+
+    private async getSDK(): Promise<Result<youtube_v3.Youtube>> {
+        if (this.sdk) {
+            return {
+                ok: true,
+                data: this.sdk,
+            }
+        }
+
+        const youtubeSDKResult = await getYoutubeSDK();
+
+        if (youtubeSDKResult.ok) {
+            this.sdk = youtubeSDKResult.data;
+        }
+
+        return youtubeSDKResult;
     }
 
 }
