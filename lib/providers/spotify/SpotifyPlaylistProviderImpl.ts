@@ -1,7 +1,7 @@
 // /lib/providers/spotify/SpotifyPlaylistProviderImpl.ts
 
-import { Result, NormalizedPlaylist } from "@/lib/types";
-import { PlaylistProvider } from "../PlaylistProvider";
+import { Result, NormalizedPlaylist, SDK_ERRORS } from "@/lib/types";
+import { AddTracksResult, PlaylistCreationResult, PlaylistProvider } from "../PlaylistProvider";
 import { getUserCacheKey, spotifyCache } from "@/lib/spotify/cache";
 import { CACHE_MESSAGES, NORMALIZED_PLAYLISTS_TTL_SECONDS, PLAYLISTS_TTL_SECONDS, PROVIDER_CALLERS, SPOTIFY } from "@/lib/cache/constants";
 import { getFromCaches, setCaches } from "@/lib/cache/layers";
@@ -61,6 +61,28 @@ export class SpotifyPlaylistProviderImpl implements PlaylistProvider {
             data: normalizedPlaylists
         }
 
+    }
+
+    async createPlaylist(name: string, description?: string): Promise<Result<PlaylistCreationResult>> {
+        console.log(`${PROVIDER_CALLERS.SPOTIFY_PLAYLIST_CREATE} Creating playlist ${name}`);
+
+        // TODO: Implement spotify playlist creation
+
+        return {
+            ok: false,
+            error: SDK_ERRORS.SPOTIFY_PLAYLIST_CREATE_FAILED,
+        }
+    }
+
+    async addTracksToPlaylist(playlistId: string, trackIds: string[]): Promise<Result<AddTracksResult>> {
+        console.log(`${PROVIDER_CALLERS.SPOTIFY_PLAYLIST_ADD_TRACKS} Adding tracks to playlist ${playlistId}`);
+
+        // TODO: Implement spotify playlist add tracks
+
+        return {
+            ok: false,
+            error: SDK_ERRORS.SPOTIFY_PLAYLIST_ADD_TRACKS_FAILED,
+        }
     }
 
     // ✅ Private helper - encapsulates API call

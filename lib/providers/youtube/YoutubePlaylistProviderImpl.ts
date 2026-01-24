@@ -1,8 +1,8 @@
 // /lib/providers/youtube/YoutubePlaylistProviderImpl.ts
 
 import { CACHE_MESSAGES, NORMALIZED_PLAYLISTS_TTL_SECONDS, PLAYLISTS_TTL_SECONDS, PROVIDER_CALLERS, YOUTUBE } from "@/lib/cache/constants";
-import { PlaylistProvider } from "../PlaylistProvider";
-import { Result, NormalizedPlaylist } from "@/lib/types";
+import { AddTracksResult, PlaylistCreationResult, PlaylistProvider } from "../PlaylistProvider";
+import { Result, NormalizedPlaylist, SDK_ERRORS } from "@/lib/types";
 import { getUserCacheKey, youtubeCache } from "@/lib/youtube/cache";
 import { getFromCaches, setCaches } from "@/lib/cache/layers";
 import { isMusicPlaylist } from "@/lib/youtube/musicFilter";
@@ -84,6 +84,65 @@ export class YoutubePlaylistProviderImpl implements PlaylistProvider {
         
     }
 
+    async createPlaylist(name: string, description?: string): Promise<Result<PlaylistCreationResult>> {
+        console.log(`${PROVIDER_CALLERS.YOUTUBE_PLAYLIST_CREATE} Creating playlist ${name}`);
+
+        const youtubeSDKResult = await getYoutubeSDK();
+        if (!youtubeSDKResult.ok) {
+            return { ok: false, error: youtubeSDKResult.error };
+        }
+        
+        const sdk = youtubeSDKResult.data;
+
+        try {
+            const response = await sdk.playlists.insert({
+                part: ['snippet', 'status'],
+                requestBody: {
+                    snippet: {
+                        title: name,
+                        description: description || `Synced from Spotify on ${new Date().toLocaleDateString()}`,
+                    },
+                    status: {
+                        privacyStatus: 'private', // Default to private for safety
+                    },
+                },
+            });
+
+            const playlistId = response.data.id;
+            if (!playlistId) {
+                return { ok: false, error: SDK_ERRORS.YOUTUBE_PLAYLIST_CREATION_FAILED };
+            }
+
+            console.log(`${PROVIDER_CALLERS.YOUTUBE_PLAYLIST_CREATE} Playlist created with ID ${playlistId}`);
+
+            return {
+                ok: true,
+                data: {
+                    id: playlistId,
+                    url: `https://www.youtube.com/playlist?list=${playlistId}`,
+                },
+            }
+        } catch (error: any) {
+            return handleYouTubeAPIError(error);
+        }
+    }
+
+    async addTracksToPlaylist(playlistId: string, trackIds: string[]): Promise<Result<AddTracksResult>> {
+        console.log(`${PROVIDER_CALLERS.YOUTUBE_PLAYLIST_ADD_TRACKS} Adding tracks to playlist ${playlistId}`);
+
+        const youtubeSDKResult = await getYoutubeSDK();
+        if (!youtubeSDKResult.ok) {
+            return { ok: false, error: youtubeSDKResult.error };
+        }
+        
+        const sdk = youtubeSDKResult.data;
+        
+        return {
+            ok: false,
+            error: SDK_ERRORS.YOUTUBE_PLAYLIST_ADD_TRACKS_FAILED,
+        }
+    }
+
     private async getRawPlaylistsFromAPI(): Promise<Result<youtube_v3.Schema$Playlist[]>> {
         const userKey = await getUserCacheKey();
         const cacheKey = `${YOUTUBE.PLAYLIST_NAMESPACE}:${userKey}`;
@@ -153,4 +212,5 @@ export class YoutubePlaylistProviderImpl implements PlaylistProvider {
             data: youtubePlaylists,
         }
     }
+
 }
