@@ -57,4 +57,8 @@ export const PROVIDER_CALLERS = {
     YOUTUBE_PLAYLIST_TRACKS: '[YouTube Track Provider - getPlaylistTracks()]',
     YOUTUBE_SEARCH: '[YouTube Search Provider - search()]',
     SPOTIFY_SEARCH: '[Spotify Search Provider - search()]',
+    YOUTUBE_PLAYLIST_CREATE: '[YouTube Playlist Provider - createPlaylist()]',
+    YOUTUBE_PLAYLIST_ADD_TRACKS: '[YouTube Playlist Provider - addTracksToPlaylist()]',
+    SPOTIFY_PLAYLIST_CREATE: '[Spotify Playlist Provider - createPlaylist()]',
+    SPOTIFY_PLAYLIST_ADD_TRACKS: '[Spotify Playlist Provider - addTracksToPlaylist()]',
 } as const;

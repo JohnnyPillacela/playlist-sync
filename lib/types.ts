@@ -24,6 +24,10 @@ export const AUTH_ERRORS = {
 export const SDK_ERRORS = {
     YOUTUBE_SDK_NOT_INITIALIZED: 'youtube_sdk_not_initialized',
     SPOTIFY_SDK_NOT_INITIALIZED: 'spotify_sdk_not_initialized',
+    SPOTIFY_PLAYLIST_CREATE_FAILED: 'spotify_playlist_create_failed',
+    SPOTIFY_PLAYLIST_ADD_TRACKS_FAILED: 'spotify_playlist_add_tracks_failed',
+    YOUTUBE_PLAYLIST_CREATION_FAILED: 'youtube_playlist_creation_failed',
+    YOUTUBE_PLAYLIST_ADD_TRACKS_FAILED: 'youtube_playlist_add_tracks_failed',
     YOUTUBE_API_ERROR: 'youtube_api_error',
     SPOTIFY_API_ERROR: 'spotify_api_error',
     YOUTUBE_QUOTA_EXCEEDED: 'youtube_quota_exceeded',
