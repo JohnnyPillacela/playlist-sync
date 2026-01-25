@@ -14,7 +14,7 @@ export interface PlaylistProvider {
 
     addTracksToPlaylist(
         playlistId: string,
-        trackIds: string[],
+        trackIdsAndNames: TrackIdAndNameMapping[],
     ): Promise<Result<AddTracksResult>>;
 }
 
@@ -26,7 +26,13 @@ export interface PlaylistCreationResult {
 export interface AddTracksResult {
     addedCount: number;
     failed: Array<{
-        id: string;
+        trackId: string;
+        trackName: string;
         error: string;
     }>;
+}
+
+export type TrackIdAndNameMapping = {
+    trackId: string;
+    trackName: string;
 }

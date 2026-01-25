@@ -24,7 +24,7 @@ export interface TransferResponse {
     matchedTracks: Array<SearchResult>;
     unmatchedTracks: Array<UnmatchedTrack>;
     failedToAdd: Array<{
-        videoId: string;
+        trackId: string;
         trackName: string;
         error: string;
     }>

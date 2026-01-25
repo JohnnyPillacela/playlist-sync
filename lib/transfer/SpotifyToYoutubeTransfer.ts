@@ -1,6 +1,6 @@
 // /lib/transfer/SpotifyToYoutubeTransfer.ts
 
-import { AddTracksResult, PlaylistCreationResult, PlaylistProvider } from "../providers/PlaylistProvider";
+import { AddTracksResult, PlaylistCreationResult, PlaylistProvider, TrackIdAndNameMapping } from "../providers/PlaylistProvider";
 import { SearchProvider, SearchResult, UnmatchedTrack } from "../providers/SearchProvider";
 import { TrackProvider } from "../providers/TrackProvider";
 import { NormalizedTrack, Result, SDK_ERRORS } from "../types";
@@ -44,13 +44,15 @@ export class SpotifyToYoutubeTransfer implements TransferService {
 
         // 4. Add matched tracks to target playlist
         console.log(`[SpotifyToYoutubeTransfer] Adding matched tracks to target playlist...`);
-        const trackIds: string[] = matchedTracks.map((track) => track.id);
+        const trackIdsAndNames: TrackIdAndNameMapping[] = matchedTracks.map((track) => ({
+            trackId: track.id,
+            trackName: track.title,
+        }));
 
-        const addTracksResult: Result<AddTracksResult> = await this.youtubePlaylistProvider.addTracksToPlaylist(createdPlaylistId, trackIds);
+        const addTracksResult: Result<AddTracksResult> = await this.youtubePlaylistProvider.addTracksToPlaylist(createdPlaylistId, trackIdsAndNames);
         if (!addTracksResult.ok) {
             return { ok: false, error: addTracksResult.error };
         }
-
 
         const cacheStats = getYoutubeCacheStats();
 
@@ -60,14 +62,18 @@ export class SpotifyToYoutubeTransfer implements TransferService {
             ok: true,
             data: {
                 success: true,
-                playlistId: "1234567890",
-                playlistUrl: "https://www.youtube.com/playlist?list=1234567890",
+                playlistId: createdPlaylistId,
+                playlistUrl: createdPlaylistUrl,
                 tracksTotal: tracks.length,
                 tracksMatched: matchedTracks.length,
-                tracksAdded: 0, // TODO: Implement this
+                tracksAdded: addTracksResult.data.addedCount,
                 matchedTracks: matchedTracks,
-                unmatchedTracks: unmatchedTracks,
-                failedToAdd: [],
+                unmatchedTracks: unmatchedTracks, // Spotify songs not available on YouTube
+                failedToAdd: addTracksResult.data.failed.map((failed) => ({
+                    trackId: failed.trackId,
+                    trackName: failed.trackName,
+                    error: failed.error,
+                })), // Failed to add tracks to YouTube playlist
                 duration: Date.now() - startTime,
                 cacheStats: cacheStats.search,
             }

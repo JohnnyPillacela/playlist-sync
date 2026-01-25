@@ -1,7 +1,7 @@
 // /lib/providers/youtube/YoutubePlaylistProviderImpl.ts
 
 import { CACHE_MESSAGES, NORMALIZED_PLAYLISTS_TTL_SECONDS, PLAYLISTS_TTL_SECONDS, PROVIDER_CALLERS, YOUTUBE } from "@/lib/cache/constants";
-import { AddTracksResult, PlaylistCreationResult, PlaylistProvider } from "../PlaylistProvider";
+import { AddTracksResult, PlaylistCreationResult, PlaylistProvider, TrackIdAndNameMapping } from "../PlaylistProvider";
 import { Result, NormalizedPlaylist, SDK_ERRORS } from "@/lib/types";
 import { getUserCacheKey, youtubeCache } from "@/lib/youtube/cache";
 import { getFromCaches, setCaches } from "@/lib/cache/layers";
@@ -129,7 +129,7 @@ export class YoutubePlaylistProviderImpl implements PlaylistProvider {
         }
     }
 
-    async addTracksToPlaylist(playlistId: string, videoIds: string[]): Promise<Result<AddTracksResult>> {
+    async addTracksToPlaylist(playlistId: string, trackIdsAndNames: TrackIdAndNameMapping[]): Promise<Result<AddTracksResult>> {
         console.log(`${PROVIDER_CALLERS.YOUTUBE_PLAYLIST_ADD_TRACKS} Adding tracks to playlist ${playlistId}`);
 
         const youtubeSDKResult = await this.getSDK();
@@ -138,12 +138,12 @@ export class YoutubePlaylistProviderImpl implements PlaylistProvider {
         }
         
         const sdk = youtubeSDKResult.data;
-        const failed: Array<{ id: string, error: string }> = [];
+        const failed: Array<{ trackId: string, trackName: string, error: string }> = [];
         let addedCount = 0;
 
         // Add tracks to playlist sequentially
         // TODO: Look into batching if yotuube API supports it
-        for (const videoId of videoIds) {
+        for (const {trackId, trackName} of trackIdsAndNames) {
             try {
                 await sdk.playlistItems.insert({
                     part: ['snippet'],
@@ -152,21 +152,22 @@ export class YoutubePlaylistProviderImpl implements PlaylistProvider {
                             playlistId: playlistId,
                             resourceId: {
                                 kind: 'youtube#video',
-                                videoId: videoId,
+                                videoId: trackId,
                             },
                         },
                     }
                 });
                 addedCount++;
             } catch (error: any) {
-                console.error(`${SDK_ERRORS.YOUTUBE_PLAYLIST_ADD_TRACKS_FAILED} Error adding track ${videoId} to playlist ${playlistId}: ${error.message}`);
+                console.error(`${SDK_ERRORS.YOUTUBE_PLAYLIST_ADD_TRACKS_FAILED} Error adding track ${trackId} to playlist ${playlistId}: ${error.message}`);
                 failed.push({
-                    id: videoId,
+                    trackId: trackId,
+                    trackName: trackName,
                     error: error.message || "Unknown error",
                 })
             }
         }
-        console.log(`${PROVIDER_CALLERS.YOUTUBE_PLAYLIST_ADD_TRACKS} Added ${addedCount}/${videoIds.length} tracks to playlist ${playlistId}`);
+        console.log(`${PROVIDER_CALLERS.YOUTUBE_PLAYLIST_ADD_TRACKS} Added ${addedCount}/${trackIdsAndNames.length} tracks to playlist ${playlistId}`);
 
         return {
             ok: true,
