@@ -14,6 +14,7 @@ import { TransferRequest, TransferResponse, TransferService } from "./TransferSe
 export class SpotifyToYoutubeTransfer implements TransferService {
     constructor(
         private readonly spotifyTrackProvider: TrackProvider,
+        private readonly youtubeTrackProvider: TrackProvider,
         private readonly youtubeSearchProvider: SearchProvider,
         private readonly youtubePlaylistProvider: PlaylistProvider,
     ) { }
@@ -43,11 +44,31 @@ export class SpotifyToYoutubeTransfer implements TransferService {
         }
 
         console.log(`[SpotifyToYoutubeTransfer] Playlist creation result: ${JSON.stringify(playlistCreationResult.data.operation)}`);
-
         const { id: playlistId, url: playlistUrl, operation: playlistOperation } = playlistCreationResult.data;
+
+        // ✅ Only fetch existing tracks if playlist was updated (not newly created)
+        let existingPlaylistTracks: NormalizedTrack[] = [];
+
+        if (playlistOperation === 'updated') {
+            const existingPlaylistTracksResult: Result<NormalizedTrack[]> = await this.youtubeTrackProvider.getPlaylistTracks(playlistId);
+            if (!existingPlaylistTracksResult.ok) {
+                return { ok: false, error: existingPlaylistTracksResult.error };
+            }
+            
+            existingPlaylistTracks = existingPlaylistTracksResult.data;
+        } else {
+            // Playlist just created - it's empty, no need to check
+            console.log(`[SpotifyToYoutubeTransfer] New playlist created, no existing tracks to check`);
+        }
+
+        // Then filter out tracks that already exist
+        const newTracks = matchedTracks.filter(track =>
+            !existingPlaylistTracks.some(existing => existing.id === track.id)
+        );
+
         // 4. Add matched tracks to target playlist
-        console.log(`[SpotifyToYoutubeTransfer] Adding matched tracks to target playlist...`);
-        const trackIdsAndNames: TrackIdAndNameMapping[] = matchedTracks.map((track) => ({
+        console.log(`[SpotifyToYoutubeTransfer] Adding matched tracks to target playlist... ${newTracks.length} tracks`);
+        const trackIdsAndNames: TrackIdAndNameMapping[] = newTracks.map((track) => ({
             trackId: track.id,
             trackName: track.title,
         }));
@@ -144,18 +165,31 @@ export class SpotifyToYoutubeTransfer implements TransferService {
             spotifyCache.playlistMap
         );
 
+        // ✅ Better - only call if cached mapping exists
         if (cachedMapping) {
-            console.log(`[SpotifyToYoutubeTransfer] Found cached mapping: ${cachedMapping.youtubePlaylistId}`);
 
-            // Verify playlist still exists on YouTube
-            // TODO: Implement check for playlist existence on YouTube
-            return {
-                ok: true,
-                data: {
-                    id: cachedMapping.youtubePlaylistId,
-                    url: `https://music.youtube.com/playlist?list=${cachedMapping.youtubePlaylistId}`,
-                    operation: 'updated'
-                }
+            // Check if cached playlist still exists on YouTube
+            const playlistExistsResult = await this.youtubePlaylistProvider.getPlaylist(
+                cachedMapping.youtubePlaylistId
+            );
+
+            if (!playlistExistsResult.ok) {
+                // API error - log and fall through to create new playlist
+                console.log(`[SpotifyToYoutubeTransfer] Error checking playlist: ${playlistExistsResult.error}`);
+            } else if (playlistExistsResult.data !== null) {
+                // Playlist exists - use it!
+                console.log(`[SpotifyToYoutubeTransfer] Verified cached playlist exists`);
+                return {
+                    ok: true,
+                    data: {
+                        id: cachedMapping.youtubePlaylistId,
+                        url: `https://music.youtube.com/playlist?list=${cachedMapping.youtubePlaylistId}`,
+                        operation: 'updated'
+                    }
+                };
+            } else {
+                // Playlist deleted - log and fall through to create new
+                console.log(`[SpotifyToYoutubeTransfer] Cached playlist no longer exists`);
             }
         }
 

@@ -6,10 +6,12 @@ import { YoutubeSearchProviderImpl } from "../providers/youtube/YoutubeSearchPro
 import { YoutubePlaylistProviderImpl } from "../providers/youtube/YoutubePlaylistProviderImpl";
 import { SpotifyToYoutubeTransfer } from "./SpotifyToYoutubeTransfer";
 import { TransferRequest, TransferResponse } from "./TransferService";
+import { YoutubeTrackProviderImpl } from "../providers/youtube/YoutubeTrackProviderImpl";
 
 export async function transfer(request: TransferRequest): Promise<Result<TransferResponse>> {
     const transferService = new SpotifyToYoutubeTransfer(
         new SpotifyTrackProviderImpl(),
+        new YoutubeTrackProviderImpl(),
         new YoutubeSearchProviderImpl(),
         new YoutubePlaylistProviderImpl()
     );
