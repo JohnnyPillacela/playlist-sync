@@ -122,6 +122,7 @@ export class YoutubePlaylistProviderImpl implements PlaylistProvider {
                 data: {
                     id: playlistId,
                     url: `https://www.youtube.com/playlist?list=${playlistId}`,
+                    operation: 'created',
                 },
             }
         } catch (error: any) {

@@ -21,6 +21,7 @@ export interface PlaylistProvider {
 export interface PlaylistCreationResult {
     id: string;
     url: string;
+    operation: 'created' | 'updated';
 }
 
 export interface AddTracksResult {
