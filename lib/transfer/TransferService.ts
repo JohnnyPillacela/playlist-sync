@@ -18,6 +18,7 @@ export interface TransferResponse {
     success: boolean;
     playlistId?: string;
     playlistUrl?: string;
+    playlistOperation?: 'created' | 'updated';
     tracksTotal: number;
     tracksMatched: number;
     tracksAdded: number;

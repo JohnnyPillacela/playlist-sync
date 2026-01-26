@@ -6,6 +6,7 @@ export const CACHE_KEY_SEPARATOR = ':';
 export const PLAYLISTS_TTL_SECONDS = 60 * 60 * 24; // 24 hours
 export const NORMALIZED_PLAYLISTS_TTL_SECONDS = 60 * 60 * 24; // 24 hours
 export const YOUTUBE_SEARCH_TTL_SECONDS = 60 * 60 * 24; // 24 hours
+export const PLAYLIST_MAPPING_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days (long-lived)
 const IN_MEMORY_CACHE_HIT = '[In-memory LRU cache] hit';
 const IN_MEMORY_CACHE_MISS = '[In-memory LRU cache] miss';
 const REDIS_CACHE_HIT = '[Redis cache] hit';
@@ -20,6 +21,7 @@ const SEARCH_NAMESPACE = 'search';
 const NORMALIZED_PLAYLISTS_NAMESPACE = 'normalized-playlists';
 const NORMALIZED_PLAYLIST_TRACKS_NAMESPACE = 'normalized-playlist-tracks';
 const PLAYLIST_TRACKS_NAMESPACE = 'playlist-tracks';
+const PLAYLIST_MAP_NAMESPACE = 'playlist-map';
 
 // YOUTUBE
 export const YOUTUBE = {
@@ -36,6 +38,7 @@ export const SPOTIFY = {
     NORMALIZED_PLAYLISTS_NAMESPACE: `${SP_NAMESPACE}:${NORMALIZED_PLAYLISTS_NAMESPACE}`,
     PLAYLIST_TRACKS_NAMESPACE: `${SP_NAMESPACE}:${PLAYLIST_TRACKS_NAMESPACE}`,
     NORMALIZED_PLAYLIST_TRACKS_NAMESPACE: `${SP_NAMESPACE}:${NORMALIZED_PLAYLIST_TRACKS_NAMESPACE}`,
+    PLAYLIST_MAP_NAMESPACE: `${SP_NAMESPACE}:${PLAYLIST_MAP_NAMESPACE}`,
 }
 
 // CACHE MESSAGES

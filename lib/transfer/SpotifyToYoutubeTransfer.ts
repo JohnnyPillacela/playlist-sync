@@ -1,8 +1,11 @@
 // /lib/transfer/SpotifyToYoutubeTransfer.ts
 
+import { PLAYLIST_MAPPING_TTL_SECONDS, SPOTIFY } from "../cache/constants";
+import { getFromCaches, setCaches } from "../cache/layers";
 import { AddTracksResult, PlaylistCreationResult, PlaylistProvider, TrackIdAndNameMapping } from "../providers/PlaylistProvider";
 import { SearchProvider, SearchResult, UnmatchedTrack } from "../providers/SearchProvider";
 import { TrackProvider } from "../providers/TrackProvider";
+import { getUserCacheKey, spotifyCache, SpotifyPlaylistMapping } from "../spotify/cache";
 import { NormalizedTrack, Result, SDK_ERRORS } from "../types";
 import { getYoutubeCacheStats } from "../youtube/cache";
 import { findMatchingTrack } from "./matching";
@@ -31,17 +34,17 @@ export class SpotifyToYoutubeTransfer implements TransferService {
         console.log(`[SpotifyToYoutubeTransfer] Matching tracks to YouTube...`);
         const { matchedTracks, unmatchedTracks } = await this.matchTracks(tracks);
 
-        // 3. Create target playlist on YouTube
-        console.log(`[SpotifyToYoutubeTransfer] Creating target playlist on YouTube...`);
+        // 3. Create or update target playlist on YouTube
+        console.log(`[SpotifyToYoutubeTransfer] Creating or updating target playlist on YouTube...`);
 
-        const playlistCreationResult: Result<PlaylistCreationResult> = await this.youtubePlaylistProvider.createPlaylist(request.playlistName, request.playlistDescription);
+        const playlistCreationResult: Result<PlaylistCreationResult> = await this.findOrCreatePlaylist(request.playlistId, request.playlistName);
         if (!playlistCreationResult.ok) {
             return { ok: false, error: playlistCreationResult.error };
         }
 
-        const createdPlaylistId = playlistCreationResult.data.id;
-        const createdPlaylistUrl = playlistCreationResult.data.url;
+        console.log(`[SpotifyToYoutubeTransfer] Playlist creation result: ${JSON.stringify(playlistCreationResult.data.operation)}`);
 
+        const { id: playlistId, url: playlistUrl, operation: playlistOperation } = playlistCreationResult.data;
         // 4. Add matched tracks to target playlist
         console.log(`[SpotifyToYoutubeTransfer] Adding matched tracks to target playlist...`);
         const trackIdsAndNames: TrackIdAndNameMapping[] = matchedTracks.map((track) => ({
@@ -49,10 +52,13 @@ export class SpotifyToYoutubeTransfer implements TransferService {
             trackName: track.title,
         }));
 
-        const addTracksResult: Result<AddTracksResult> = await this.youtubePlaylistProvider.addTracksToPlaylist(createdPlaylistId, trackIdsAndNames);
+        const addTracksResult: Result<AddTracksResult> = await this.youtubePlaylistProvider.addTracksToPlaylist(playlistId, trackIdsAndNames);
         if (!addTracksResult.ok) {
             return { ok: false, error: addTracksResult.error };
         }
+
+        // 5. Store mapping in cache for future lookups
+        await this.storePlaylisMapping(request.playlistId, playlistId, addTracksResult.data.addedCount);
 
         const cacheStats = getYoutubeCacheStats();
 
@@ -62,8 +68,9 @@ export class SpotifyToYoutubeTransfer implements TransferService {
             ok: true,
             data: {
                 success: true,
-                playlistId: createdPlaylistId,
-                playlistUrl: createdPlaylistUrl,
+                playlistId: playlistId,
+                playlistUrl: playlistUrl,
+                playlistOperation: playlistOperation,
                 tracksTotal: tracks.length,
                 tracksMatched: matchedTracks.length,
                 tracksAdded: addTracksResult.data.addedCount,
@@ -117,5 +124,80 @@ export class SpotifyToYoutubeTransfer implements TransferService {
         }
 
         return { matchedTracks, unmatchedTracks };
+    }
+
+    // NEW: Helper method for deduplication
+    private async findOrCreatePlaylist(
+        spotifyPlaylistId: string,
+        playlistName: string
+    ): Promise<Result<PlaylistCreationResult>> {
+
+        const NAMESPACE = '[SpotifyToYoutubeTransfer - findOrCreatePlaylist()]';
+
+        // 1. Check cache for existing mapping
+        const userKey = await getUserCacheKey();
+        const cacheKey = `${SPOTIFY.PLAYLIST_MAP_NAMESPACE}:${userKey}:${spotifyPlaylistId}`;
+
+        const cachedMapping = await getFromCaches<SpotifyPlaylistMapping>(
+            cacheKey,
+            NAMESPACE,
+            spotifyCache.playlistMap
+        );
+
+        if (cachedMapping) {
+            console.log(`[SpotifyToYoutubeTransfer] Found cached mapping: ${cachedMapping.youtubePlaylistId}`);
+
+            // Verify playlist still exists on YouTube
+            // TODO: Implement check for playlist existence on YouTube
+            return {
+                ok: true,
+                data: {
+                    id: cachedMapping.youtubePlaylistId,
+                    url: `https://music.youtube.com/playlist?list=${cachedMapping.youtubePlaylistId}`,
+                    operation: 'updated'
+                }
+            }
+        }
+
+        // 3. Create new playlist
+        console.log(`[SpotifyToYoutubeTransfer] Creating new playlist: ${playlistName}`);
+        const createResult = await this.youtubePlaylistProvider.createPlaylist(
+            playlistName,
+            `Synced from Spotify on ${new Date().toLocaleDateString()}`
+        );
+
+        if (!createResult.ok) {
+            return { ok: false, error: createResult.error };
+        }
+
+        return createResult;
+    }
+
+    // NEW: Store mapping in cache
+    private async storePlaylisMapping(
+        spotifyPlaylistId: string,
+        youtubePlaylistId: string,
+        trackCount: number
+    ): Promise<void> {
+        const NAMESPACE = '[SpotifyToYoutubeTransfer - storePlaylisMapping()]';
+
+        const userKey = await getUserCacheKey();
+        const cacheKey = `${SPOTIFY.PLAYLIST_MAP_NAMESPACE}:${userKey}:${spotifyPlaylistId}`;
+
+        const mapping: SpotifyPlaylistMapping = {
+            youtubePlaylistId,
+            lastSyncedAt: Date.now(),
+            trackCount
+        };
+
+        await setCaches(
+            cacheKey,
+            NAMESPACE,
+            spotifyCache.playlistMap,
+            mapping,
+            PLAYLIST_MAPPING_TTL_SECONDS
+        );
+
+        console.log(`[SpotifyToYoutubeTransfer] Stored mapping: ${spotifyPlaylistId} -> ${youtubePlaylistId}`);
     }
 }
