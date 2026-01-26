@@ -1,7 +1,7 @@
 // /lib/providers/spotify/SpotifyPlaylistProviderImpl.ts
 
 import { Result, NormalizedPlaylist, SDK_ERRORS } from "@/lib/types";
-import { AddTracksResult, PlaylistCreationResult, PlaylistProvider } from "../PlaylistProvider";
+import { AddTracksResult, PlaylistCreationResult, PlaylistProvider, TrackIdAndNameMapping } from "../PlaylistProvider";
 import { getUserCacheKey, spotifyCache } from "@/lib/spotify/cache";
 import { CACHE_MESSAGES, NORMALIZED_PLAYLISTS_TTL_SECONDS, PLAYLISTS_TTL_SECONDS, PROVIDER_CALLERS, SPOTIFY } from "@/lib/cache/constants";
 import { getFromCaches, setCaches } from "@/lib/cache/layers";
@@ -74,7 +74,7 @@ export class SpotifyPlaylistProviderImpl implements PlaylistProvider {
         }
     }
 
-    async addTracksToPlaylist(playlistId: string, trackIds: string[]): Promise<Result<AddTracksResult>> {
+    async addTracksToPlaylist(playlistId: string, trackIdsAndNames: TrackIdAndNameMapping[]): Promise<Result<AddTracksResult>> {
         console.log(`${PROVIDER_CALLERS.SPOTIFY_PLAYLIST_ADD_TRACKS} Adding tracks to playlist ${playlistId}`);
 
         // TODO: Implement spotify playlist add tracks
