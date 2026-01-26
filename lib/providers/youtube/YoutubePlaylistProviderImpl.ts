@@ -31,7 +31,7 @@ export class YoutubePlaylistProviderImpl implements PlaylistProvider {
             }
         }
 
-        console.log(`${PROVIDER_CALLERS.YOUTUBE_PLAYLISTS} ${CACHE_MESSAGES.FETCHING_FROM_API}`);
+        console.log(`${PROVIDER_CALLERS.YOUTUBE_PLAYLISTS} ${CACHE_MESSAGES.CHECKING_RAW_CACHE}`);
 
         // 3. Fetch from API
         const rawPlaylistsResult = await this.getRawPlaylistsFromAPI();

@@ -27,7 +27,7 @@ export class SpotifyPlaylistProviderImpl implements PlaylistProvider {
             }
         }
     
-        console.log(`${PROVIDER_CALLERS.SPOTIFY_PLAYLISTS} ${CACHE_MESSAGES.FETCHING_FROM_API}`);
+        console.log(`${PROVIDER_CALLERS.SPOTIFY_PLAYLISTS} ${CACHE_MESSAGES.CHECKING_RAW_CACHE}`);
 
         const rawPlaylistsResult = await this.getRawPlaylistsFromAPI();
 

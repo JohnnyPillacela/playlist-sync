@@ -32,7 +32,7 @@ export class YoutubeSearchProviderImpl implements SearchProvider {
             }
         }
     
-        console.log(`${PROVIDER_CALLERS.YOUTUBE_SEARCH} ${CACHE_MESSAGES.FETCHING_FROM_API}`);
+        console.log(`${PROVIDER_CALLERS.YOUTUBE_SEARCH} ${CACHE_MESSAGES.CHECKING_RAW_CACHE}`);
     
         const youtubeSDKResult = await this.getSDK();
 

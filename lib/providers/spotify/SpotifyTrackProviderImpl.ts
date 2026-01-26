@@ -21,7 +21,7 @@ export class SpotifyTrackProviderImpl implements TrackProvider {
             }
         }
     
-        console.log(`${PROVIDER_CALLERS.SPOTIFY_PLAYLIST_TRACKS} ${CACHE_MESSAGES.FETCHING_FROM_API}`);
+        console.log(`${PROVIDER_CALLERS.SPOTIFY_PLAYLIST_TRACKS} ${CACHE_MESSAGES.CHECKING_RAW_CACHE}`);
 
         const rawTracksResult = await this.getRawPlaylistTracksFromAPI(playlistId);
         if (!rawTracksResult.ok) {
