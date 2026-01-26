@@ -25,6 +25,7 @@ export class YoutubePlaylistProviderImpl implements PlaylistProvider {
         );
 
         if (cachedNormalizedPlaylists) {
+            console.log(`${PROVIDER_CALLERS.YOUTUBE_PLAYLISTS} ${CACHE_MESSAGES.NORMALIZED_CACHE_HIT}`);
             return {
                 ok: true,
                 data: cachedNormalizedPlaylists,

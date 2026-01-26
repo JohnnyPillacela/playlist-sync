@@ -10,6 +10,7 @@ export const PLAYLIST_MAPPING_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days (long-
 const IN_MEMORY_CACHE_HIT = '[In-memory LRU cache] hit';
 const IN_MEMORY_CACHE_MISS = '[In-memory LRU cache] miss';
 const CHECKING_RAW_CACHE = '[Normalized Cache miss] Checking RAW Cache';
+const NORMALIZED_CACHE_HIT = '[Normalized Cache] hit';
 const REDIS_CACHE_HIT = '[Redis cache] hit';
 const REDIS_CACHE_MISS = '[Redis cache] miss';
 const FETCHING_FROM_API = '[Fetching from API...]';
@@ -45,6 +46,7 @@ export const SPOTIFY = {
 // CACHE MESSAGES
 export const CACHE_MESSAGES = {
     CHECKING_RAW_CACHE,
+    NORMALIZED_CACHE_HIT,
     IN_MEMORY_CACHE_HIT,
     IN_MEMORY_CACHE_MISS,
     REDIS_CACHE_HIT,

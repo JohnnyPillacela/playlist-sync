@@ -15,6 +15,7 @@ export class SpotifyTrackProviderImpl implements TrackProvider {
     
         const cachedTracks = await getFromCaches<NormalizedTrack[]>(cacheKey, PROVIDER_CALLERS.SPOTIFY_PLAYLIST_TRACKS, spotifyCache.normalizedTracks);
         if (cachedTracks) {
+            console.log(`${PROVIDER_CALLERS.SPOTIFY_PLAYLIST_TRACKS} ${CACHE_MESSAGES.NORMALIZED_CACHE_HIT}`);
             return {
                 ok: true,
                 data: cachedTracks

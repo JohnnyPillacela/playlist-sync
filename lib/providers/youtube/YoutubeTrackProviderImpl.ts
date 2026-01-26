@@ -9,7 +9,6 @@ import { getYoutubeSDK } from "@/lib/youtube/sdk";
 import { youtube_v3 } from "googleapis/build/src/apis/youtube/v3";
 import { handleYouTubeAPIError } from "@/lib/youtube/errorHandler";
 
-
 export class YoutubeTrackProviderImpl implements TrackProvider {
     async getPlaylistTracks(playlistId: string): Promise<Result<NormalizedTrack[]>> {
         const userKey = await getUserCacheKey();
@@ -17,6 +16,7 @@ export class YoutubeTrackProviderImpl implements TrackProvider {
 
         const cachedTracks = await getFromCaches<NormalizedTrack[]>(cacheKey, PROVIDER_CALLERS.YOUTUBE_PLAYLIST_TRACKS, youtubeCache.normalizedTracks);
         if (cachedTracks) {
+            console.log(`${PROVIDER_CALLERS.YOUTUBE_PLAYLIST_TRACKS} ${CACHE_MESSAGES.NORMALIZED_CACHE_HIT}`);
             return {
                 ok: true,
                 data: cachedTracks

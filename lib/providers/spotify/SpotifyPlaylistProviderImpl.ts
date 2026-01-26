@@ -21,6 +21,7 @@ export class SpotifyPlaylistProviderImpl implements PlaylistProvider {
             spotifyCache.normalizedPlaylists,
         );
         if (cachedNormalizedPlaylists) {
+            console.log(`${PROVIDER_CALLERS.SPOTIFY_PLAYLISTS} ${CACHE_MESSAGES.NORMALIZED_CACHE_HIT}`);
             return {
                 ok: true,
                 data: cachedNormalizedPlaylists,
