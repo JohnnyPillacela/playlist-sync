@@ -22,10 +22,10 @@ export const getFromCaches = async <T extends {}>(
     try {
         const memoryHit = lruCache.get(cacheKey);
         if (memoryHit) {
-            console.log(`${callerNamespace} ${CACHE_MESSAGES.IN_MEMORY_CACHE_HIT}`);
+            // console.log(`${callerNamespace} ${CACHE_MESSAGES.IN_MEMORY_CACHE_HIT}`);
             return memoryHit;
         }
-        console.log(`${callerNamespace} ${CACHE_MESSAGES.IN_MEMORY_CACHE_MISS}`);
+        // console.log(`${callerNamespace} ${CACHE_MESSAGES.IN_MEMORY_CACHE_MISS}`);
     } catch (err) {
         console.warn(`${callerNamespace} LRU get failed`, err);
     }
@@ -34,7 +34,7 @@ export const getFromCaches = async <T extends {}>(
     try {
         const redisHit = await redis.get<T>(cacheKey);
         if (redisHit) {
-            console.log(`${callerNamespace} ${CACHE_MESSAGES.REDIS_CACHE_HIT}`);
+            // console.log(`${callerNamespace} ${CACHE_MESSAGES.REDIS_CACHE_HIT}`);
 
             // 🔥 Important: warm LRU, best-effort
             try {
@@ -46,7 +46,7 @@ export const getFromCaches = async <T extends {}>(
             return redisHit;
         }
 
-        console.log(`${callerNamespace} ${CACHE_MESSAGES.REDIS_CACHE_MISS}`);
+        // console.log(`${callerNamespace} ${CACHE_MESSAGES.REDIS_CACHE_MISS}`);
     } catch (err) {
         console.warn(`${callerNamespace} Redis get failed`);
         console.warn(err);
