@@ -34,6 +34,11 @@ export class SpotifyToYoutubeTransfer implements TransferService {
         // 2. Match tracks to YouTube
         console.log(`[SpotifyToYoutubeTransfer] Matching tracks to YouTube...`);
         const { matchedTracks, unmatchedTracks } = await this.matchTracks(tracks);
+        const searchCacheStats = getYoutubeCacheStats().search;
+        console.log(
+            `[SpotifyToYoutubeTransfer] Matched ${matchedTracks.length}/${tracks.length} tracks ` +
+            `(Cache: ${searchCacheStats.hits} hits, ${searchCacheStats.misses} misses, ${searchCacheStats.hitRate.toFixed(1)}% hit rate)`
+        );
 
         // 3. Create or update target playlist on YouTube
         console.log(`[SpotifyToYoutubeTransfer] Creating or updating target playlist on YouTube...`);
@@ -54,7 +59,7 @@ export class SpotifyToYoutubeTransfer implements TransferService {
             if (!existingPlaylistTracksResult.ok) {
                 return { ok: false, error: existingPlaylistTracksResult.error };
             }
-            
+
             existingPlaylistTracks = existingPlaylistTracksResult.data;
         } else {
             // Playlist just created - it's empty, no need to check
