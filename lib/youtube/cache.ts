@@ -5,6 +5,7 @@ import { LRUCache } from '../cache/cache';
 import { getGoogleUserInfo } from './auth';
 import { hash } from '../cache/keyBuilder';
 import { SearchResult } from '../providers/SearchProvider';
+import { NormalizedTrack } from '../types';
 
 /**
  * Cache for YouTube search results.
@@ -50,7 +51,7 @@ const youtubePlaylistCache = new LRUCache<youtube_v3.Schema$Playlist[]>(1000, 60
  * - Prevents repeated API calls when viewing the same playlist
  * - Saves on YouTube API quota for frequently accessed playlists
  */
-const youtubeTrackCache = new LRUCache<youtube_v3.Schema$PlaylistItem[]>(1000, 60 * 24); // 24 hours
+const youtubeNormalizedTrackCache = new LRUCache<NormalizedTrack[]>(1000, 60 * 24); // 24 hours
 
 /**
  * Cache for normalized YouTube playlists (filtered for music playlists only).
@@ -74,7 +75,7 @@ const youtubeNormalizedPlaylistCache = new LRUCache<any[]>(1000, 60 * 24); // 24
 export const youtubeCache = {
     search: youtubeSearchCache,
     playlists: youtubePlaylistCache,
-    tracks: youtubeTrackCache,
+    normalizedTracks: youtubeNormalizedTrackCache,
     normalizedPlaylists: youtubeNormalizedPlaylistCache,
 } as const;
 
@@ -85,7 +86,7 @@ export function getYoutubeCacheStats() {
     return {
         search: youtubeSearchCache.getStats(),
         playlists: youtubePlaylistCache.getStats(),
-        tracks: youtubeTrackCache.getStats(),
+        normalizedTracks: youtubeNormalizedTrackCache.getStats(),
         normalizedPlaylists: youtubeNormalizedPlaylistCache.getStats(),
     };
 }
