@@ -32,7 +32,7 @@ export class YoutubeSearchProviderImpl implements SearchProvider {
             }
         }
     
-        console.log(`${PROVIDER_CALLERS.YOUTUBE_SEARCH} ${CACHE_MESSAGES.CHECKING_RAW_CACHE}`);
+        console.log(`${PROVIDER_CALLERS.YOUTUBE_SEARCH} ${CACHE_MESSAGES.FETCHING_FROM_API}`);
     
         const youtubeSDKResult = await this.getSDK();
 
@@ -82,8 +82,6 @@ export class YoutubeSearchProviderImpl implements SearchProvider {
     
         // Set in caches before returning
         await setCaches(cacheKey, PROVIDER_CALLERS.YOUTUBE_SEARCH, youtubeCache.search, sorted[0], YOUTUBE_SEARCH_TTL_SECONDS);
-    
-        console.log(`${PROVIDER_CALLERS.YOUTUBE_SEARCH} Cached ${sorted[0]}`);
     
         return { ok: true, data: sorted[0] };
     }
