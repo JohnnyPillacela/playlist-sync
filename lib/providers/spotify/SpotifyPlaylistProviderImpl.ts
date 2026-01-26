@@ -85,6 +85,16 @@ export class SpotifyPlaylistProviderImpl implements PlaylistProvider {
         }
     }
 
+    async getPlaylist(playlistId: string): Promise<Result<NormalizedPlaylist>> {
+
+        // TODO: Implement spotify playlist get
+
+        return {
+            ok: false,
+            error: SDK_ERRORS.SPOTIFY_PLAYLIST_GET_FAILED,
+        }
+    }
+
     // ✅ Private helper - encapsulates API call
     private async getRawPlaylistsFromAPI(): Promise<Result<SimplifiedPlaylist[]>> {
         const userKey = await getUserCacheKey();

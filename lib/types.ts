@@ -34,6 +34,8 @@ export const SDK_ERRORS = {
     SPOTIFY_QUOTA_EXCEEDED: 'spotify_quota_exceeded',
     YOUTUBE_RATE_LIMIT: 'youtube_rate_limit',
     SPOTIFY_RATE_LIMIT: 'spotify_rate_limit',
+    YOUTUBE_PLAYLIST_GET_FAILED: 'youtube_playlist_get_failed',
+    SPOTIFY_PLAYLIST_GET_FAILED: 'spotify_playlist_get_failed',
 } as const;
 
 export const GEN_ERRORS = {

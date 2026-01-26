@@ -16,6 +16,10 @@ export interface PlaylistProvider {
         playlistId: string,
         trackIdsAndNames: TrackIdAndNameMapping[],
     ): Promise<Result<AddTracksResult>>;
+
+    getPlaylist(
+        playlistId: string,
+    ): Promise<Result<NormalizedPlaylist | null>>;
 }
 
 export interface PlaylistCreationResult {

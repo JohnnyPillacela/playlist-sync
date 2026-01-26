@@ -130,6 +130,46 @@ export class YoutubePlaylistProviderImpl implements PlaylistProvider {
         }
     }
 
+    async getPlaylist(playlistId: string): Promise<Result<NormalizedPlaylist | null>> {
+        console.log(`${PROVIDER_CALLERS.YOUTUBE_PLAYLIST_GET} Getting playlist ${playlistId}`);
+
+        const youtubeSDKResult = await this.getSDK();
+        if (!youtubeSDKResult.ok) {
+            return { ok: false, error: youtubeSDKResult.error };
+        }
+        let response: youtube_v3.Schema$PlaylistListResponse | null = null;
+
+        try {
+            const sdk = youtubeSDKResult.data;
+
+            response = (await sdk.playlists.list({
+                part: ['snippet', 'contentDetails'],
+                id: [playlistId],
+            })).data;
+        } catch (error: any) {
+            return handleYouTubeAPIError(error);
+        }
+
+        if (!response) {
+            return { ok: false, error: SDK_ERRORS.YOUTUBE_PLAYLIST_GET_FAILED };
+        }
+        const playlist = response.items?.[0];
+        if (!playlist) {
+            return { ok: true, data: null };
+        }
+
+        return {
+            ok: true,
+            data: {
+                id: playlist.id ?? '',
+                name: playlist.snippet?.title || "Untitled Playlist",
+                trackCount: playlist.contentDetails?.itemCount || 0,
+                thumbnailUrl: playlist.snippet?.thumbnails?.default?.url || "Undefined",
+                provider: "youtube-music",
+            },
+        }
+    }
+
     async addTracksToPlaylist(playlistId: string, trackIdsAndNames: TrackIdAndNameMapping[]): Promise<Result<AddTracksResult>> {
         console.log(`${PROVIDER_CALLERS.YOUTUBE_PLAYLIST_ADD_TRACKS} Adding tracks to playlist ${playlistId}`);
 
