@@ -11,7 +11,7 @@ import { getServerSDK } from "@/lib/spotify/sdk";
 export class SpotifyTrackProviderImpl implements TrackProvider {
     async getPlaylistTracks(playlistId: string): Promise<Result<NormalizedTrack[]>> {
         const userKey = await getUserCacheKey();
-        const cacheKey = `${SPOTIFY.NORMALIZED_PLAYLIST_TRACKS_NAMESPACE}:${userKey}`;
+        const cacheKey = `${SPOTIFY.NORMALIZED_PLAYLIST_TRACKS_NAMESPACE}:${userKey}:${playlistId}`;
     
         const cachedTracks = await getFromCaches<NormalizedTrack[]>(cacheKey, PROVIDER_CALLERS.SPOTIFY_PLAYLIST_TRACKS, spotifyCache.normalizedTracks);
         if (cachedTracks) {
