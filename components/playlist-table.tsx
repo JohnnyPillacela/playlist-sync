@@ -12,6 +12,7 @@ import {
 import Image from "next/image";
 import { NormalizedPlaylist } from "@/lib/types";
 import { ListMusic } from "lucide-react";
+import TransferButton from "./transfer-button";
 
 interface PlaylistTableProps {
   playlists: NormalizedPlaylist[];
@@ -37,6 +38,7 @@ export default function PlaylistTable({
               <TableHead className="text-left">Thumbnail</TableHead>
               <TableHead>Playlist Name</TableHead>
               <TableHead className="text-right">Songs</TableHead>
+              <TableHead className="text-right">Transfer</TableHead>
               <TableHead className="text-right">ID</TableHead>
             </TableRow>
           </TableHeader>
@@ -72,6 +74,9 @@ export default function PlaylistTable({
                     </TableCell>
                     <TableCell className="text-right text-muted-foreground">
                       {totalItems} {totalItems === 1 ? "song" : "songs"}
+                    </TableCell>
+                    <TableCell className="text-right text-muted-foreground">
+                      <TransferButton transferRequest={{ playlistId: playlist.id, playlistName: playlist.name }} />
                     </TableCell>
                     <TableCell className="text-right text-muted-foreground">
                       {playlist.id}
