@@ -22,6 +22,7 @@ export const AUTH_ERRORS = {
 } as const;
 
 export const SDK_ERRORS = {
+    TRANSFER_SERVICE_ERROR: 'transfer_service_error',
     YOUTUBE_SDK_NOT_INITIALIZED: 'youtube_sdk_not_initialized',
     SPOTIFY_SDK_NOT_INITIALIZED: 'spotify_sdk_not_initialized',
     SPOTIFY_PLAYLIST_CREATE_FAILED: 'spotify_playlist_create_failed',
