@@ -1,7 +1,7 @@
 // /lib/providers/youtube/YoutubePlaylistProviderImpl.ts
 
 import { CACHE_MESSAGES, NORMALIZED_PLAYLISTS_TTL_SECONDS, PLAYLISTS_TTL_SECONDS, PROVIDER_CALLERS, YOUTUBE } from "@/lib/cache/constants";
-import { AddTracksResult, PlaylistCreationResult, PlaylistProvider, TrackIdAndNameMapping } from "../PlaylistProvider";
+import { AddTracksResult, PlaylistCreationResult, PlaylistProvider, sanitizePlaylistName, TrackIdAndNameMapping } from "../PlaylistProvider";
 import { Result, NormalizedPlaylist, SDK_ERRORS } from "@/lib/types";
 import { getUserCacheKey, youtubeCache } from "@/lib/youtube/cache";
 import { getFromCaches, setCaches } from "@/lib/cache/layers";
@@ -102,7 +102,7 @@ export class YoutubePlaylistProviderImpl implements PlaylistProvider {
                 part: ['snippet', 'status'],
                 requestBody: {
                     snippet: {
-                        title: name,
+                        title: sanitizePlaylistName(name),
                         description: description || `Synced from Spotify on ${new Date().toLocaleDateString()}`,
                     },
                     status: {
