@@ -45,7 +45,8 @@ export interface CanonicalTrackQuery {
 export function normalizeArtist(artist: string): string {
     return artist
         .toLowerCase()
-        .replace(/feat\.|ft\.|featuring|x|&/g, '')
+        .replace(/feat\.|ft\.|featuring|&/g, '')
+        .replace(/\sx\s/g, ' ')
         .replace(/[^\w\s]/g, '')
         .replace(/\s+/g, ' ')
         .trim();
