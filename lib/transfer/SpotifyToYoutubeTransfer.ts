@@ -34,10 +34,10 @@ export class SpotifyToYoutubeTransfer implements TransferService {
         // 2. Match tracks to YouTube
         console.log(`[SpotifyToYoutubeTransfer] 2. Matching Spotify Tracks to YouTube...`);
         const { matchedTracks, unmatchedTracks } = await this.matchTracks(tracks);
-        const searchCacheStats = getYoutubeCacheStats().search;
+        const inMemoryLRUSearchCache = getYoutubeCacheStats().search;
         console.log(
-            `[SpotifyToYoutubeTransfer] 2. Matched ${matchedTracks.length}/${tracks.length} tracks ` +
-            `(Cache: ${searchCacheStats.hits} hits, ${searchCacheStats.misses} misses, ${searchCacheStats.hitRate.toFixed(1)}% hit rate)`
+            `[SpotifyToYoutubeTransfer] Matched ${matchedTracks.length}/${tracks.length} tracks ` +
+            `(LRU in-memory: ${inMemoryLRUSearchCache.hits} hits, ${inMemoryLRUSearchCache.misses} misses, ${inMemoryLRUSearchCache.hitRate.toFixed(1)}% hit rate)`
         );
 
         // 3. Create or update target playlist on YouTube
@@ -86,8 +86,6 @@ export class SpotifyToYoutubeTransfer implements TransferService {
         // 5. Store mapping in cache for future lookups
         await this.storePlaylisMapping(request.playlistId, playlistId, addTracksResult.data.addedCount);
 
-        const cacheStats = getYoutubeCacheStats();
-
         console.log(`[SpotifyToYoutubeTransfer] 5. Transfer completed successfully in ${Date.now() - startTime}ms`);
 
         return {
@@ -108,7 +106,7 @@ export class SpotifyToYoutubeTransfer implements TransferService {
                     error: failed.error,
                 })), // Failed to add tracks to YouTube playlist
                 duration: Date.now() - startTime,
-                cacheStats: cacheStats.search,
+                cacheStats: inMemoryLRUSearchCache,
             }
         }
 
