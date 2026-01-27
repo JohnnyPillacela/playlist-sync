@@ -23,7 +23,7 @@ export class SpotifyToYoutubeTransfer implements TransferService {
         const startTime = Date.now();
 
         // 1. Fetch source tracks from Spotify
-        console.log(`[SpotifyToYoutubeTransfer] Fetching source tracks from Spotify...`);
+        console.log(`[SpotifyToYoutubeTransfer] 1. Fetching source tracks from Spotify...`);
         const tracksResult = await this.spotifyTrackProvider.getPlaylistTracks(request.playlistId);
         if (!tracksResult.ok) {
             return { ok: false, error: tracksResult.error };
@@ -32,23 +32,23 @@ export class SpotifyToYoutubeTransfer implements TransferService {
         const tracks = tracksResult.data;
 
         // 2. Match tracks to YouTube
-        console.log(`[SpotifyToYoutubeTransfer] Matching tracks to YouTube...`);
+        console.log(`[SpotifyToYoutubeTransfer] 2. Matching Spotify Tracks to YouTube...`);
         const { matchedTracks, unmatchedTracks } = await this.matchTracks(tracks);
         const searchCacheStats = getYoutubeCacheStats().search;
         console.log(
-            `[SpotifyToYoutubeTransfer] Matched ${matchedTracks.length}/${tracks.length} tracks ` +
+            `[SpotifyToYoutubeTransfer] 2. Matched ${matchedTracks.length}/${tracks.length} tracks ` +
             `(Cache: ${searchCacheStats.hits} hits, ${searchCacheStats.misses} misses, ${searchCacheStats.hitRate.toFixed(1)}% hit rate)`
         );
 
         // 3. Create or update target playlist on YouTube
-        console.log(`[SpotifyToYoutubeTransfer] Creating or updating target playlist on YouTube...`);
+        console.log(`[SpotifyToYoutubeTransfer] 3. Creating or updating target playlist on YouTube...`);
 
         const playlistCreationResult: Result<PlaylistCreationResult> = await this.findOrCreatePlaylist(request.playlistId, request.playlistName);
         if (!playlistCreationResult.ok) {
             return { ok: false, error: playlistCreationResult.error };
         }
 
-        console.log(`[SpotifyToYoutubeTransfer] Playlist creation result: ${JSON.stringify(playlistCreationResult.data.operation)}`);
+        console.log(`[SpotifyToYoutubeTransfer] 3. Playlist creation result: ${JSON.stringify(playlistCreationResult.data.operation)}`);
         const { id: playlistId, url: playlistUrl, operation: playlistOperation } = playlistCreationResult.data;
 
         // ✅ Only fetch existing tracks if playlist was updated (not newly created)
@@ -63,7 +63,7 @@ export class SpotifyToYoutubeTransfer implements TransferService {
             existingPlaylistTracks = existingPlaylistTracksResult.data;
         } else {
             // Playlist just created - it's empty, no need to check
-            console.log(`[SpotifyToYoutubeTransfer] New playlist created, no existing tracks to check`);
+            console.log(`[SpotifyToYoutubeTransfer] 3. New playlist created, no existing tracks to check`);
         }
 
         // Then filter out tracks that already exist
@@ -72,7 +72,7 @@ export class SpotifyToYoutubeTransfer implements TransferService {
         );
 
         // 4. Add matched tracks to target playlist
-        console.log(`[SpotifyToYoutubeTransfer] Adding matched tracks to target playlist... ${newTracks.length} tracks`);
+        console.log(`[SpotifyToYoutubeTransfer] 4. Adding matched tracks to target playlist... ${newTracks.length} tracks`);
         const trackIdsAndNames: TrackIdAndNameMapping[] = newTracks.map((track) => ({
             trackId: track.id,
             trackName: track.title,
@@ -88,7 +88,7 @@ export class SpotifyToYoutubeTransfer implements TransferService {
 
         const cacheStats = getYoutubeCacheStats();
 
-        console.log(`[SpotifyToYoutubeTransfer] Transfer completed successfully in ${Date.now() - startTime}ms`);
+        console.log(`[SpotifyToYoutubeTransfer] 5. Transfer completed successfully in ${Date.now() - startTime}ms`);
 
         return {
             ok: true,
