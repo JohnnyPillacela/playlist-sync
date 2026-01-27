@@ -87,7 +87,7 @@ export default function PlaylistViewer({providerData}: PlaylistViewerProps) {
                     setSpotifyError('Failed to load Spotify playlists');
                     setSpotifyUserPlaylists([]);
                 } else {
-                    setSpotifyUserPlaylists(playlists);
+                    setSpotifyUserPlaylists(playlists.sort((a, b) => a.name.localeCompare(b.name)));
                 }
                 
                 setSpotifyLoading(false);
@@ -103,7 +103,7 @@ export default function PlaylistViewer({providerData}: PlaylistViewerProps) {
                     setYoutubeError('Failed to load YouTube Music playlists');
                     setYoutubeUserPlaylists([]);
                 } else {
-                    setYoutubeUserPlaylists(playlists);
+                    setYoutubeUserPlaylists(playlists.sort((a, b) => a.name.localeCompare(b.name)));
                 }
                 
                 setYoutubeLoading(false);
