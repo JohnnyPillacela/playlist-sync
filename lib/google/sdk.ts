@@ -8,7 +8,7 @@ import { google, oauth2_v2 } from "googleapis";
 
 const GOOGLE_SDK_INIT = "[GOOGLE_SDK_INIT]";
 
-export async function getGoogleSDK(): Promise<Result<oauth2_v2.Oauth2>> {
+export async function getGoogleOAuth2SDK(): Promise<Result<oauth2_v2.Oauth2>> {
     const cookieStore = await cookies();
     const googleAccessToken = cookieStore.get(GOOGLE_ACCESS_TOKEN_KEY)?.value;
     if (!googleAccessToken) {

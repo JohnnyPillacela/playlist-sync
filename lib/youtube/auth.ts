@@ -2,7 +2,7 @@
 import { OAuth2Client } from "google-auth-library";
 import { GoogleUserInfo } from "../constants/google";
 import { Result } from "../types";
-import { getGoogleSDK } from "../google/sdk";
+import { getGoogleOAuth2SDK } from "../google/sdk";
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -102,19 +102,19 @@ export async function refreshYoutubeAccessToken(
 
 export async function getGoogleUserInfo(): Promise<Result<GoogleUserInfo>> {
 
-    const googleSDKResult = await getGoogleSDK();
+    const googleOAuth2SDKResult = await getGoogleOAuth2SDK();
 
-    if (!googleSDKResult.ok) {
+    if (!googleOAuth2SDKResult.ok) {
         return {
             ok: false,
-            error: googleSDKResult.error
+            error: googleOAuth2SDKResult.error
         }
     }
 
-    const googleSDK = googleSDKResult.data;
+    const googleOAuth2SDK = googleOAuth2SDKResult.data;
 
     try {
-        const userInfoResult = await googleSDK.userinfo.get();
+        const userInfoResult = await googleOAuth2SDK.userinfo.get();
         const userInfo: GoogleUserInfo = {
             id: userInfoResult.data.id || '',
             email: userInfoResult.data.email || '',
