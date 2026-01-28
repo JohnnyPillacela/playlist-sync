@@ -2,7 +2,7 @@
 import { OAuth2Client } from "google-auth-library";
 import { GoogleUserInfo } from "../constants/google";
 import { Result } from "../types";
-import { getGoogleOAuth2SDK } from "../google/sdk";
+import { getGoogleOAuth2SDK } from "../google/oauth2sdk";
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
