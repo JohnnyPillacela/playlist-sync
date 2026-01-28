@@ -22,7 +22,7 @@ import { NormalizedTrack } from '../types';
  * - Saves on YouTube API quota and reduces latency for popular searches
  * - Note: The 'cameFromCache' field is always false when stored, and set to true when retrieved
  */
-const youtubeSearchCache = new LRUCache<SearchResult>(1000, 60 * 24); // 24 hours
+const youtubeSearchCache = new LRUCache<SearchResult>(1000, 60 * 24 * 30); // 30 days
 
 /**
  * Cache for YouTube playlists metadata.
