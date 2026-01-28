@@ -21,6 +21,8 @@ import { NormalizedTrack } from '../types';
  * - This cache is NOT user-specific - all users share the same cached search results
  * - Saves on YouTube API quota and reduces latency for popular searches
  * - Note: The 'cameFromCache' field is always false when stored, and set to true when retrieved
+ * 
+ * TODO: Move this to database
  */
 const youtubeSearchCache = new LRUCache<SearchResult>(1000, 60 * 24 * 30); // 30 days
 
