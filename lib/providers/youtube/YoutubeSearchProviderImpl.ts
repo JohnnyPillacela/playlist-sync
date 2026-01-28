@@ -9,6 +9,8 @@ import { youtubeCache } from "@/lib/youtube/cache";
 import { getYoutubeSDK } from "@/lib/youtube/sdk";
 import { handleYouTubeAPIError } from "@/lib/youtube/errorHandler";
 import { youtube_v3 } from "googleapis/build/src/apis/youtube/v3";
+import { getYTMusicClient } from "@/lib/youtube/ytmusic/client";
+import { SongDetailed } from "ytmusic-api";
 
 export class YoutubeSearchProviderImpl implements SearchProvider {
     private sdk: youtube_v3.Youtube | null = null;
@@ -31,6 +33,36 @@ export class YoutubeSearchProviderImpl implements SearchProvider {
                 } 
             }
         }
+
+        // ========================================
+        // Try YTMusic scraper first (quota-free)
+        // ========================================
+        try {
+            const ytMusicClient = await getYTMusicClient();
+            const scraperResults = await ytMusicClient.searchSongs(searchQuery);
+            
+            if (scraperResults.length > 0) {
+                const searchResult = this.mapSongDetailedToSearchResult(
+                    scraperResults[0]
+                );
+                
+                // Cache the scraper result (same cache as API results)
+                await setCaches(
+                    cacheKey,
+                    PROVIDER_CALLERS.YOUTUBE_SEARCH,
+                    youtubeCache.search,
+                    searchResult,
+                    YOUTUBE_SEARCH_TTL_SECONDS
+                );
+                
+                console.log(`${PROVIDER_CALLERS.YOUTUBE_SEARCH} Found via scraper: ${searchResult.title} by ${searchResult.artists.join(', ')}`);
+                return { ok: true, data: searchResult };
+            }
+            
+            console.log(`${PROVIDER_CALLERS.YOUTUBE_SEARCH} Scraper returned no results, falling back to YouTube API`);
+        } catch (error: any) {
+            console.warn(`${PROVIDER_CALLERS.YOUTUBE_SEARCH} Scraper failed (${error.message}), falling back to YouTube API`);
+        };
     
         console.log(`${PROVIDER_CALLERS.YOUTUBE_SEARCH} ${CACHE_MESSAGES.FETCHING_FROM_API}`);
     
@@ -99,5 +131,18 @@ export class YoutubeSearchProviderImpl implements SearchProvider {
         }
         
         return youtubeSDKResult;
+    }
+
+    private mapSongDetailedToSearchResult(song: SongDetailed): SearchResult {   
+        return {
+            id: song.videoId,
+            title: song.name,
+            artists: [song.artist.name],
+            channelTitle: song.artist.name,
+            confidence: 0.8,
+            thumbnailUrl: song.thumbnails[0].url,
+            searchDuration: 0,
+            cameFromCache: false,
+        }
     }
 }
