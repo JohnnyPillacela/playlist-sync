@@ -200,6 +200,9 @@ export class YoutubePlaylistProviderImpl implements PlaylistProvider {
                     }
                 });
                 addedCount++;
+                setTimeout(() => {
+                    console.log(`${PROVIDER_CALLERS.YOUTUBE_PLAYLIST_ADD_TRACKS} Added track ${trackName} to playlist ${playlistId}`);
+                }, 200);
             } catch (error: any) {
                 console.error(`${SDK_ERRORS.YOUTUBE_PLAYLIST_ADD_TRACKS_FAILED} Error adding track ${trackId} to playlist ${playlistId}: ${error.message}`);
                 failed.push({
