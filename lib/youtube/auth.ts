@@ -1,8 +1,8 @@
 // /lib/youtube/auth.ts
 import { OAuth2Client } from "google-auth-library";
-import { GOOGLE_ACCESS_TOKEN_KEY, GoogleUserInfo } from "../constants/google";
+import { GoogleUserInfo } from "../constants/google";
 import { Result } from "../types";
-import { cookies } from "next/headers";
+import { getGoogleSDK } from "../google/sdk";
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -101,39 +101,35 @@ export async function refreshYoutubeAccessToken(
 }
 
 export async function getGoogleUserInfo(): Promise<Result<GoogleUserInfo>> {
-    const cookieStore = await cookies();
-    const googleAccessToken = cookieStore.get(GOOGLE_ACCESS_TOKEN_KEY);
-    if (!googleAccessToken) {
-        const errorMessage = `[getGoogleUserInfo] No ${GOOGLE_ACCESS_TOKEN_KEY} found in cookies`;
+
+    const googleSDKResult = await getGoogleSDK();
+
+    if (!googleSDKResult.ok) {
         return {
             ok: false,
-            error: errorMessage
+            error: googleSDKResult.error
         }
     }
 
-    const response = await fetch(
-        "https://www.googleapis.com/oauth2/v2/userinfo",
-        {
-            headers: {
-                Authorization: `Bearer ${googleAccessToken.value}`,
-            },
-            // Prevent accidental caching during dev
-            cache: "no-store",
-        }
-    );
+    const googleSDK = googleSDKResult.data;
 
-    if (!response.ok) {
-        const text = await response.text();
-        const errorMessage = `[getGoogleUserInfo] Failed to fetch Google user info: ${text}`;
+    try {
+        const userInfoResult = await googleSDK.userinfo.get();
+        const userInfo: GoogleUserInfo = {
+            id: userInfoResult.data.id || '',
+            email: userInfoResult.data.email || '',
+            name: userInfoResult.data.name || '',
+            picture: userInfoResult.data.picture || '',
+            verified_email: userInfoResult.data.verified_email || false,
+        }
+        return {
+            ok: true,
+            data: userInfo,
+        }
+    } catch (error) {
         return {
             ok: false,
-            error: errorMessage
+            error: error as string
         }
-    }
-
-    const data: GoogleUserInfo = await response.json();
-    return {
-        ok: true,
-        data: data
     }
 }
