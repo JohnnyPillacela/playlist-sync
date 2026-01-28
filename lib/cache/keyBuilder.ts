@@ -3,10 +3,16 @@ import { createHash } from 'crypto';
 const MAX_KEY_LENGTH = 512;
 const KEY_SEPARATOR = ':';
 
+function stripDiacritics(str: string): string {
+    // Normalize to NFD (decomposed) form and remove combining marks
+    // so that accented letters are preserved as their ASCII base.
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
 function normalize(str: string | null | undefined): string {
     if (!str) return '';
 
-    return str
+    return stripDiacritics(str)
         .toLowerCase()
         .trim()
         .replace(/[^\w\s]/g, '') // strip punctuation

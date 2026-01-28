@@ -41,9 +41,15 @@ export interface CanonicalTrackQuery {
     title: string;
 }
 
+function stripDiacritics(str: string): string {
+    // Normalize to NFD (decomposed) form and remove all combining marks
+    // so that, e.g., "SANÁME" -> "SANAME" instead of "SANME"/"SNAME".
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
 
 export function normalizeArtist(artist: string): string {
-    return artist
+    return stripDiacritics(artist)
         .toLowerCase()
         .replace(/feat\.|ft\.|featuring|&/g, '')
         .replace(/\sx\s/g, ' ')
@@ -53,7 +59,7 @@ export function normalizeArtist(artist: string): string {
 }
 
 export function normalizeTitle(title: string): string {
-    return title
+    return stripDiacritics(title)
         .toLowerCase()
         .replace(/\(.*?\)|\[.*?\]/g, '') // remove remix/remaster/live
         .replace(/-.*$/g, '')            // remove dash suffixes
