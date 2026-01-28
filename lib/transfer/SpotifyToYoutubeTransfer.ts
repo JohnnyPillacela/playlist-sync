@@ -49,7 +49,7 @@ export class SpotifyToYoutubeTransfer implements TransferService {
         }
 
         console.log(`[SpotifyToYoutubeTransfer] 3. Playlist creation result: ${JSON.stringify(playlistCreationResult.data.operation)}`);
-        const { id: playlistId, url: playlistUrl, operation: playlistOperation } = playlistCreationResult.data;
+        const { id: playlistId, url: playlistUrl, name: playlistName, operation: playlistOperation } = playlistCreationResult.data;
 
         // ✅ Only fetch existing tracks if playlist was updated (not newly created)
         let existingPlaylistTracks: NormalizedTrack[] = [];
@@ -84,7 +84,7 @@ export class SpotifyToYoutubeTransfer implements TransferService {
         }
 
         // 5. Store mapping in cache for future lookups
-        await this.storePlaylisMapping(request.playlistId, playlistId, addTracksResult.data.addedCount);
+        await this.storePlaylistMapping(request.playlistId, playlistId, playlistName, addTracksResult.data.addedCount);
 
         console.log(`[SpotifyToYoutubeTransfer] 5. Transfer completed successfully in ${Date.now() - startTime}ms`);
 
@@ -187,6 +187,7 @@ export class SpotifyToYoutubeTransfer implements TransferService {
                     data: {
                         id: cachedMapping.youtubePlaylistId,
                         url: `https://music.youtube.com/playlist?list=${cachedMapping.youtubePlaylistId}`,
+                        name: cachedMapping.youtubePlaylistName,
                         operation: 'updated'
                     }
                 };
@@ -211,9 +212,10 @@ export class SpotifyToYoutubeTransfer implements TransferService {
     }
 
     // NEW: Store mapping in cache
-    private async storePlaylisMapping(
+    private async storePlaylistMapping(
         spotifyPlaylistId: string,
         youtubePlaylistId: string,
+        youtubePlaylistName: string,
         trackCount: number
     ): Promise<void> {
         const NAMESPACE = '[SpotifyToYoutubeTransfer - storePlaylisMapping()]';
@@ -223,6 +225,7 @@ export class SpotifyToYoutubeTransfer implements TransferService {
 
         const mapping: SpotifyPlaylistMapping = {
             youtubePlaylistId,
+            youtubePlaylistName,
             lastSyncedAt: Date.now(),
             trackCount
         };

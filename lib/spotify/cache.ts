@@ -49,6 +49,7 @@ export const getUserCacheKey = async (): Promise<string> => {
 // Interface for Spotify playlist mapping
 export interface SpotifyPlaylistMapping {
     youtubePlaylistId: string;
+    youtubePlaylistName: string;
     lastSyncedAt: number; // Unix timestamp
     trackCount: number; // Number of tracks synced
 }
