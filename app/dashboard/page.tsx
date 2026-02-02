@@ -3,7 +3,7 @@
 import { _getCurrentUserDetails } from "@/lib/spotify/auth";
 import PleaseSignIn from "@/components/please-sign-in";
 import GreetUserCard from "@/components/GreetUserCard";
-import PlaylistViewer from "@/components/playlist-viewer";
+import PlaylistViewerTabs from "@/components/playlist-viewer-tabs";
 import { getGoogleUserInfo } from "@/lib/youtube/auth";
 import { PlaylistProviderData } from "@/lib/types";
 
@@ -33,7 +33,7 @@ export default async function Dashboard() {
     const providerData: PlaylistProviderData[] = [spotifyProviderData, youtubeProviderData];
 
     return (
-        <div className="min-h-screen bg-emerald-50">
+        <div className="min-h-screen bg-background">
             <div className="w-3/4 mx-auto mt-8 mb-8">
                 <GreetUserCard 
                     spotifyUser={spotifyUser} 
@@ -43,7 +43,7 @@ export default async function Dashboard() {
 
 
 
-            <PlaylistViewer providerData={providerData} />
+            <PlaylistViewerTabs providerData={providerData} />
 
         </div>
     )
