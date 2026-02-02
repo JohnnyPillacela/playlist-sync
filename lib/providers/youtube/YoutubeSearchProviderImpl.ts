@@ -24,6 +24,7 @@ export class YoutubeSearchProviderImpl implements SearchProvider {
         // Check LRU and Redis caches - returns from either LRU or Redis if found or null if not found
         const cachedResult = await getFromCaches<SearchResult>(cacheKey, PROVIDER_CALLERS.YOUTUBE_SEARCH, youtubeCache.search);
         if (cachedResult) {
+            console.log(`${PROVIDER_CALLERS.YOUTUBE_SEARCH} Found in cache: ${cachedResult.title} by ${cachedResult.artists.join(', ')}`);
             return { 
                 ok: true, 
                 data: {
