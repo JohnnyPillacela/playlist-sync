@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Lora, IBM_Plex_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-sans",
@@ -33,7 +34,9 @@ export default function RootLayout({
       <body
         className={`${plusJakarta.variable} ${lora.variable} ${ibmPlexMono.variable} font-sans antialiased`}
       >
-        {children}
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
