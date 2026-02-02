@@ -2,6 +2,7 @@
 
 import { _getCurrentUserDetails } from "@/lib/spotify/auth";
 import PleaseSignIn from "@/components/please-sign-in";
+import { ThemeToggle } from "@/components/theme-toggle";
 import GreetUserCard from "@/components/GreetUserCard";
 import PlaylistViewerTabs from "@/components/playlist-viewer-tabs";
 import { getGoogleUserInfo } from "@/lib/youtube/auth";
@@ -14,7 +15,10 @@ export default async function Dashboard() {
     // Show "not signed in" view only if BOTH services are not authenticated
     if (!spotifyUserResult.ok && !googleUserResult.ok) {
         return (
-            <PleaseSignIn musicProvider="Spotify or Google" />
+            <div className="relative min-h-screen bg-background">
+                <ThemeToggle className="absolute right-4 top-4 z-10" />
+                <PleaseSignIn musicProvider="Spotify or Google" />
+            </div>
         );
     }
     
@@ -33,7 +37,8 @@ export default async function Dashboard() {
     const providerData: PlaylistProviderData[] = [spotifyProviderData, youtubeProviderData];
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="relative min-h-screen bg-background">
+            <ThemeToggle className="absolute right-4 top-4 z-10" />
             <div className="w-3/4 mx-auto mt-8 mb-8">
                 <GreetUserCard 
                     spotifyUser={spotifyUser} 
