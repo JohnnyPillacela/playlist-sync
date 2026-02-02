@@ -39,7 +39,6 @@ export default function PlaylistTable({
               <TableHead>Playlist Name</TableHead>
               <TableHead className="text-right">Songs</TableHead>
               <TableHead className="text-right">Transfer</TableHead>
-              <TableHead className="text-right">ID</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -77,9 +76,6 @@ export default function PlaylistTable({
                     </TableCell>
                     <TableCell className="text-right text-muted-foreground">
                       <TransferButton transferRequest={{ playlistId: playlist.id, playlistName: playlist.name }} />
-                    </TableCell>
-                    <TableCell className="text-right text-muted-foreground">
-                      {playlist.id}
                     </TableCell>
                   </TableRow>
                 );
