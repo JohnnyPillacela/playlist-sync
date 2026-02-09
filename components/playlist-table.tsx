@@ -37,7 +37,7 @@ export default function PlaylistTable({
               <TableHead className="text-left">No.</TableHead>
               <TableHead className="text-left">Thumbnail</TableHead>
               <TableHead>Playlist Name</TableHead>
-              <TableHead className="text-right">Songs</TableHead>
+              <TableHead className="text-right"># of Songs</TableHead>
               <TableHead className="text-right">Transfer</TableHead>
             </TableRow>
           </TableHeader>
