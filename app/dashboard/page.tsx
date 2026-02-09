@@ -37,7 +37,7 @@ export default async function Dashboard() {
     const providerData: PlaylistProviderData[] = [spotifyProviderData, youtubeProviderData];
 
     return (
-        <div className="relative min-h-screen bg-background">
+        <div className="relative min-h-screen bg-ambient">
             <ThemeToggle className="absolute right-4 top-4 z-10" />
             <div className="w-3/4 mx-auto mt-8 mb-8">
                 <GreetUserCard 
