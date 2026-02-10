@@ -21,8 +21,8 @@ const serviceConfigs: Record<string, ServiceConfig> = {
     displayName: "Spotify",
     icon: Music,
     colors: {
-      bg: "bg-[#1DB954]",
-      hover: "hover:bg-[#1ed760]",
+      bg: "bg-[#1ED760]",
+      hover: "hover:bg-[#1DB954]",
       text: "text-white",
     },
   },
@@ -31,8 +31,8 @@ const serviceConfigs: Record<string, ServiceConfig> = {
     displayName: "YouTube Music",
     icon: Youtube,
     colors: {
-      bg: "bg-[#FF0000]",
-      hover: "hover:bg-[#cc0000]",
+      bg: "bg-[#FF0033]",
+      hover: "hover:bg-[#CC0029]",
       text: "text-white",
     },
   },
