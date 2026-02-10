@@ -236,7 +236,7 @@ export default function PlaylistViewerTabs({
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto mt-4">
+    <div className="w-full mt-4">
       <Tabs defaultValue={defaultTab} className="w-full">
         <TabsList className="w-full sm:w-auto grid grid-cols-2">
           <TabsTrigger value="spotify">Spotify</TabsTrigger>
