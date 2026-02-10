@@ -40,14 +40,14 @@ export default async function Dashboard() {
         <div className="relative pb-16">
             <ThemeToggle className="absolute right-4 top-4 z-10" />
             <div className="w-full max-w-7xl mx-auto">
-                <div className="mt-8 mb-8">
+                <div className="my-10 px-4 md:px-6">
                     <GreetUserCard 
                         spotifyUser={spotifyUser} 
                         googleUser={googleUser}
                     />
+                    <PlaylistViewerTabs providerData={providerData} />
                 </div>
 
-                <PlaylistViewerTabs providerData={providerData} />
             </div>
         </div>
     )
