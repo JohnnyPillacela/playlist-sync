@@ -2,16 +2,17 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Music, Youtube, LucideIcon } from "lucide-react";
+import Image from "next/image";
 
 type ServiceConfig = {
   name: string;
   displayName: string;
-  icon: LucideIcon;
+  logo: string;
   colors: {
     bg: string;
     hover: string;
     text: string;
+    border: string;
   };
 };
 
@@ -19,21 +20,23 @@ const serviceConfigs: Record<string, ServiceConfig> = {
   spotify: {
     name: "spotify",
     displayName: "Spotify",
-    icon: Music,
+    logo: "/logos/spotify.svg",
     colors: {
-      bg: "bg-[#1ED760]",
-      hover: "hover:bg-[#1DB954]",
-      text: "text-white",
+      bg: "bg-white",
+      hover: "hover:bg-gray-50",
+      text: "text-gray-900",
+      border: "border-2 border-[#1DB954]",
     },
   },
   youtube: {
     name: "youtube",
     displayName: "YouTube Music",
-    icon: Youtube,
+    logo: "/logos/youtube-icon.svg",
     colors: {
-      bg: "bg-[#FF0033]",
-      hover: "hover:bg-[#CC0029]",
-      text: "text-white",
+      bg: "bg-white",
+      hover: "hover:bg-gray-50",
+      text: "text-gray-900",
+      border: "border-2 border-[#FF0033]",
     },
   },
 };
@@ -54,15 +57,19 @@ export function LoginServiceButton({
     return null;
   }
 
-  const Icon = config.icon;
-
   return (
     <Button
       onClick={() => window.location.href = authUrl}
       size="lg"
-      className={`${config.colors.bg} ${config.colors.hover} ${config.colors.text} border-0 shadow-lg transition-all duration-200`}
+      className={`${config.colors.bg} ${config.colors.hover} ${config.colors.text} ${config.colors.border} shadow-lg transition-all duration-200`}
     >
-      <Icon className="mr-2 h-5 w-5" />
+      <Image
+        src={config.logo}
+        alt={`${config.displayName} logo`}
+        width={20}
+        height={20}
+        className="mr-2"
+      />
       Connect with {config.displayName}
     </Button>
   );
