@@ -7,9 +7,8 @@ import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from './ui/empty';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { ListMusic, Loader2, LogIn } from 'lucide-react';
-import { Button } from './ui/button';
-import Link from 'next/link';
 import { useEffect, useState, useMemo } from 'react';
+import { LoginServiceButton } from './login-service-button';
 
 interface PlaylistViewerTabsProps {
   providerData: PlaylistProviderData[];
@@ -142,9 +141,11 @@ export default function PlaylistViewerTabs({
                   Please sign in to view your {providerName} playlists
                 </EmptyTitle>
               </EmptyHeader>
-              <Link href={authUrl}>
-                <Button>Sign in to {providerName}</Button>
-              </Link>
+              {service === 'spotify' ? (
+                <LoginServiceButton service="spotify" authUrl="/api/spotify/auth" />
+              ) : (
+                <LoginServiceButton service="youtube" authUrl="/api/youtube/auth" />
+              )}
             </Empty>
           </CardContent>
         </Card>
