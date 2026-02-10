@@ -31,14 +31,15 @@ export default function PlaylistTable({
         <CardTitle>Your {providerName} Playlists</CardTitle>
       </CardHeader>
       <CardContent>
-        <Table>
+        {/* <Table className="table-fixed w-full"> */}
+        <Table className="table-fixed w-full min-w-[500px] sm:min-w-0">
           <TableHeader>
             <TableRow>
-              <TableHead className="text-left">No.</TableHead>
-              <TableHead className="text-left">Thumbnail</TableHead>
-              <TableHead>Playlist Name</TableHead>
-              <TableHead className="text-right"># of Songs</TableHead>
-              <TableHead className="text-right">Transfer</TableHead>
+              <TableHead className="w-[10%] text-left">No.</TableHead>
+              <TableHead className="w-[20%] text-left">Thumbnail</TableHead>
+              <TableHead className="w-[30%] text-left">Playlist Name</TableHead>
+              <TableHead className="w-[20%] text-right"># of Songs</TableHead>
+              <TableHead className="w-[20%] text-right">Transfer</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -68,7 +69,7 @@ export default function PlaylistTable({
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="font-medium">
+                    <TableCell className="font-medium whitespace-normal wrap-break-word min-w-0">
                       {playlist.name}
                     </TableCell>
                     <TableCell className="text-right text-muted-foreground">

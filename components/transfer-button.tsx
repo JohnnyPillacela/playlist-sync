@@ -87,7 +87,7 @@ export default function TransferButton({
                         Transferring...
                     </>
                 ) : (
-                    'Transfer to YouTube'
+                    'To YouTube'
                 )}
             </Button>
 
