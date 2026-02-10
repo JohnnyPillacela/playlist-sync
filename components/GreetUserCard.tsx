@@ -22,7 +22,7 @@ export default function GreetUserCard({ spotifyUser, googleUser }: GreetUserCard
             const response = await fetch('/api/dev/clear-cookies', {
                 method: 'POST',
             });
-            
+
             if (response.ok) {
                 // Redirect to home page after clearing cookies
                 router.push('/dashboard');
@@ -31,7 +31,7 @@ export default function GreetUserCard({ spotifyUser, googleUser }: GreetUserCard
         } catch (error) {
             console.error('Failed to clear cookies:', error);
         }
-    }; 
+    };
 
     const handleClearSpotifyCookies = async () => {
         try {
@@ -108,26 +108,26 @@ export default function GreetUserCard({ spotifyUser, googleUser }: GreetUserCard
 
     return (
         <Card>
-        <CardHeader>
-            <CardTitle className="text-5xl font-bold">Playlist Sync Dashboard!</CardTitle>
-            <CardDescription className="text-3xl mt-2">
-                Sync your playlists between connected services
-            </CardDescription>
-            <div className="mt-4 flex gap-3">
-                <Link href="/">
-                    <Button variant="outline">Back to Home</Button>
-                </Link>
-                <Button variant="destructive" onClick={handleClearCookies}>
-                    Log out of all services
-                </Button>
-            </div>
-        </CardHeader>
-        <CardContent>
-            {/* 2-Column Service Status Layout */}
-            <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mt-6">
-                {serviceOrder.map(service => renderServiceCard(service))}
-            </div>
-        </CardContent>
-    </Card>
+            <CardHeader>
+                <CardTitle className="text-5xl font-bold">Playlist Sync Dashboard!</CardTitle>
+                <CardDescription className="text-3xl mt-2">
+                    Sync your playlists between connected services
+                </CardDescription>
+                <div className="mt-4 flex gap-3">
+                    <Link href="/">
+                        <Button variant="outline">Back to Home</Button>
+                    </Link>
+                    <Button variant="destructive" onClick={handleClearCookies}>
+                        Log out of all services
+                    </Button>
+                </div>
+            </CardHeader>
+            <CardContent>
+                {/* 2-Column Service Status Layout */}
+                <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mt-6">
+                    {serviceOrder.map(service => renderServiceCard(service))}
+                </div>
+            </CardContent>
+        </Card>
     )
 }
