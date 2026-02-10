@@ -32,7 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${plusJakarta.variable} ${lora.variable} ${ibmPlexMono.variable} font-sans antialiased`}
+        className={`${plusJakarta.variable} ${lora.variable} ${ibmPlexMono.variable} font-sans antialiased bg-ambient dark:bg-ambient-dark`}
       >
         <ThemeProvider>
           {children}
