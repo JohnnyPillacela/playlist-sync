@@ -83,7 +83,7 @@ export default function ServiceUserInfo({
         {userData ? (
           <LogoutServiceButton serviceName={serviceName} onClick={onLogout} />
         ) : (
-          <LoginServiceButton serviceName={serviceName} authUrl={authUrl} />
+          <LoginServiceButton service={service} authUrl={authUrl} />
         )}
       </CardFooter>
     </Card>
