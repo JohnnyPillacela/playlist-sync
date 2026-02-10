@@ -13,6 +13,7 @@ import Image from "next/image";
 import { NormalizedPlaylist } from "@/lib/types";
 import { ListMusic } from "lucide-react";
 import TransferButton from "./transfer-button";
+import { Badge } from "./ui/badge";
 
 interface PlaylistTableProps {
   playlists: NormalizedPlaylist[];
@@ -38,7 +39,7 @@ export default function PlaylistTable({
               <TableHead className="w-[10%] text-left">No.</TableHead>
               <TableHead className="w-[20%] text-left">Thumbnail</TableHead>
               <TableHead className="w-[30%] text-left">Playlist Name</TableHead>
-              <TableHead className="w-[20%] text-right"># of Songs</TableHead>
+              <TableHead className="w-[20%] text-right hidden md:table-cell"># of Songs</TableHead>
               <TableHead className="w-[20%] text-right">Transfer</TableHead>
             </TableRow>
           </TableHeader>
@@ -70,9 +71,16 @@ export default function PlaylistTable({
                       </div>
                     </TableCell>
                     <TableCell className="font-medium whitespace-normal wrap-break-word min-w-0">
-                      {playlist.name}
+                      <div className="flex flex-col gap-1">
+                        <Badge variant="secondary" className="w-fit md:hidden">
+                          {totalItems} {totalItems === 1 ? "song" : "songs"}
+                        </Badge>
+                        <span>
+                          {playlist.name}
+                        </span>
+                      </div>
                     </TableCell>
-                    <TableCell className="text-right text-muted-foreground">
+                    <TableCell className="text-right text-muted-foreground hidden md:table-cell">
                       {totalItems} {totalItems === 1 ? "song" : "songs"}
                     </TableCell>
                     <TableCell className="text-right text-muted-foreground">
