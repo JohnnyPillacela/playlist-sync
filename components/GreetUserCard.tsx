@@ -124,7 +124,7 @@ export default function GreetUserCard({ spotifyUser, googleUser }: GreetUserCard
             </CardHeader>
             <CardContent>
                 {/* 2-Column Service Status Layout */}
-                <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                     {serviceOrder.map(service => renderServiceCard(service))}
                 </div>
             </CardContent>

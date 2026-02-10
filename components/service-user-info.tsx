@@ -27,7 +27,7 @@ export default function ServiceUserInfo({
   return (
     <Card className="border-muted">
         <CardHeader>
-            <CardTitle className="text-2xl font-bold flex items-center gap-3">
+            <CardTitle className="text-2xl font-bold flex flex-col sm:flex-row sm:items-center gap-2">
               {serviceName}
               <Badge variant={userData ? "default" : "secondary"}>
                 {userData ? "Connected" : "Not connected"}
@@ -41,7 +41,7 @@ export default function ServiceUserInfo({
               <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Email
               </span>
-              <span className="text-sm">{userData.email}</span>
+              <span className="text-sm break-all">{userData.email}</span>
             </div>
 
             {/* Service-specific fields */}
