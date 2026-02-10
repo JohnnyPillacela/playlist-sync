@@ -16,11 +16,11 @@ export default function Home() {
         </Button>
       </Link>
       <LoginServiceButton
-        serviceName="Spotify"
+        service="spotify"
         authUrl="/api/spotify/auth"
       />
       <LoginServiceButton
-        serviceName="Google"
+        service="youtube"
         authUrl="/api/youtube/auth"
       />
     </div>
