@@ -22,8 +22,8 @@ const serviceConfigs: Record<string, ServiceConfig> = {
     displayName: "Spotify",
     logo: "/logos/spotify.svg",
     colors: {
-      bg: "bg-white",
-      hover: "hover:bg-gray-50",
+      bg: "bg-green-50/50",
+      hover: "hover:bg-green-100/60",
       text: "text-gray-900",
       border: "border-2 border-[#1DB954]",
     },
@@ -33,8 +33,8 @@ const serviceConfigs: Record<string, ServiceConfig> = {
     displayName: "YouTube Music",
     logo: "/logos/youtube-icon.svg",
     colors: {
-      bg: "bg-white",
-      hover: "hover:bg-gray-50",
+      bg: "bg-red-50/50",
+      hover: "hover:bg-red-100/60",
       text: "text-gray-900",
       border: "border-2 border-[#FF0033]",
     },
