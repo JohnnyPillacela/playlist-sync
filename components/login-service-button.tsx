@@ -44,11 +44,14 @@ const serviceConfigs: Record<string, ServiceConfig> = {
 interface LoginServiceButtonProps {
   service: string;
   authUrl: string;
+  /** Optional label override for i18n (e.g. "Connect with Spotify" or "Conectar con Spotify") */
+  label?: string;
 }
 
 export function LoginServiceButton({
   service,
   authUrl,
+  label,
 }: LoginServiceButtonProps) {
   const config = serviceConfigs[service];
   
@@ -56,6 +59,8 @@ export function LoginServiceButton({
     console.error(`Unknown service: ${service}`);
     return null;
   }
+
+  const displayLabel = label ?? `Connect with ${config.displayName}`;
 
   return (
     <Button
@@ -70,7 +75,7 @@ export function LoginServiceButton({
         height={20}
         className="mr-2"
       />
-      Connect with {config.displayName}
+      {displayLabel}
     </Button>
   );
 }
