@@ -9,7 +9,7 @@ function prefersSpanish(acceptLanguage: string | null): boolean {
   return first === 'es';
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   if (pathname !== '/') {
     return NextResponse.next();
