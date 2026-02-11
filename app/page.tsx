@@ -5,5 +5,5 @@ import { getMessages } from '@/lib/i18n';
 
 export default async function Home() {
   const messages = await getMessages('en', 'landing-page');
-  return <LandingPage messages={messages} />;
+  return <LandingPage messages={messages} locale="en" />;
 }

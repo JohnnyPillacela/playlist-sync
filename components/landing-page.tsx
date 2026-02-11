@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { LoginServiceButton } from "@/components/login-service-button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import Link from "next/link";
+import type { Locale } from "@/lib/i18n";
 
 export interface LandingPageMessages {
   appName: string;
@@ -15,11 +17,13 @@ export interface LandingPageMessages {
 
 interface LandingPageProps {
   messages: LandingPageMessages;
+  locale?: Locale;
 }
 
-export function LandingPage({ messages }: LandingPageProps) {
+export function LandingPage({ messages, locale = 'en' }: LandingPageProps) {
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center gap-4">
+      <LanguageSwitcher currentLocale={locale} />
       <ThemeToggle className="absolute right-4 top-4" />
       <p className="mb-1 text-2xl font-semibold text-muted-foreground">
         {messages.appName}
