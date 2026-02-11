@@ -2,8 +2,18 @@
   "appName": "Wave Sync",
   "headline": "Sync your music between Spotify and YouTube Music",
   "subhead": "Transfer playlists both ways. One place for your music.",
+  "tagline": "Your playlists, everywhere.",
+  "feature1": "Sync in both directions",
+  "feature2": "No duplicate manual work",
+  "feature3": "Free — just connect your accounts",
+  "howItWorksTitle": "How it works",
+  "step1": "Connect Spotify and YouTube Music",
+  "step2": "Pick a playlist",
+  "step3": "Sync once or keep in sync",
   "ctaDashboard": "View all playlists",
   "ctaConnectSpotify": "Connect with Spotify",
   "ctaConnectYoutube": "Connect with YouTube Music",
+  "ctaSubtext": "Connect at least one service to get started.",
+  "trustLine": "We don't store your music — we just move it.",
   "footer": "Free. No account required beyond Spotify and Google."
 }

@@ -9,9 +9,19 @@ export interface LandingPageMessages {
   appName: string;
   headline: string;
   subhead: string;
+  tagline?: string;
+  feature1: string;
+  feature2: string;
+  feature3: string;
+  howItWorksTitle?: string;
+  step1?: string;
+  step2?: string;
+  step3?: string;
   ctaDashboard: string;
   ctaConnectSpotify: string;
   ctaConnectYoutube: string;
+  ctaSubtext?: string;
+  trustLine?: string;
   footer?: string;
 }
 
